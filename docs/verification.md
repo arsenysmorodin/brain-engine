@@ -117,17 +117,19 @@ Smoke проверяет основной вид, внутренние отде�
 Итоговый прогон с настоящим окном и Metal:
 
 ```sh
-target/debug/neuro-app --smoke-test output/network-verified
-target/debug/neuro-cli simulate output/network-verified/brain-project.json --csv output/network-verified/network-cli.csv > output/network-verified/network-cli.json
-cmp output/network-verified/network-gui.csv output/network-verified/network-cli.csv
-cmp output/network-verified/network-reopened.csv output/network-verified/network-cli.csv
+target/debug/neuro-app --smoke-test output/network-final
+target/debug/neuro-cli simulate output/network-final/brain-project.json --csv output/network-final/network-cli.csv > output/network-final/network-cli.json
+cmp output/network-final/network-gui.csv output/network-final/network-cli.csv
+cmp output/network-final/network-reopened.csv output/network-final/network-cli.csv
 ```
 
 Проверены состояния на 80/180/240 мс, запись и открытие проекта, точное восстановление конфигурации, открытие с t=0 на паузе, идентичный повторный расчёт, CSV, выбор кадра 240 мс из истории, защита проекта от перезаписи CSV. Некорректная задержка не меняет открытый проект и состояние; NaN локальной tau очищает отображаемую активность и блокирует сохранение/CSV. В том же прогоне сохранены проверки старых сцен, анатомического инвентаря, обеих рецепторных моделей и их ошибок. Три CSV сети совпали побайтно; прежние CSV также сверены с CLI.
 
-Артефакты: `output/network-verified/simulation-80ms.png`, `simulation-180ms.png`, `simulation-deep-240ms.png`, `simulation-history.png`, `brain-project.json`, `network-gui.csv`, `network-reopened.csv`, `network-cli.csv`, `network-passed.txt`. Снимки осмотрены: фиксированная легенда, E/I-кривые, время, подписи осей и атрибуция видны. В первой визуальной итерации устранены обрезанная крайняя подпись времени и лишняя анатомическая цветовая настройка в режиме активности.
+Артефакты: `output/network-final/simulation-80ms.png`, `simulation-180ms.png`, `simulation-deep-240ms.png`, `simulation-history.png`, `brain-project.json`, `network-gui.csv`, `network-reopened.csv`, `network-cli.csv`, `network-passed.txt`. Снимки осмотрены: фиксированная легенда, E/I-кривые, время, подписи осей и атрибуция видны. В первой визуальной итерации устранены обрезанная крайняя подпись времени и лишняя анатомическая цветовая настройка в режиме активности.
 
 Обычными действиями macOS отдельно подтверждены: вкладка «Симуляция», запуск с продвижением времени до 508 мс, пауза на 565 мс, выбор кадра 178 мс щелчком по графику с возвратом соответствующих цветов, выбор FMA72654 в списке с E=0.046/I=0.050, графиком и схемой только её связей; раскрытие редактора показывает направления, вес 8 и задержку 24 мс. После изменения пользователем открытого окна дальнейшая ручная проверка записи и редактирования прекращена, его сцена не заменялась. Ручное отключение связи и точный ввод параметров поэтому не заявляются; сохранение/редактирование/перечитывание и повторный расчёт покрыты программным сценарием выше.
+
+При финальном завершении прогона обнаружено ожидание в `RenderAppChannels::drop`: основной поток ждал возврата render app, а render-поток оставался в расписании Bevy. Снимок стека сохранён в `output/network-verified/smoke-exit.sample.txt`. На macOS отключён `PipelinedRenderingPlugin`: расписания рендера выполняются в основном потоке, GPU/Metal и научный интегратор сохранены. После этого полный прогон `output/network-final` завершился штатно с кодом **0**; все 36 тестов и строгий Clippy прошли повторно, три CSV сети совпали побайтно. Зависший тестовый экземпляр завершён отдельно; открытое пользователем приложение не закрывалось.
 
 Приложение пересобрано с метаданными популяционной модели в Resources/licenses и проверено codesign. В текущей dev-сборке Apple linker дополнительно сообщает о большом `__eh_frame` и возможном замедлении обработки исключений; сборка и нативные проверки успешны. Это предупреждение не связано с численной точностью. Многодневная работа и отдельная матрица всех размеров окна/дисплеев не проверялись.
 

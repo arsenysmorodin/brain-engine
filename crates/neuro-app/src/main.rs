@@ -403,6 +403,24 @@ fn main() {
             std::process::exit(1);
         }
     };
+    let plugins = DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: "NeuroLab — исследовательская лаборатория".into(),
+            resolution: (1380, 900).into(),
+            resize_constraints: bevy::window::WindowResizeConstraints {
+                min_width: 1100.0,
+                min_height: 720.0,
+                ..default()
+            },
+            ..default()
+        }),
+        ..default()
+    });
+    // On macOS the render thread can await a main-thread task during shutdown,
+    // while RenderAppChannels::drop blocks that thread waiting for the render app.
+    // Keep the render schedules on the main thread; GPU rendering is unchanged.
+    #[cfg(target_os = "macos")]
+    let plugins = plugins.disable::<bevy::render::pipelined_rendering::PipelinedRenderingPlugin>();
     let mut app = App::new();
     app.insert_resource(lab)
         .insert_resource(ClearColor(Color::srgb_u8(17, 21, 28)))
@@ -412,19 +430,7 @@ fn main() {
             focused_mode: UpdateMode::reactive(std::time::Duration::from_millis(50)),
             unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs(1)),
         })
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "NeuroLab — исследовательская лаборатория".into(),
-                resolution: (1380, 900).into(),
-                resize_constraints: bevy::window::WindowResizeConstraints {
-                    min_width: 1100.0,
-                    min_height: 720.0,
-                    ..default()
-                },
-                ..default()
-            }),
-            ..default()
-        }))
+        .add_plugins(plugins)
         .add_plugins(EguiPlugin::default())
         .add_systems(Startup, brain::setup)
         .add_systems(Update, brain::advance_network)
