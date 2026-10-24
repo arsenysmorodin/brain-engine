@@ -15,9 +15,10 @@ pub enum ArterialTerritory {
     PcaLeft,
     PcaRight,
     Vertebrobasilar,
+    Mixed,
 }
 impl ArterialTerritory {
-    pub const ALL: [Self; 7] = [
+    pub const ALL: [Self; 8] = [
         Self::AcaLeft,
         Self::AcaRight,
         Self::McaLeft,
@@ -25,6 +26,7 @@ impl ArterialTerritory {
         Self::PcaLeft,
         Self::PcaRight,
         Self::Vertebrobasilar,
+        Self::Mixed,
     ];
     pub fn label(self) -> &'static str {
         match self {
@@ -35,6 +37,7 @@ impl ArterialTerritory {
             Self::PcaLeft => "PCA · слева",
             Self::PcaRight => "PCA · справа",
             Self::Vertebrobasilar => "Вертебробазилярный",
+            Self::Mixed => "Смешанное снабжение",
         }
     }
     pub fn key(self) -> &'static str {
@@ -46,6 +49,7 @@ impl ArterialTerritory {
             Self::PcaLeft => "pca_left",
             Self::PcaRight => "pca_right",
             Self::Vertebrobasilar => "vertebrobasilar",
+            Self::Mixed => "mixed",
         }
     }
 }
@@ -102,10 +106,10 @@ impl CaffeinePerfusion {
                 .map(|r| {
                     let left = r.hemisphere == Hemisphere::Left;
                     let territory =
-                        if matches!(r.kind, TissueKind::Cerebellum | TissueKind::Brainstem)
-                            || r.hemisphere == Hemisphere::Bilateral
-                        {
+                        if matches!(r.kind, TissueKind::Cerebellum | TissueKind::Brainstem) {
                             ArterialTerritory::Vertebrobasilar
+                        } else if r.hemisphere == Hemisphere::Bilateral {
+                            ArterialTerritory::Mixed
                         } else if r.group == BrainGroup::Occipital
                             || ["hippocampus", "thalamus", "parahippocampal"]
                                 .iter()

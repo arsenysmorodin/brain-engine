@@ -16,6 +16,7 @@ pub fn territory_rgb(t: ArterialTerritory) -> [u8; 3] {
         ArterialTerritory::PcaLeft => [185, 161, 244],
         ArterialTerritory::PcaRight => [142, 122, 207],
         ArterialTerritory::Vertebrobasilar => [108, 166, 229],
+        ArterialTerritory::Mixed => [136, 146, 163],
     }
 }
 fn color(rgb: [u8; 3]) -> Color32 {

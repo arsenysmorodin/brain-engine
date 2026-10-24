@@ -122,7 +122,7 @@ pub fn caffeine_arterial_boundary(s: &CaffeineScenario, time_min: f64) -> f64 {
             };
             Some(p.bioavailability * d.amount_mg * ka * factor / p.volume_l())
         })
-        .sum()
+        .fold(0.0, |total, amount| total + amount)
 }
 fn flow(s: &CaffeineScenario, r: &RegionalPerfusion, ca: f64) -> f64 {
     let p = s.perfusion.as_ref().expect("configured");
@@ -254,6 +254,10 @@ mod tests {
     #[test]
     fn delivery_is_causal_flow_sensitive_balanced_and_convergent() {
         let (a, mut s) = reference();
+        assert_eq!(
+            caffeine_arterial_boundary(&s, 0.0).to_bits(),
+            0.0_f64.to_bits()
+        );
         let p = s.perfusion.as_mut().unwrap();
         p.vasoconstriction_enabled = false;
         for r in &mut p.regions {

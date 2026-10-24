@@ -556,7 +556,7 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         super::vascular::view_controls(ui, lab);
     }
     let height =
-        (ui.available_height() - if lab.caffeine.show_plot { 223.0 } else { 60.0 }).max(100.0);
+        (ui.available_height() - if lab.caffeine.show_plot { 245.0 } else { 80.0 }).max(100.0);
     if lab.caffeine.route {
         pathway::show(ui, &mut lab.caffeine, height);
     } else {
@@ -663,7 +663,11 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         plot(ui, lab);
     }
     lab.dirty |= lab.scene != scene_before;
-    ui.label(RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Артерии и ткань · расчётная перфузия · плотности рецепторов неизвестны").size(10.5).color(MUTED));
+    ui.label(
+        RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Перфузия: модель с допущениями")
+            .size(10.5)
+            .color(MUTED),
+    );
 }
 fn legend(ui: &mut egui::Ui, c: &CaffeineLab) {
     if super::vascular::legend(ui, c) {

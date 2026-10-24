@@ -1520,7 +1520,7 @@
       },
       {
         "region_id": "FMA62008",
-        "territory": "vertebrobasilar",
+        "territory": "mixed",
         "tissue_mass_g": 25.925925925925927,
         "baseline_cbf_ml_100g_min": 50.0,
         "flow_fraction": 1.0,
@@ -1565,7 +1565,7 @@
       },
       {
         "region_id": "FMA86464",
-        "territory": "vertebrobasilar",
+        "territory": "mixed",
         "tissue_mass_g": 25.925925925925927,
         "baseline_cbf_ml_100g_min": 20.0,
         "flow_fraction": 1.0,
