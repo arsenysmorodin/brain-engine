@@ -454,7 +454,7 @@ pub fn sync_flow(
         if visible {
             transform.translation = super::circulation::geometry::along(
                 &path.points,
-                (c.time_min * 12.0 + part.path as f64 * 0.171) as f32,
+                (c.visual_phase + part.path as f64 * 0.171) as f32,
             );
             if let Some(material) = materials.get_mut(&handle.0) {
                 let color = super::circulation::DRUG_COLORS[c.selected.index()].to_array();

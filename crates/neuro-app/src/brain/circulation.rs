@@ -21,6 +21,7 @@ pub struct CirculationLab {
     pub trace: Option<CirculationTrace>,
     pub knowledge: CirculationKnowledge,
     pub time_min: f64,
+    pub visual_phase: f64,
     clock_min: f64,
     pub playing: bool,
     pub speed: f64,
@@ -49,6 +50,7 @@ impl CirculationLab {
             trace: None,
             knowledge: CirculationKnowledge::bundled()?,
             time_min: 0.0,
+            visual_phase: 0.0,
             clock_min: 0.0,
             playing: false,
             speed: 15.0,
@@ -80,6 +82,7 @@ impl CirculationLab {
     pub fn refresh(&mut self, atlas: &BrainAtlas) {
         self.playing = false;
         self.time_min = 0.0;
+        self.visual_phase = 0.0;
         self.clock_min = 0.0;
         self.revision = self.revision.wrapping_add(1);
         match simulate_circulation(self.scenario.clone(), atlas) {
@@ -117,6 +120,7 @@ impl CirculationLab {
         if !self.playing || !focused || !dt.is_finite() || dt <= 0.0 || !self.speed.is_finite() {
             return;
         }
+        self.visual_phase = (self.visual_phase + dt.min(0.1) * 0.35).rem_euclid(1.0);
         self.clock_min =
             (self.clock_min + dt.min(0.1) * self.speed).min(self.scenario.duration_min);
         if let Some(t) = &self.trace {
@@ -651,5 +655,31 @@ mod tests {
         let p = &lab.flow_geometry.paths[0].points;
         assert_eq!(geometry::along(p, 0.0), p[0]);
         assert!(geometry::along(p, 0.5).is_finite());
+    }
+}
+
+#[cfg(test)]
+mod animation_tests {
+    use super::*;
+    #[test]
+    fn direction_markers_move_between_pk_frames_and_freeze_when_paused() {
+        let atlas = BrainAtlas::bundled().unwrap();
+        let mut s = CirculationScenario::reference(&atlas, 1);
+        s.duration_min = 10.0;
+        let mut c = CirculationLab::from_scenario(s, &atlas).unwrap();
+        c.set_time(6.0);
+        c.speed = 0.05;
+        c.playing = true;
+        let before = (c.time_min, c.visual_phase);
+        c.tick(0.1, true);
+        assert_eq!(c.time_min, before.0);
+        assert_ne!(c.visual_phase, before.1);
+        c.playing = false;
+        let phase = c.visual_phase;
+        c.tick(0.1, true);
+        assert_eq!(c.visual_phase, phase);
+        c.playing = true;
+        c.tick(0.1, false);
+        assert_eq!(c.visual_phase, phase);
     }
 }

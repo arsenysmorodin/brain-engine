@@ -83,7 +83,13 @@ impl FlowGeometry {
                 });
             }
             let cortical = r.kind == neuro_domain::TissueKind::Cortex;
-            let destination = if cortical {
+            let destination = if r.kind == neuro_domain::TissueKind::Cerebellum {
+                if r.hemisphere == neuro_domain::Hemisphere::Bilateral {
+                    confluence
+                } else {
+                    Vec3::new(c.x.signum() * 0.65, 0.14, 1.02)
+                }
+            } else if cortical {
                 if c.y < 0.05 {
                     Vec3::new(c.x.signum() * 0.65, 0.14, 1.02)
                 } else {

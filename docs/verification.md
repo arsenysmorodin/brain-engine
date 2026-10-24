@@ -171,4 +171,4 @@ PK-CSV GUI и CLI совпадает побайтно; JSON полного не�
 
 ## Замкнутая циркуляция, три пурина и учебник
 
-64 теста и нативный 900-кадровый прогон: [circulation-verification.md](circulation-verification.md). Общая/региональная CSV GUI совпадают с CLI побайтно. Модель и источники: [circulation-model.md](circulation-model.md). Эти проверки дополняют исторические результаты выше.
+65 тестов и нативный 900-кадровый прогон: [circulation-verification.md](circulation-verification.md). Общая/региональная CSV GUI совпадают с CLI побайтно. Модель и источники: [circulation-model.md](circulation-model.md). Эти проверки дополняют исторические результаты выше.
