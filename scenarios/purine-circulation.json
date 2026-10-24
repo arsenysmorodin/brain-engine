@@ -1,0 +1,548 @@
+{
+  "format_version": 1,
+  "document_kind": "circulation_scenario",
+  "model_id": "purine_closed_circulation_v1",
+  "model_revision": 1,
+  "provenance_id": "purine_sources_2026_10_24_v1",
+  "name": "Пурины: замкнутый кровеносный контур",
+  "parameters": [
+    {
+      "apparent_volume_l": 49.0,
+      "apparent_clearance_l_h": 6.792842369487464,
+      "absorption_half_min": 7.5,
+      "tissue_blood_partition": 1.0,
+      "exchange_min_inv": 0.5
+    },
+    {
+      "apparent_volume_l": 303.0,
+      "apparent_clearance_l_h": 149.0,
+      "absorption_half_min": 10.0,
+      "tissue_blood_partition": 1.0,
+      "exchange_min_inv": 0.5
+    },
+    {
+      "apparent_volume_l": 51.0,
+      "apparent_clearance_l_h": 1.6,
+      "absorption_half_min": 10.0,
+      "tissue_blood_partition": 1.0,
+      "exchange_min_inv": 0.5
+    }
+  ],
+  "doses": [
+    {
+      "substance": "caffeine",
+      "time_min": 0.0,
+      "amount_mg": 150.0
+    },
+    {
+      "substance": "methylliberine",
+      "time_min": 0.0,
+      "amount_mg": 100.0
+    },
+    {
+      "substance": "theacrine",
+      "time_min": 0.0,
+      "amount_mg": 50.0
+    }
+  ],
+  "duration_min": 1440.0,
+  "interactions": true,
+  "beds": {
+    "model_id": "caffeine_regional_perfusion_v1",
+    "model_revision": 1,
+    "provenance_id": "perfusion_sources_2026_10_24_v1",
+    "vasoconstriction_enabled": true,
+    "max_flow_reduction": 0.4,
+    "flow_half_effect_mg_l": 3.0,
+    "regions": [
+      {
+        "region_id": "FMA72654",
+        "territory": "aca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72653",
+        "territory": "aca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72656",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72655",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72658",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72657",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72662",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72661",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72666",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72665",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72672",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72671",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72668",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72667",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72670",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72669",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72686",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72685",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72688",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72687",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72690",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72689",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72976",
+        "territory": "pca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72975",
+        "territory": "pca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72978",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72977",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72718",
+        "territory": "aca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72717",
+        "territory": "aca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72706",
+        "territory": "pca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72705",
+        "territory": "pca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72714",
+        "territory": "pca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72713",
+        "territory": "pca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72833",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72832",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA258716",
+        "territory": "pca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA258714",
+        "territory": "pca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72827",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72826",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72829",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72828",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72831",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72830",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72801",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72805",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA260794",
+        "territory": "mca_left",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 20.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72800",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA72804",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA260791",
+        "territory": "mca_right",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 20.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA62008",
+        "territory": "mixed",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA67944",
+        "territory": "vertebrobasilar",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA61993",
+        "territory": "vertebrobasilar",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA67943",
+        "territory": "vertebrobasilar",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA62004",
+        "territory": "vertebrobasilar",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 50.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      },
+      {
+        "region_id": "FMA86464",
+        "territory": "mixed",
+        "tissue_mass_g": 25.925925925925927,
+        "baseline_cbf_ml_100g_min": 20.0,
+        "flow_fraction": 1.0,
+        "partition_tissue_blood": 1.0,
+        "transit_sec": 2.0
+      }
+    ]
+  },
+  "capillary_volume_fraction": 0.03,
+  "venous_volume_fraction": 0.04
+}

@@ -367,3 +367,59 @@ fn caffeine_cli_roundtrip_trace_and_explicit_neural_hypothesis() {
             .contains("Непроверенная")
     );
 }
+
+#[test]
+fn closed_circulation_cli_matches_shared_kernel_and_protects_input() {
+    let temp = Temp::new();
+    let input = temp.0.join("loop.json");
+    let csv = temp.0.join("pk.csv");
+    let regional = temp.0.join("regions.csv");
+    assert!(
+        cli()
+            .arg("new-circulation")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    let atlas = neuro_domain::BrainAtlas::bundled().unwrap();
+    let mut s = neuro_domain::CirculationScenario::load(&input, &atlas).unwrap();
+    s.duration_min = 5.0;
+    s.save(&input, &atlas).unwrap();
+    let shared = neuro_engine::simulate_circulation(s, &atlas).unwrap();
+    let result = cli()
+        .arg("circulation")
+        .arg(&input)
+        .arg("--csv")
+        .arg(&csv)
+        .arg("--regional-csv")
+        .arg(&regional)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(fs::read_to_string(csv).unwrap(), shared.csv());
+    assert_eq!(fs::read_to_string(regional).unwrap(), shared.regional_csv());
+    let actual: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(
+        actual["frames"],
+        serde_json::to_value(&shared).unwrap()["frames"]
+    );
+    let before = fs::read(&input).unwrap();
+    assert!(
+        !cli()
+            .arg("circulation")
+            .arg(&input)
+            .arg("--csv")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(before, fs::read(&input).unwrap());
+}

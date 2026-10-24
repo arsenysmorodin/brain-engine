@@ -13,6 +13,8 @@ mod vascular;
 pub use vascular::*;
 mod perfusion;
 pub use perfusion::*;
+mod circulation;
+pub use circulation::*;
 mod caffeine;
 pub use caffeine::*;
 
