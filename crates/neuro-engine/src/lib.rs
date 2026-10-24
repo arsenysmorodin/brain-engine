@@ -1,10 +1,12 @@
-//! CPU/f64 equilibrium binding and operational response. No graphics or kinetics.
+//! CPU/f64 binding, operational response and population-network dynamics. No graphics.
 use neuro_domain::{Error, Parameters, Scenario, atomic_write};
 use serde::Serialize;
 use std::path::Path;
 
 mod response;
 pub use response::*;
+mod network;
+pub use network::*;
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(untagged)]

@@ -198,3 +198,51 @@ fn anatomical_inventory_validates_meshes_and_exports_unknown_activity() {
         neuro_domain::BrainAtlas::bundled().unwrap().csv()
     );
 }
+
+#[test]
+fn neural_network_cli_reproduces_shared_trace_and_guards_input() {
+    let temp = Temp::new();
+    let input = temp.0.join("network.json");
+    let csv = temp.0.join("trace.csv");
+    assert!(
+        cli()
+            .arg("new-network")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    let atlas = neuro_domain::BrainAtlas::bundled().unwrap();
+    let network = neuro_domain::NetworkScenario::load(&input, &atlas).unwrap();
+    let expected = neuro_engine::simulate_network(network, &atlas).unwrap();
+    let result = cli()
+        .arg("simulate")
+        .arg(&input)
+        .arg("--csv")
+        .arg(&csv)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(fs::read_to_string(csv).unwrap(), expected.csv());
+    let value: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(value["elapsed_ms"], 1000.0);
+    assert_eq!(value["scenario"]["data_kind"], "illustrative");
+    let before = fs::read(&input).unwrap();
+    assert!(
+        !cli()
+            .arg("simulate")
+            .arg(&input)
+            .arg("--csv")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(fs::read(&input).unwrap(), before);
+}

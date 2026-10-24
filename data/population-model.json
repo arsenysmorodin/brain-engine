@@ -1,0 +1,23 @@
+{
+  "model_id": "wilson_cowan_delayed_rate_v1",
+  "model_revision": 1,
+  "equation_source": {
+    "authors": "Heitmann S, Ermentrout GB",
+    "year": 2020,
+    "title": "Direction-selective motion discrimination by traveling waves in visual cortex",
+    "doi": "10.1371/journal.pcbi.1008164",
+    "pmid": "32877405",
+    "url": "https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008164",
+    "context": "Generalized Wilson–Cowan excitatory/inhibitory rate equations (1), (2), sigmoid (8). Computational visual-cortex model; not a human whole-brain connectome.",
+    "verification": "publisher_full_text_equations_verified",
+    "checked_on": "2026-10-24"
+  },
+  "adaptation": "Discrete FMA regions replace a spatial continuum. Signed delayed E-to-E graph coupling and finite rectangular stimuli are NeuroLab assumptions; weights, delays and local default parameters are illustrative, not fitted or imported from the paper.",
+  "state_units": "E and I normalized population activity, dimensionless 0–1; not Hz, BOLD, percent of cells or receptor occupancy",
+  "time_units": "model milliseconds; illustrative time constants and delays",
+  "history": "initial state held constant for all t < 0",
+  "numerics": "CPU f64, deterministic Heun method of steps; grid-aligned delays >= dt; no randomness or post-step clipping",
+  "validation": "analytic uncoupled exponential oracle, step convergence, causal delay and disconnection tests; no independent biological validation",
+  "connectivity": "Explicit illustrative branching graph. Its drawn arcs are schematic, not reconstructed axon tracts.",
+  "limitations": "Homogeneous E/I masses do not represent cellular types, laminae, neurotransmitters or regional specialization. Cerebellum, brainstem, white matter and cavities have no population model in this version. No real-substance effects are connected."
+}

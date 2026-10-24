@@ -56,21 +56,24 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     let path = next_path(&mut args, &command)?;
     match command.as_str() {
-        "new" | "new-response" => {
+        "new" | "new-response" | "new-network" => {
             if args.next().is_some() {
                 return Err("Лишний аргумент команды new".into());
             }
             if path.exists() {
                 return Err("Файл уже существует; укажите новый путь".into());
             }
-            if command == "new-response" {
+            if command == "new-network" {
+                let atlas = neuro_domain::BrainAtlas::bundled()?;
+                neuro_domain::NetworkScenario::bundled(&atlas)?.save(&path, &atlas)?;
+            } else if command == "new-response" {
                 ResponseScenario::default().save(&path)?;
             } else {
                 Scenario::default().save(&path)?;
             }
             println!("Создан illustrative-сценарий: {}", path.display());
         }
-        "run" => {
+        "run" | "simulate" => {
             let mut csv = None;
             let mut json = None;
             while let Some(flag) = args.next() {
@@ -90,11 +93,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             {
                 return Err("CSV и JSON должны иметь разные пути".into());
             }
-            let evaluation = evaluate_experiment(&Experiment::load(&path)?)?;
-            if let Some(csv) = csv {
-                evaluation.export_csv(csv)?;
-            }
-            let text = serde_json::to_string_pretty(&evaluation)?;
+            let text = if command == "simulate" {
+                let atlas = neuro_domain::BrainAtlas::bundled()?;
+                let scenario = neuro_domain::NetworkScenario::load(&path, &atlas)?;
+                let trace = neuro_engine::simulate_network(scenario, &atlas)?;
+                if let Some(csv) = csv {
+                    trace.export_csv(csv)?;
+                }
+                serde_json::to_string_pretty(&trace)?
+            } else {
+                let evaluation = evaluate_experiment(&Experiment::load(&path)?)?;
+                if let Some(csv) = csv {
+                    evaluation.export_csv(csv)?;
+                }
+                serde_json::to_string_pretty(&evaluation)?
+            };
             if let Some(json) = json {
                 atomic_write(&json, format!("{text}\n").as_bytes())?;
             }
@@ -122,6 +135,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. atlas проверяет геометрию и выводит каталог областей. JSON — stdout, ошибки — stderr и код 1."
+        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );
 }
