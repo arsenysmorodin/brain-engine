@@ -1,0 +1,413 @@
+[
+  {
+    "fma_id": "FMA72654",
+    "mesh_ids": [
+      "FJ1833"
+    ],
+    "name_en": "left superior frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72653",
+    "mesh_ids": [
+      "FJ1834"
+    ],
+    "name_en": "right superior frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72656",
+    "mesh_ids": [
+      "FJ1787"
+    ],
+    "name_en": "left middle frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72655",
+    "mesh_ids": [
+      "FJ1788"
+    ],
+    "name_en": "right middle frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72658",
+    "mesh_ids": [
+      "FJ1744"
+    ],
+    "name_en": "left inferior frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72657",
+    "mesh_ids": [
+      "FJ1745"
+    ],
+    "name_en": "right inferior frontal gyrus"
+  },
+  {
+    "fma_id": "FMA72662",
+    "mesh_ids": [
+      "FJ1800"
+    ],
+    "name_en": "left precentral gyrus"
+  },
+  {
+    "fma_id": "FMA72661",
+    "mesh_ids": [
+      "FJ1801"
+    ],
+    "name_en": "right precentral gyrus"
+  },
+  {
+    "fma_id": "FMA72666",
+    "mesh_ids": [
+      "FJ1797"
+    ],
+    "name_en": "left postcentral gyrus"
+  },
+  {
+    "fma_id": "FMA72665",
+    "mesh_ids": [
+      "FJ1798"
+    ],
+    "name_en": "right postcentral gyrus"
+  },
+  {
+    "fma_id": "FMA72672",
+    "mesh_ids": [
+      "FJ1835"
+    ],
+    "name_en": "left superior parietal lobule"
+  },
+  {
+    "fma_id": "FMA72671",
+    "mesh_ids": [
+      "FJ1836"
+    ],
+    "name_en": "right superior parietal lobule"
+  },
+  {
+    "fma_id": "FMA72668",
+    "mesh_ids": [
+      "FJ1841"
+    ],
+    "name_en": "left supramarginal gyrus"
+  },
+  {
+    "fma_id": "FMA72667",
+    "mesh_ids": [
+      "FJ1842"
+    ],
+    "name_en": "right supramarginal gyrus"
+  },
+  {
+    "fma_id": "FMA72670",
+    "mesh_ids": [
+      "FJ1732"
+    ],
+    "name_en": "left angular gyrus"
+  },
+  {
+    "fma_id": "FMA72669",
+    "mesh_ids": [
+      "FJ1733"
+    ],
+    "name_en": "right angular gyrus"
+  },
+  {
+    "fma_id": "FMA72686",
+    "mesh_ids": [
+      "FJ1789"
+    ],
+    "name_en": "left middle temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72685",
+    "mesh_ids": [
+      "FJ1790"
+    ],
+    "name_en": "right middle temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72688",
+    "mesh_ids": [
+      "FJ1746"
+    ],
+    "name_en": "left inferior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72687",
+    "mesh_ids": [
+      "FJ1747"
+    ],
+    "name_en": "right inferior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72690",
+    "mesh_ids": [
+      "FJ1783"
+    ],
+    "name_en": "left fusiform gyrus"
+  },
+  {
+    "fma_id": "FMA72689",
+    "mesh_ids": [
+      "FJ1784"
+    ],
+    "name_en": "right fusiform gyrus"
+  },
+  {
+    "fma_id": "FMA72976",
+    "mesh_ids": [
+      "FJ1791"
+    ],
+    "name_en": "left occipital lobe"
+  },
+  {
+    "fma_id": "FMA72975",
+    "mesh_ids": [
+      "FJ1792"
+    ],
+    "name_en": "right occipital lobe"
+  },
+  {
+    "fma_id": "FMA72978",
+    "mesh_ids": [
+      "FJ1748"
+    ],
+    "name_en": "left insula"
+  },
+  {
+    "fma_id": "FMA72977",
+    "mesh_ids": [
+      "FJ1749"
+    ],
+    "name_en": "right insula"
+  },
+  {
+    "fma_id": "FMA72718",
+    "mesh_ids": [
+      "FJ1739"
+    ],
+    "name_en": "left cingulate gyrus"
+  },
+  {
+    "fma_id": "FMA72717",
+    "mesh_ids": [
+      "FJ1740"
+    ],
+    "name_en": "right cingulate gyrus"
+  },
+  {
+    "fma_id": "FMA72706",
+    "mesh_ids": [
+      "FJ1785"
+    ],
+    "name_en": "left parahippocampal gyrus"
+  },
+  {
+    "fma_id": "FMA72705",
+    "mesh_ids": [
+      "FJ1786"
+    ],
+    "name_en": "right parahippocampal gyrus"
+  },
+  {
+    "fma_id": "FMA72714",
+    "mesh_ids": [
+      "FJ1759"
+    ],
+    "name_en": "left hippocampus"
+  },
+  {
+    "fma_id": "FMA72713",
+    "mesh_ids": [
+      "FJ1807"
+    ],
+    "name_en": "right hippocampus"
+  },
+  {
+    "fma_id": "FMA72833",
+    "mesh_ids": [
+      "FJ1753"
+    ],
+    "name_en": "left amygdala"
+  },
+  {
+    "fma_id": "FMA72832",
+    "mesh_ids": [
+      "FJ1829"
+    ],
+    "name_en": "right amygdala"
+  },
+  {
+    "fma_id": "FMA258716",
+    "mesh_ids": [
+      "FJ1782"
+    ],
+    "name_en": "left thalamus"
+  },
+  {
+    "fma_id": "FMA258714",
+    "mesh_ids": [
+      "FJ1827"
+    ],
+    "name_en": "right thalamus"
+  },
+  {
+    "fma_id": "FMA72827",
+    "mesh_ids": [
+      "FJ1754"
+    ],
+    "name_en": "left caudate nucleus"
+  },
+  {
+    "fma_id": "FMA72826",
+    "mesh_ids": [
+      "FJ1802"
+    ],
+    "name_en": "right caudate nucleus"
+  },
+  {
+    "fma_id": "FMA72829",
+    "mesh_ids": [
+      "FJ1776"
+    ],
+    "name_en": "left putamen"
+  },
+  {
+    "fma_id": "FMA72828",
+    "mesh_ids": [
+      "FJ1823"
+    ],
+    "name_en": "right putamen"
+  },
+  {
+    "fma_id": "FMA72831",
+    "mesh_ids": [
+      "FJ1757"
+    ],
+    "name_en": "left globus pallidus"
+  },
+  {
+    "fma_id": "FMA72830",
+    "mesh_ids": [
+      "FJ1805"
+    ],
+    "name_en": "right globus pallidus"
+  },
+  {
+    "fma_id": "FMA78450",
+    "mesh_ids": [
+      "FJ1767"
+    ],
+    "name_en": "left lateral ventricle"
+  },
+  {
+    "fma_id": "FMA78449",
+    "mesh_ids": [
+      "FJ1814"
+    ],
+    "name_en": "right lateral ventricle"
+  },
+  {
+    "fma_id": "FMA72801",
+    "mesh_ids": [
+      "FJ1837"
+    ],
+    "name_en": "anterior part of left superior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72805",
+    "mesh_ids": [
+      "FJ1839"
+    ],
+    "name_en": "posterior part of left superior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA260794",
+    "mesh_ids": [
+      "FJ1758"
+    ],
+    "name_en": "white matter of left cerebral hemisphere"
+  },
+  {
+    "fma_id": "FMA72800",
+    "mesh_ids": [
+      "FJ1838"
+    ],
+    "name_en": "anterior part of right superior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA72804",
+    "mesh_ids": [
+      "FJ1840"
+    ],
+    "name_en": "posterior part of right superior temporal gyrus"
+  },
+  {
+    "fma_id": "FMA260791",
+    "mesh_ids": [
+      "FJ1806"
+    ],
+    "name_en": "white matter of right cerebral hemisphere"
+  },
+  {
+    "fma_id": "FMA62008",
+    "mesh_ids": [
+      "FJ1760",
+      "FJ1808"
+    ],
+    "name_en": "hypothalamus"
+  },
+  {
+    "fma_id": "FMA67944",
+    "mesh_ids": [
+      "FJ1781",
+      "FJ1830"
+    ],
+    "name_en": "cerebellum"
+  },
+  {
+    "fma_id": "FMA61993",
+    "mesh_ids": [
+      "FJ1770",
+      "FJ1817"
+    ],
+    "name_en": "midbrain"
+  },
+  {
+    "fma_id": "FMA67943",
+    "mesh_ids": [
+      "FJ1775",
+      "FJ1822"
+    ],
+    "name_en": "pons"
+  },
+  {
+    "fma_id": "FMA62004",
+    "mesh_ids": [
+      "FJ1769",
+      "FJ1831"
+    ],
+    "name_en": "medulla oblongata"
+  },
+  {
+    "fma_id": "FMA86464",
+    "mesh_ids": [
+      "FJ1742"
+    ],
+    "name_en": "corpus callosum"
+  },
+  {
+    "fma_id": "FMA78454",
+    "mesh_ids": [
+      "FJ1730"
+    ],
+    "name_en": "third ventricle"
+  },
+  {
+    "fma_id": "FMA78469",
+    "mesh_ids": [
+      "FJ1731"
+    ],
+    "name_en": "fourth ventricle"
+  }
+]

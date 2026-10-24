@@ -10,5 +10,9 @@ serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 
+[dev-dependencies]
+flate2 = "=1.1.10"
+crc32fast = "=1.5.3"
+
 [lints]
 workspace = true

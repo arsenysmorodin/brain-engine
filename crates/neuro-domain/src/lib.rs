@@ -5,6 +5,8 @@ use thiserror::Error;
 
 mod response;
 pub use response::*;
+mod brain;
+pub use brain::*;
 
 pub const FORMAT_VERSION: u32 = 1;
 pub const MODEL_ID: &str = "competitive_binding_equilibrium_v1";

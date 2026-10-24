@@ -179,3 +179,22 @@ fn response_cli_roundtrip_export_and_benchmark() {
     assert_eq!(value["passed"], true);
     assert_eq!(value["independent_experimental_validation"], false);
 }
+
+#[test]
+fn anatomical_inventory_validates_meshes_and_exports_unknown_activity() {
+    let temp = Temp::new();
+    let csv = temp.0.join("regions.csv");
+    let output = cli().arg("atlas").arg("--csv").arg(&csv).output().unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let atlas: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(atlas["regions"].as_array().unwrap().len(), 58);
+    assert_eq!(atlas["meshes"].as_array().unwrap().len(), 63);
+    assert_eq!(
+        std::fs::read_to_string(csv).unwrap(),
+        neuro_domain::BrainAtlas::bundled().unwrap().csv()
+    );
+}

@@ -1,0 +1,21 @@
+BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International.
+
+Data source: BodyParts3D 4.0, IS-A polygon meshes (99% polygon reduction).
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+Official license, updated February 27, 2025:
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html
+Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+Citation: Mitsuhashi et al., BodyParts3D: 3D structure database for anatomical concepts.
+DOI: 10.1093/nar/gkn613; PMID: 18835852.
+
+NeuroLab changes: selected 58 structures / 63 meshes from the official archive,
+triangulated and converted OBJ coordinates to indexed f32 binary geometry;
+added Russian names and editorial display groups. Relative source positions
+are preserved. Rendering computes normals and normalizes display coordinates.
+No physiological activity or connectivity is included in these assets.
+
+The assets and adapted anatomical metadata are distributed under CC BY 4.0.
+The project's MIT license applies to its own code, not to these third-party assets.

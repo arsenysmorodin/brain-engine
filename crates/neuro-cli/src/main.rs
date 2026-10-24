@@ -37,6 +37,23 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         return Ok(());
     }
+    if command == "atlas" {
+        let csv = match args.next().as_deref() {
+            None => None,
+            Some("--csv") => Some(next_path(&mut args, "--csv")?),
+            _ => return Err("Используйте atlas [--csv regions.csv]".into()),
+        };
+        if args.next().is_some() {
+            return Err("Лишний аргумент atlas".into());
+        }
+        let atlas = neuro_domain::BrainAtlas::bundled()?;
+        let _geometry = neuro_domain::BrainGeometry::bundled(&atlas)?;
+        if let Some(path) = csv {
+            atomic_write(&path, atlas.csv().as_bytes())?;
+        }
+        println!("{}", serde_json::to_string_pretty(&atlas)?);
+        return Ok(());
+    }
     let path = next_path(&mut args, &command)?;
     match command.as_str() {
         "new" | "new-response" => {
@@ -105,6 +122,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — связывание и операционный ответ (illustrative)\n\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. JSON — stdout, ошибки — stderr и код 1. Дозировок и прогнозов эффектов нет."
+        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. atlas проверяет геометрию и выводит каталог областей. JSON — stdout, ошибки — stderr и код 1."
     );
 }

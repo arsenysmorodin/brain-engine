@@ -1,0 +1,1170 @@
+{
+  "atlas_id": "bodyparts3d_brain_4.0",
+  "atlas_revision": 1,
+  "coordinate_space": "BodyParts3D source coordinates; no MNI registration",
+  "format_version": 1,
+  "limitations": "Анатомическая визуализация, низкополигональная геометрия. Не индивидуальный мозг и не функциональная парцелляция. Набор структур неполон. Связи, параметры и активность областей не заданы; неизвестное не равно нулю.",
+  "meshes": [
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1730.obj",
+      "id": "FJ1730",
+      "source_crc32": "45bfdc0c",
+      "triangles": 3870,
+      "vertices": 1994
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1731.obj",
+      "id": "FJ1731",
+      "source_crc32": "b3e8455a",
+      "triangles": 6940,
+      "vertices": 3567
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1732.obj",
+      "id": "FJ1732",
+      "source_crc32": "32c0a84f",
+      "triangles": 3588,
+      "vertices": 2048
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1733.obj",
+      "id": "FJ1733",
+      "source_crc32": "b44c8b1e",
+      "triangles": 3554,
+      "vertices": 2084
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1739.obj",
+      "id": "FJ1739",
+      "source_crc32": "bcba884a",
+      "triangles": 2416,
+      "vertices": 1365
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1740.obj",
+      "id": "FJ1740",
+      "source_crc32": "382168ca",
+      "triangles": 2346,
+      "vertices": 1330
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1742.obj",
+      "id": "FJ1742",
+      "source_crc32": "3630ae0a",
+      "triangles": 30232,
+      "vertices": 16716
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1744.obj",
+      "id": "FJ1744",
+      "source_crc32": "8ca2e6aa",
+      "triangles": 3290,
+      "vertices": 1927
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1745.obj",
+      "id": "FJ1745",
+      "source_crc32": "c3432979",
+      "triangles": 3292,
+      "vertices": 1928
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1746.obj",
+      "id": "FJ1746",
+      "source_crc32": "26195051",
+      "triangles": 2732,
+      "vertices": 1573
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1747.obj",
+      "id": "FJ1747",
+      "source_crc32": "f6920609",
+      "triangles": 2768,
+      "vertices": 1610
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1748.obj",
+      "id": "FJ1748",
+      "source_crc32": "9a4a2216",
+      "triangles": 2448,
+      "vertices": 1250
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1749.obj",
+      "id": "FJ1749",
+      "source_crc32": "eab1641e",
+      "triangles": 2448,
+      "vertices": 1261
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1753.obj",
+      "id": "FJ1753",
+      "source_crc32": "fe1363c5",
+      "triangles": 382,
+      "vertices": 202
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1754.obj",
+      "id": "FJ1754",
+      "source_crc32": "6685c553",
+      "triangles": 2544,
+      "vertices": 1334
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1757.obj",
+      "id": "FJ1757",
+      "source_crc32": "52f4b46d",
+      "triangles": 7080,
+      "vertices": 3542
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1758.obj",
+      "id": "FJ1758",
+      "source_crc32": "65160a48",
+      "triangles": 25542,
+      "vertices": 15286
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1759.obj",
+      "id": "FJ1759",
+      "source_crc32": "b77e5683",
+      "triangles": 980,
+      "vertices": 492
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1760.obj",
+      "id": "FJ1760",
+      "source_crc32": "6b2307fd",
+      "triangles": 2050,
+      "vertices": 1183
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1767.obj",
+      "id": "FJ1767",
+      "source_crc32": "9343ff7f",
+      "triangles": 17968,
+      "vertices": 8986
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1769.obj",
+      "id": "FJ1769",
+      "source_crc32": "dda926e7",
+      "triangles": 6036,
+      "vertices": 3196
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1770.obj",
+      "id": "FJ1770",
+      "source_crc32": "1fa819e3",
+      "triangles": 6468,
+      "vertices": 4157
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1775.obj",
+      "id": "FJ1775",
+      "source_crc32": "617f88d7",
+      "triangles": 10304,
+      "vertices": 5764
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1776.obj",
+      "id": "FJ1776",
+      "source_crc32": "91496a38",
+      "triangles": 7056,
+      "vertices": 3642
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1781.obj",
+      "id": "FJ1781",
+      "source_crc32": "75054fe4",
+      "triangles": 23818,
+      "vertices": 12098
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1782.obj",
+      "id": "FJ1782",
+      "source_crc32": "a5d72e56",
+      "triangles": 1702,
+      "vertices": 853
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1783.obj",
+      "id": "FJ1783",
+      "source_crc32": "b9636324",
+      "triangles": 1550,
+      "vertices": 869
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1784.obj",
+      "id": "FJ1784",
+      "source_crc32": "69cec1b4",
+      "triangles": 1626,
+      "vertices": 909
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1785.obj",
+      "id": "FJ1785",
+      "source_crc32": "3fde9911",
+      "triangles": 740,
+      "vertices": 435
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1786.obj",
+      "id": "FJ1786",
+      "source_crc32": "488ba816",
+      "triangles": 882,
+      "vertices": 482
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1787.obj",
+      "id": "FJ1787",
+      "source_crc32": "04fc0a21",
+      "triangles": 3416,
+      "vertices": 1973
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1788.obj",
+      "id": "FJ1788",
+      "source_crc32": "8515610e",
+      "triangles": 3326,
+      "vertices": 1960
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1789.obj",
+      "id": "FJ1789",
+      "source_crc32": "b69c4cab",
+      "triangles": 2710,
+      "vertices": 1528
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1790.obj",
+      "id": "FJ1790",
+      "source_crc32": "a12c3888",
+      "triangles": 2754,
+      "vertices": 1563
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1791.obj",
+      "id": "FJ1791",
+      "source_crc32": "2a22f6f8",
+      "triangles": 4390,
+      "vertices": 2538
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1792.obj",
+      "id": "FJ1792",
+      "source_crc32": "c26134e7",
+      "triangles": 4564,
+      "vertices": 2625
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1797.obj",
+      "id": "FJ1797",
+      "source_crc32": "40ae3adf",
+      "triangles": 3604,
+      "vertices": 2033
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1798.obj",
+      "id": "FJ1798",
+      "source_crc32": "b8cd78ff",
+      "triangles": 3604,
+      "vertices": 2045
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1800.obj",
+      "id": "FJ1800",
+      "source_crc32": "707ae91d",
+      "triangles": 4042,
+      "vertices": 2336
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1801.obj",
+      "id": "FJ1801",
+      "source_crc32": "925f8cda",
+      "triangles": 4042,
+      "vertices": 2382
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1802.obj",
+      "id": "FJ1802",
+      "source_crc32": "30a25b02",
+      "triangles": 2570,
+      "vertices": 1334
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1805.obj",
+      "id": "FJ1805",
+      "source_crc32": "7016ce1f",
+      "triangles": 5344,
+      "vertices": 2674
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1806.obj",
+      "id": "FJ1806",
+      "source_crc32": "9388a1ad",
+      "triangles": 26512,
+      "vertices": 15757
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1807.obj",
+      "id": "FJ1807",
+      "source_crc32": "7624c65a",
+      "triangles": 1020,
+      "vertices": 515
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1808.obj",
+      "id": "FJ1808",
+      "source_crc32": "34dbc808",
+      "triangles": 2028,
+      "vertices": 1191
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1814.obj",
+      "id": "FJ1814",
+      "source_crc32": "b970cb05",
+      "triangles": 18016,
+      "vertices": 9011
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1817.obj",
+      "id": "FJ1817",
+      "source_crc32": "3c8de195",
+      "triangles": 6440,
+      "vertices": 4050
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1822.obj",
+      "id": "FJ1822",
+      "source_crc32": "68a35679",
+      "triangles": 10346,
+      "vertices": 6179
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1823.obj",
+      "id": "FJ1823",
+      "source_crc32": "1409c61c",
+      "triangles": 7064,
+      "vertices": 3690
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1827.obj",
+      "id": "FJ1827",
+      "source_crc32": "f1819bbf",
+      "triangles": 758,
+      "vertices": 381
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1829.obj",
+      "id": "FJ1829",
+      "source_crc32": "5d6db412",
+      "triangles": 384,
+      "vertices": 202
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1830.obj",
+      "id": "FJ1830",
+      "source_crc32": "4be9e58b",
+      "triangles": 23882,
+      "vertices": 12226
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1831.obj",
+      "id": "FJ1831",
+      "source_crc32": "4aef6f8a",
+      "triangles": 6060,
+      "vertices": 3281
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1833.obj",
+      "id": "FJ1833",
+      "source_crc32": "742006c7",
+      "triangles": 6452,
+      "vertices": 3625
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1834.obj",
+      "id": "FJ1834",
+      "source_crc32": "bbef162b",
+      "triangles": 6450,
+      "vertices": 3671
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1835.obj",
+      "id": "FJ1835",
+      "source_crc32": "56162d99",
+      "triangles": 5364,
+      "vertices": 3181
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1836.obj",
+      "id": "FJ1836",
+      "source_crc32": "da261187",
+      "triangles": 5640,
+      "vertices": 3241
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1837.obj",
+      "id": "FJ1837",
+      "source_crc32": "ed997724",
+      "triangles": 1804,
+      "vertices": 1039
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1838.obj",
+      "id": "FJ1838",
+      "source_crc32": "c1e2e108",
+      "triangles": 1892,
+      "vertices": 1082
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1839.obj",
+      "id": "FJ1839",
+      "source_crc32": "8a03cae5",
+      "triangles": 2264,
+      "vertices": 1200
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1840.obj",
+      "id": "FJ1840",
+      "source_crc32": "18116574",
+      "triangles": 2264,
+      "vertices": 1220
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1841.obj",
+      "id": "FJ1841",
+      "source_crc32": "a77affd5",
+      "triangles": 2344,
+      "vertices": 1323
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1842.obj",
+      "id": "FJ1842",
+      "source_crc32": "c096df8c",
+      "triangles": 2314,
+      "vertices": 1368
+    }
+  ],
+  "regions": [
+    {
+      "group": "frontal",
+      "hemisphere": "left",
+      "id": "FMA72654",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1833"
+      ],
+      "name": "Верхняя лобная извилина · левая",
+      "name_en": "left superior frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "right",
+      "id": "FMA72653",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1834"
+      ],
+      "name": "Верхняя лобная извилина · правая",
+      "name_en": "right superior frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "left",
+      "id": "FMA72656",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1787"
+      ],
+      "name": "Средняя лобная извилина · левая",
+      "name_en": "left middle frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "right",
+      "id": "FMA72655",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1788"
+      ],
+      "name": "Средняя лобная извилина · правая",
+      "name_en": "right middle frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "left",
+      "id": "FMA72658",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1744"
+      ],
+      "name": "Нижняя лобная извилина · левая",
+      "name_en": "left inferior frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "right",
+      "id": "FMA72657",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1745"
+      ],
+      "name": "Нижняя лобная извилина · правая",
+      "name_en": "right inferior frontal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "left",
+      "id": "FMA72662",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1800"
+      ],
+      "name": "Предцентральная извилина · левая",
+      "name_en": "left precentral gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "frontal",
+      "hemisphere": "right",
+      "id": "FMA72661",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1801"
+      ],
+      "name": "Предцентральная извилина · правая",
+      "name_en": "right precentral gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "left",
+      "id": "FMA72666",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1797"
+      ],
+      "name": "Постцентральная извилина · левая",
+      "name_en": "left postcentral gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "right",
+      "id": "FMA72665",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1798"
+      ],
+      "name": "Постцентральная извилина · правая",
+      "name_en": "right postcentral gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "left",
+      "id": "FMA72672",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1835"
+      ],
+      "name": "Верхняя теменная долька · левая",
+      "name_en": "left superior parietal lobule",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "right",
+      "id": "FMA72671",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1836"
+      ],
+      "name": "Верхняя теменная долька · правая",
+      "name_en": "right superior parietal lobule",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "left",
+      "id": "FMA72668",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1841"
+      ],
+      "name": "Надкраевая извилина · левая",
+      "name_en": "left supramarginal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "right",
+      "id": "FMA72667",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1842"
+      ],
+      "name": "Надкраевая извилина · правая",
+      "name_en": "right supramarginal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "left",
+      "id": "FMA72670",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1732"
+      ],
+      "name": "Угловая извилина · левая",
+      "name_en": "left angular gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "parietal",
+      "hemisphere": "right",
+      "id": "FMA72669",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1733"
+      ],
+      "name": "Угловая извилина · правая",
+      "name_en": "right angular gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "left",
+      "id": "FMA72686",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1789"
+      ],
+      "name": "Средняя височная извилина · левая",
+      "name_en": "left middle temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "right",
+      "id": "FMA72685",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1790"
+      ],
+      "name": "Средняя височная извилина · правая",
+      "name_en": "right middle temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "left",
+      "id": "FMA72688",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1746"
+      ],
+      "name": "Нижняя височная извилина · левая",
+      "name_en": "left inferior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "right",
+      "id": "FMA72687",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1747"
+      ],
+      "name": "Нижняя височная извилина · правая",
+      "name_en": "right inferior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "left",
+      "id": "FMA72690",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1783"
+      ],
+      "name": "Веретенообразная извилина · левая",
+      "name_en": "left fusiform gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "right",
+      "id": "FMA72689",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1784"
+      ],
+      "name": "Веретенообразная извилина · правая",
+      "name_en": "right fusiform gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "occipital",
+      "hemisphere": "left",
+      "id": "FMA72976",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1791"
+      ],
+      "name": "Затылочная доля · левая",
+      "name_en": "left occipital lobe",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "occipital",
+      "hemisphere": "right",
+      "id": "FMA72975",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1792"
+      ],
+      "name": "Затылочная доля · правая",
+      "name_en": "right occipital lobe",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "insula",
+      "hemisphere": "left",
+      "id": "FMA72978",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1748"
+      ],
+      "name": "Островок · левая",
+      "name_en": "left insula",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "insula",
+      "hemisphere": "right",
+      "id": "FMA72977",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1749"
+      ],
+      "name": "Островок · правая",
+      "name_en": "right insula",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "left",
+      "id": "FMA72718",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1739"
+      ],
+      "name": "Поясная извилина · левая",
+      "name_en": "left cingulate gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "right",
+      "id": "FMA72717",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1740"
+      ],
+      "name": "Поясная извилина · правая",
+      "name_en": "right cingulate gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "left",
+      "id": "FMA72706",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1785"
+      ],
+      "name": "Парагиппокампальная извилина · левая",
+      "name_en": "left parahippocampal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "right",
+      "id": "FMA72705",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1786"
+      ],
+      "name": "Парагиппокампальная извилина · правая",
+      "name_en": "right parahippocampal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "left",
+      "id": "FMA72714",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1759"
+      ],
+      "name": "Гиппокамп · левая",
+      "name_en": "left hippocampus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "medial",
+      "hemisphere": "right",
+      "id": "FMA72713",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1807"
+      ],
+      "name": "Гиппокамп · правая",
+      "name_en": "right hippocampus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "left",
+      "id": "FMA72833",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1753"
+      ],
+      "name": "Миндалина · левая",
+      "name_en": "left amygdala",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "right",
+      "id": "FMA72832",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1829"
+      ],
+      "name": "Миндалина · правая",
+      "name_en": "right amygdala",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "left",
+      "id": "FMA258716",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1782"
+      ],
+      "name": "Таламус · левая",
+      "name_en": "left thalamus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "right",
+      "id": "FMA258714",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1827"
+      ],
+      "name": "Таламус · правая",
+      "name_en": "right thalamus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "left",
+      "id": "FMA72827",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1754"
+      ],
+      "name": "Хвостатое ядро · левая",
+      "name_en": "left caudate nucleus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "right",
+      "id": "FMA72826",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1802"
+      ],
+      "name": "Хвостатое ядро · правая",
+      "name_en": "right caudate nucleus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "left",
+      "id": "FMA72829",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1776"
+      ],
+      "name": "Скорлупа · левая",
+      "name_en": "left putamen",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "right",
+      "id": "FMA72828",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1823"
+      ],
+      "name": "Скорлупа · правая",
+      "name_en": "right putamen",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "left",
+      "id": "FMA72831",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1757"
+      ],
+      "name": "Бледный шар · левая",
+      "name_en": "left globus pallidus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "right",
+      "id": "FMA72830",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1805"
+      ],
+      "name": "Бледный шар · правая",
+      "name_en": "right globus pallidus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "ventricles",
+      "hemisphere": "left",
+      "id": "FMA78450",
+      "kind": "cavity",
+      "mesh_ids": [
+        "FJ1767"
+      ],
+      "name": "Боковой желудочек · левая",
+      "name_en": "left lateral ventricle",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "ventricles",
+      "hemisphere": "right",
+      "id": "FMA78449",
+      "kind": "cavity",
+      "mesh_ids": [
+        "FJ1814"
+      ],
+      "name": "Боковой желудочек · правая",
+      "name_en": "right lateral ventricle",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "left",
+      "id": "FMA72801",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1837"
+      ],
+      "name": "Верхняя височная извилина · левая, передняя часть",
+      "name_en": "anterior part of left superior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "left",
+      "id": "FMA72805",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1839"
+      ],
+      "name": "Верхняя височная извилина · левая, задняя часть",
+      "name_en": "posterior part of left superior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "white_matter",
+      "hemisphere": "left",
+      "id": "FMA260794",
+      "kind": "white_matter",
+      "mesh_ids": [
+        "FJ1758"
+      ],
+      "name": "Белое вещество · левое полушарие",
+      "name_en": "white matter of left cerebral hemisphere",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "right",
+      "id": "FMA72800",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1838"
+      ],
+      "name": "Верхняя височная извилина · правая, передняя часть",
+      "name_en": "anterior part of right superior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "temporal",
+      "hemisphere": "right",
+      "id": "FMA72804",
+      "kind": "cortex",
+      "mesh_ids": [
+        "FJ1840"
+      ],
+      "name": "Верхняя височная извилина · правая, задняя часть",
+      "name_en": "posterior part of right superior temporal gyrus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "white_matter",
+      "hemisphere": "right",
+      "id": "FMA260791",
+      "kind": "white_matter",
+      "mesh_ids": [
+        "FJ1806"
+      ],
+      "name": "Белое вещество · правое полушарие",
+      "name_en": "white matter of right cerebral hemisphere",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "deep",
+      "hemisphere": "bilateral",
+      "id": "FMA62008",
+      "kind": "gray_matter",
+      "mesh_ids": [
+        "FJ1760",
+        "FJ1808"
+      ],
+      "name": "Гипоталамус",
+      "name_en": "hypothalamus",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "cerebellum",
+      "hemisphere": "bilateral",
+      "id": "FMA67944",
+      "kind": "cerebellum",
+      "mesh_ids": [
+        "FJ1781",
+        "FJ1830"
+      ],
+      "name": "Мозжечок",
+      "name_en": "cerebellum",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "brainstem",
+      "hemisphere": "bilateral",
+      "id": "FMA61993",
+      "kind": "brainstem",
+      "mesh_ids": [
+        "FJ1770",
+        "FJ1817"
+      ],
+      "name": "Средний мозг",
+      "name_en": "midbrain",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "brainstem",
+      "hemisphere": "bilateral",
+      "id": "FMA67943",
+      "kind": "brainstem",
+      "mesh_ids": [
+        "FJ1775",
+        "FJ1822"
+      ],
+      "name": "Мост",
+      "name_en": "pons",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "brainstem",
+      "hemisphere": "bilateral",
+      "id": "FMA62004",
+      "kind": "brainstem",
+      "mesh_ids": [
+        "FJ1769",
+        "FJ1831"
+      ],
+      "name": "Продолговатый мозг",
+      "name_en": "medulla oblongata",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "white_matter",
+      "hemisphere": "bilateral",
+      "id": "FMA86464",
+      "kind": "white_matter",
+      "mesh_ids": [
+        "FJ1742"
+      ],
+      "name": "Мозолистое тело",
+      "name_en": "corpus callosum",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "ventricles",
+      "hemisphere": "bilateral",
+      "id": "FMA78454",
+      "kind": "cavity",
+      "mesh_ids": [
+        "FJ1730"
+      ],
+      "name": "Третий желудочек",
+      "name_en": "third ventricle",
+      "source_id": "bodyparts3d-4.0"
+    },
+    {
+      "group": "ventricles",
+      "hemisphere": "bilateral",
+      "id": "FMA78469",
+      "kind": "cavity",
+      "mesh_ids": [
+        "FJ1731"
+      ],
+      "name": "Четвёртый желудочек",
+      "name_en": "fourth ventricle",
+      "source_id": "bodyparts3d-4.0"
+    }
+  ],
+  "source": {
+    "archive_url": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/isa_BP3D_4.0_obj_99.zip",
+    "attribution": "BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International",
+    "changes": "Выбраны структуры мозга; русские названия и группы интерфейса добавлены NeuroLab. OBJ преобразован в индексированные треугольники f32. Исходное положение структур сохранено; нормали и освещение вычисляются при отображении.",
+    "checked_on": "2026-10-24",
+    "id": "bodyparts3d-4.0",
+    "license": "CC BY 4.0",
+    "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+    "publication_doi": "10.1093/nar/gkn613",
+    "title": "BodyParts3D 4.0 · Database Center for Life Science",
+    "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html",
+    "verification": "official_dataset_and_license_verified"
+  },
+  "species": "Homo sapiens · анатомическая модель взрослого мужчины",
+  "title": "Мозг человека · BodyParts3D",
+  "total_triangles": 370316,
+  "total_vertices": 204507
+}
