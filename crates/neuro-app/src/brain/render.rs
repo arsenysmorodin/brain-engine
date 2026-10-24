@@ -20,7 +20,7 @@ pub struct BrainViewport {
     size: UVec2,
     last_scene: Option<BrainScene>,
     active: bool,
-    last_simulation: Option<(bool, u64, bool, u64)>,
+    last_simulation: Option<(bool, u64, bool, u64, bool, u64)>,
 }
 #[derive(Component)]
 pub struct BrainCameraEntity;
@@ -123,6 +123,7 @@ pub fn setup(
             Transform::default(),
         ));
     }
+    setup_flow(&mut commands, &lab.brain, &mut meshes, &mut materials);
     for source in &lab.brain.vascular_meshes {
         commands.spawn((
             BrainPart {
@@ -207,6 +208,8 @@ pub fn sync(
         simulation.revision,
         caffeine.mode,
         caffeine.revision,
+        lab.brain.circulation.mode,
+        lab.brain.circulation.revision,
     );
     if viewport.last_scene.as_ref() == Some(&lab.brain.scene)
         && viewport.last_simulation == Some(simulation_revision)
@@ -227,13 +230,20 @@ pub fn sync(
                     neuro_domain::Hemisphere::Left
                 )
             );
-            *visibility = if caffeine.mode && caffeine.show_vessels && side_visible {
+            *visibility = if ((caffeine.mode && caffeine.show_vessels)
+                || (lab.brain.circulation.mode && lab.brain.circulation.arteries))
+                && side_visible
+            {
                 Visibility::Visible
             } else {
                 Visibility::Hidden
             };
             if let Some(material) = materials.get_mut(&handle.0) {
-                let rgb = super::vascular::vessel_rgb(&lab.brain, part.region);
+                let rgb = if lab.brain.circulation.mode {
+                    lab.brain.circulation.artery_rgb()
+                } else {
+                    super::vascular::vessel_rgb(&lab.brain, part.region)
+                };
                 material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
             }
             continue;
@@ -241,6 +251,7 @@ pub fn sync(
         let region = &lab.brain.atlas.regions[part.region];
         *visibility = if lab.brain.scene.visible(region)
             && (!caffeine.mode || caffeine.tissue_opacity > 0.0)
+            && (!lab.brain.circulation.mode || lab.brain.circulation.opacity > 0.0)
         {
             Visibility::Visible
         } else {
@@ -250,7 +261,9 @@ pub fn sync(
         if let Some(material) = materials.get_mut(&handle.0) {
             let selected = lab.brain.scene.selected_region.as_ref() == Some(&region.id);
             let activity = simulation.state(&region.id);
-            let rgb = if caffeine.mode {
+            let rgb = if lab.brain.circulation.mode {
+                lab.brain.circulation.region_rgb(region)
+            } else if caffeine.mode {
                 caffeine.region_rgb(region)
             } else if simulation.mode {
                 activity.map_or([65, 69, 77], |s| super::simulation::heat_rgb(s.e))
@@ -261,7 +274,9 @@ pub fn sync(
             } else {
                 [184, 194, 207]
             };
-            let alpha = if caffeine.mode {
+            let alpha = if lab.brain.circulation.mode {
+                lab.brain.circulation.opacity
+            } else if caffeine.mode {
                 if selected {
                     caffeine.tissue_opacity.max(0.6)
                 } else {
@@ -336,6 +351,115 @@ mod tests {
             .unwrap()
         {
             assert!((Vec3::from_array(*normal) - Vec3::Z).length() < 1e-6);
+        }
+    }
+}
+
+#[derive(Component)]
+pub struct FlowSegment {
+    path: usize,
+}
+#[derive(Component)]
+pub struct FlowParticle {
+    path: usize,
+}
+fn setup_flow(
+    commands: &mut Commands,
+    brain: &super::BrainLab,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+) {
+    let bead = meshes.add(Sphere::new(0.014).mesh().ico(1).expect("icosphere"));
+    for (i, source) in brain.flow_geometry.meshes.iter().enumerate() {
+        let material = materials.add(StandardMaterial {
+            base_color: Color::srgb_u8(80, 115, 180),
+            perceptual_roughness: 0.5,
+            ..default()
+        });
+        commands.spawn((
+            FlowSegment { path: i },
+            Mesh3d(meshes.add(display_mesh(source))),
+            MeshMaterial3d(material),
+            Transform::default(),
+            Visibility::Hidden,
+        ));
+        commands.spawn((
+            FlowParticle { path: i },
+            Mesh3d(bead.clone()),
+            MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: Color::WHITE,
+                unlit: true,
+                ..default()
+            })),
+            Transform::default(),
+            Visibility::Hidden,
+        ));
+    }
+}
+pub fn sync_flow(
+    lab: Res<Lab>,
+    mut segments: Query<
+        (
+            &FlowSegment,
+            &mut Visibility,
+            &MeshMaterial3d<StandardMaterial>,
+        ),
+        Without<FlowParticle>,
+    >,
+    mut particles: Query<
+        (
+            &FlowParticle,
+            &mut Visibility,
+            &mut Transform,
+            &MeshMaterial3d<StandardMaterial>,
+        ),
+        Without<FlowSegment>,
+    >,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    let c = &lab.brain.circulation;
+    let active = lab.view == View::Brain && c.mode;
+    for (part, mut visibility, handle) in &mut segments {
+        let visible = active && c.path_visible(&lab.brain, part.path);
+        *visibility = if visible {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+        if visible && let Some(material) = materials.get_mut(&handle.0) {
+            let rgb = c.path_rgb(&lab.brain, part.path);
+            material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
+        }
+    }
+    for (part, mut visibility, mut transform, handle) in &mut particles {
+        let path = &lab.brain.flow_geometry.paths[part.path];
+        let q_nonzero = path
+            .region
+            .and_then(|i| c.bed_index(&lab.brain.atlas.regions[i].id))
+            .and_then(|i| c.frame().map(|f| f.cbf_ml_100g_min[i] > 0.0))
+            .unwrap_or_else(|| {
+                c.frame()
+                    .is_some_and(|f| f.systemic[c.selected.index()].return_mg_min > 0.0)
+            });
+        let visible = active
+            && c.particles
+            && c.path_visible(&lab.brain, part.path)
+            && q_nonzero
+            && c.path_concentration(&lab.brain, part.path) > 1e-9;
+        *visibility = if visible {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
+        if visible {
+            transform.translation = super::circulation::geometry::along(
+                &path.points,
+                (c.time_min * 12.0 + part.path as f64 * 0.171) as f32,
+            );
+            if let Some(material) = materials.get_mut(&handle.0) {
+                let color = super::circulation::DRUG_COLORS[c.selected.index()].to_array();
+                material.base_color = Color::srgb_u8(color[0], color[1], color[2]);
+            }
         }
     }
 }

@@ -72,6 +72,7 @@ impl Lab {
         if view != View::Brain {
             self.brain.simulation.playing = false;
             self.brain.caffeine.playing = false;
+            self.brain.circulation.playing = false;
         }
         self.view = view;
         self.status_error = false;
@@ -162,7 +163,10 @@ impl Lab {
         let brain = self.view == View::Brain;
         let network = brain && self.brain.simulation.mode;
         let caffeine = brain && self.brain.caffeine.mode;
-        let last_path = if caffeine {
+        let circulation = brain && self.brain.circulation.mode;
+        let last_path = if circulation {
+            &self.brain.circulation.last_path
+        } else if caffeine {
             &self.brain.caffeine.last_path
         } else if network {
             &self.brain.simulation.last_path
@@ -174,8 +178,14 @@ impl Lab {
             &self.last_scenario_path
         };
         self.file_path = match action {
-            FileAction::RegionalCsv => cwd.join("neuro-caffeine-regions.csv"),
-            FileAction::Csv => cwd.join(if caffeine {
+            FileAction::RegionalCsv => cwd.join(if circulation {
+                "neuro-purine-regions.csv"
+            } else {
+                "neuro-caffeine-regions.csv"
+            }),
+            FileAction::Csv => cwd.join(if circulation {
+                "neuro-purine-pk.csv"
+            } else if caffeine {
                 "neuro-caffeine-pk.csv"
             } else if network {
                 "neuro-brain-trace.csv"
@@ -187,7 +197,9 @@ impl Lab {
                 "neuro-results.csv"
             }),
             FileAction::Open => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if caffeine {
+                cwd.join(if circulation {
+                    "scenarios/purine-circulation.json"
+                } else if caffeine {
                     "scenarios/caffeine.json"
                 } else if network {
                     "scenarios/brain-network.json"
@@ -200,7 +212,9 @@ impl Lab {
                 })
             }),
             FileAction::Save => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if caffeine {
+                cwd.join(if circulation {
+                    "neuro-purine-project.json"
+                } else if caffeine {
                     "neuro-caffeine-project.json"
                 } else if network {
                     "neuro-brain-project.json"
@@ -234,7 +248,21 @@ impl Lab {
         }
         match action {
             FileAction::Save => {
-                if self.view == View::Brain && self.brain.caffeine.mode {
+                if self.view == View::Brain && self.brain.circulation.mode {
+                    let c = &mut self.brain.circulation;
+                    neuro_domain::require(
+                        c.trace.is_some() && !c.needs_run && c.error.is_none(),
+                        "Пересчитайте исправленный протокол перед сохранением",
+                    )?;
+                    neuro_domain::CirculationProject::new(
+                        self.brain.scene.clone(),
+                        c.scenario.clone(),
+                    )
+                    .save(path, &self.brain.atlas)?;
+                    c.last_path = Some(path.into());
+                    c.dirty = false;
+                    self.brain.dirty = false;
+                } else if self.view == View::Brain && self.brain.caffeine.mode {
                     neuro_domain::require(
                         self.brain.caffeine.trace.is_some() && self.brain.caffeine.error.is_none(),
                         "Исправьте параметры кофеина перед сохранением",
@@ -275,7 +303,41 @@ impl Lab {
                 }
             }
             FileAction::Open => match WorkspaceDocument::load(path, &self.brain.atlas)? {
+                WorkspaceDocument::CirculationProject(project) => {
+                    let mut c = brain::circulation::CirculationLab::from_scenario(
+                        project.scenario,
+                        &self.brain.atlas,
+                    )?;
+                    c.mode = true;
+                    c.last_path = Some(path.into());
+                    c.revision = self.brain.circulation.revision.wrapping_add(1);
+                    self.brain.scene = project.scene;
+                    self.brain.circulation = c;
+                    self.brain.caffeine.mode = false;
+                    self.brain.caffeine.playing = false;
+                    self.brain.simulation.mode = false;
+                    self.brain.simulation.playing = false;
+                    self.brain.dirty = false;
+                    self.view = View::Brain;
+                }
+                WorkspaceDocument::Circulation(scenario) => {
+                    let mut c = brain::circulation::CirculationLab::from_scenario(
+                        scenario,
+                        &self.brain.atlas,
+                    )?;
+                    c.mode = true;
+                    c.source_path = Some(path.into());
+                    c.revision = self.brain.circulation.revision.wrapping_add(1);
+                    self.brain.circulation = c;
+                    self.brain.caffeine.mode = false;
+                    self.brain.caffeine.playing = false;
+                    self.brain.simulation.mode = false;
+                    self.brain.simulation.playing = false;
+                    self.view = View::Brain;
+                }
                 WorkspaceDocument::CaffeineProject(project) => {
+                    self.brain.circulation.mode = false;
+                    self.brain.circulation.playing = false;
                     let mut caffeine = brain::caffeine::CaffeineLab::from_scenario(
                         project.scenario,
                         &self.brain.atlas,
@@ -291,6 +353,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Caffeine(scenario) => {
+                    self.brain.circulation.mode = false;
+                    self.brain.circulation.playing = false;
                     let mut caffeine =
                         brain::caffeine::CaffeineLab::from_scenario(scenario, &self.brain.atlas)?;
                     caffeine.mode = true;
@@ -302,6 +366,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Brain(scene) => {
+                    self.brain.circulation.mode = false;
+                    self.brain.circulation.playing = false;
                     self.brain.caffeine.mode = false;
                     self.brain.caffeine.playing = false;
                     self.brain.simulation.playing = false;
@@ -312,6 +378,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Project(project) => {
+                    self.brain.circulation.mode = false;
+                    self.brain.circulation.playing = false;
                     self.brain.caffeine.mode = false;
                     self.brain.caffeine.playing = false;
                     let mut simulation =
@@ -325,6 +393,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Network(network) => {
+                    self.brain.circulation.mode = false;
+                    self.brain.circulation.playing = false;
                     self.brain.caffeine.mode = false;
                     self.brain.caffeine.playing = false;
                     let mut simulation =
@@ -367,7 +437,8 @@ impl Lab {
             FileAction::Csv | FileAction::RegionalCsv => {
                 neuro_domain::require(
                     !matches!(action, FileAction::RegionalCsv)
-                        || (self.view == View::Brain && self.brain.caffeine.mode),
+                        || (self.view == View::Brain
+                            && (self.brain.caffeine.mode || self.brain.circulation.mode)),
                     "Региональный CSV доступен в режиме кофеина",
                 )?;
                 for scenario_path in [
@@ -378,6 +449,8 @@ impl Lab {
                     &self.brain.simulation.source_path,
                     &self.brain.caffeine.last_path,
                     &self.brain.caffeine.source_path,
+                    &self.brain.circulation.last_path,
+                    &self.brain.circulation.source_path,
                 ]
                 .into_iter()
                 .flatten()
@@ -390,7 +463,25 @@ impl Lab {
                         "CSV не должен перезаписывать сценарий",
                     )?;
                 }
-                if self.view == View::Brain && self.brain.caffeine.mode {
+                if self.view == View::Brain && self.brain.circulation.mode {
+                    let c = &self.brain.circulation;
+                    neuro_domain::require(
+                        !c.needs_run && c.error.is_none(),
+                        "Пересчитайте протокол перед экспортом",
+                    )?;
+                    let tr = c.trace.as_ref().ok_or_else(|| {
+                        neuro_domain::Error::Validation("Нет трассы циркуляции".into())
+                    })?;
+                    neuro_domain::atomic_write(
+                        path,
+                        if matches!(action, FileAction::RegionalCsv) {
+                            tr.regional_csv()
+                        } else {
+                            tr.csv()
+                        }
+                        .as_bytes(),
+                    )?;
+                } else if self.view == View::Brain && self.brain.caffeine.mode {
                     neuro_domain::require(
                         self.brain.caffeine.error.is_none(),
                         "Исправьте параметры кофеина перед экспортом",
@@ -528,7 +619,10 @@ fn main() {
         .add_plugins(EguiPlugin::default())
         .add_systems(Startup, brain::setup)
         .add_systems(Update, brain::advance_network)
-        .add_systems(EguiPrimaryContextPass, (ui, brain::sync).chain());
+        .add_systems(
+            EguiPrimaryContextPass,
+            (ui, (brain::sync, brain::sync_flow)).chain(),
+        );
     smoke::configure(&mut app);
     app.run();
 }
@@ -538,7 +632,11 @@ fn ui(
     viewport: Res<brain::BrainViewport>,
 ) -> Result {
     let ctx = contexts.ctx_mut()?;
-    let previous_brain_mode = (lab.brain.simulation.mode, lab.brain.caffeine.mode);
+    let previous_brain_mode = (
+        lab.brain.simulation.mode,
+        lab.brain.caffeine.mode,
+        lab.brain.circulation.mode,
+    );
     if !lab.initialized {
         configure(ctx);
         lab.initialized = true;
@@ -561,7 +659,19 @@ fn ui(
                 ui.add_space(16.0);
                 muted(ui, "Среда моделирования мозга");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if lab.view == View::Brain && lab.brain.caffeine.mode {
+                    if lab.view == View::Brain && lab.brain.circulation.mode {
+                        ui.menu_button("Экспорт CSV", |ui| {
+                            if ui.button("Общая PK трёх веществ").clicked() {
+                                lab.open_dialog(FileAction::Csv);
+                                ui.close();
+                            }
+                            if ui.button("Капилляры, ткань и венозный возврат").clicked()
+                            {
+                                lab.open_dialog(FileAction::RegionalCsv);
+                                ui.close();
+                            }
+                        });
+                    } else if lab.view == View::Brain && lab.brain.caffeine.mode {
                         ui.menu_button("Экспорт CSV", |ui| {
                             if ui.button("Общая фармакокинетика").clicked() {
                                 lab.open_dialog(FileAction::Csv);
@@ -606,6 +716,9 @@ fn ui(
                 if lab.brain.dirty {
                     ui.colored_label(PURPLE, "Сцена мозга не сохранена");
                 }
+                if lab.brain.circulation.dirty {
+                    ui.colored_label(PURPLE, "Протокол смеси не сохранён");
+                }
                 if lab.brain.caffeine.dirty {
                     ui.colored_label(PURPLE, "Протокол кофеина не сохранён");
                 }
@@ -626,7 +739,8 @@ fn ui(
     egui::SidePanel::left("catalog").exact_width(if lab.view==View::Brain {270.0}else{205.0}).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
         if ui.add_sized([ui.available_width(),36.0],egui::Button::new("Мозг · 3D").selected(lab.view==View::Brain)).clicked() {lab.view=View::Brain;}
         if lab.view==View::Brain {
-            if ui.add_sized([ui.available_width(),32.0],egui::Button::new("Кофеин · PK и мозг").selected(lab.brain.caffeine.mode)).clicked() {lab.brain.caffeine.mode=true;lab.brain.simulation.mode=false;lab.brain.simulation.playing=false;}
+            if ui.add_sized([ui.available_width(),32.0],egui::Button::new("Кровеносный контур и смеси").selected(lab.brain.circulation.mode)).clicked(){lab.brain.circulation.mode=true;lab.brain.caffeine.mode=false;lab.brain.caffeine.playing=false;lab.brain.simulation.mode=false;lab.brain.simulation.playing=false;}
+            if ui.add_sized([ui.available_width(),32.0],egui::Button::new("Кофеин · PK и мозг").selected(lab.brain.caffeine.mode)).clicked() {lab.brain.circulation.mode=false;lab.brain.circulation.playing=false;lab.brain.caffeine.mode=true;lab.brain.simulation.mode=false;lab.brain.simulation.playing=false;}
             ui.collapsing("Другие разделы",|ui| {
                 if ui.button("Карта механизмов").clicked() {lab.view=View::Map;}
                 if ui.button("Связывание A / B").clicked() {lab.view=View::Experiment;}
@@ -702,9 +816,17 @@ fn ui(
                     });
             }
         });
-    if previous_brain_mode != (lab.brain.simulation.mode, lab.brain.caffeine.mode) {
+    if previous_brain_mode
+        != (
+            lab.brain.simulation.mode,
+            lab.brain.caffeine.mode,
+            lab.brain.circulation.mode,
+        )
+    {
         lab.status_error = false;
-        lab.status = if lab.brain.caffeine.mode {
+        lab.status = if lab.brain.circulation.mode {
+            "Контур: выберите вещество, область и время; параметры протокола находятся слева."
+        } else if lab.brain.caffeine.mode {
             "Кофеин: настройте приём, запустите шкалу времени или выберите узел карты."
         } else if lab.brain.simulation.mode {
             "Сеть E/I: запуск, выбор области и редактирование связей."

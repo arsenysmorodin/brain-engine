@@ -20,7 +20,11 @@ pub fn configure(app: &mut App) {
             std::process::exit(1);
         }
         app.insert_resource(Smoke {
-            frame: 0,
+            frame: if std::env::args().any(|a| a == "--circulation-only") {
+                680
+            } else {
+                0
+            },
             directory,
         })
         .insert_resource(WinitSettings::continuous())
@@ -662,6 +666,103 @@ fn run(
         }
         680 => {
             std::fs::write(smoke.directory.join("perfusion-passed.txt"),"127 arterial meshes / 85 named structures; regional flow reduction and local Ct; 3 s early playback; regional CSV and project replay; input overwrite blocked; disabled/NaN perfusion blocks regional export; regional E/I drivers replay.\n").unwrap();
+        }
+
+        690 => {
+            let atlas = lab.brain.atlas.clone();
+            let mut scenario = neuro_domain::CirculationScenario::reference(&atlas, 7);
+            scenario.duration_min = 60.0;
+            let mut c =
+                crate::brain::circulation::CirculationLab::from_scenario(scenario, &atlas).unwrap();
+            c.mode = true;
+            c.set_time(1.5);
+            lab.brain.circulation = c;
+            lab.brain.caffeine.mode = false;
+            lab.brain.simulation.mode = false;
+            lab.brain.scene = Default::default();
+            lab.view = View::Brain;
+            lab.status = "Контур: три вещества, капиллярный обмен и венозный возврат.".into();
+        }
+        700 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("circulation-overview.png"),
+                ));
+        }
+        710 => {
+            lab.brain.scene.selected_region = Some("FMA72976".into());
+            lab.brain.circulation.opacity = 0.04;
+            lab.brain.circulation.revision += 1;
+            lab.brain.focus_selected();
+        }
+        720 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("circulation-capillaries.png"),
+                ));
+        }
+        730 => {
+            lab.brain.scene.camera = Default::default();
+            lab.brain.circulation.selected = neuro_domain::Purine::Methylliberine;
+            lab.brain.circulation.early = false;
+            lab.brain.circulation.set_time(60.0);
+        }
+        740 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("circulation-methylliberine.png"),
+                ));
+        }
+        750 => {
+            lab.brain.circulation.selected = neuro_domain::Purine::Theacrine;
+            lab.brain.circulation.arteries = false;
+            lab.brain.circulation.capillaries = false;
+            lab.brain.circulation.selected_path = Some(lab.brain.flow_geometry.paths.len() - 1);
+            lab.brain.circulation.revision += 1;
+        }
+        760 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("circulation-venous-return.png"),
+                ));
+        }
+        770 => {
+            let path = smoke.directory.join("circulation-project.json");
+            assert!(lab.perform(FileAction::Save, &path));
+            assert!(lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("circulation-gui.csv")
+            ));
+            assert!(lab.perform(
+                FileAction::RegionalCsv,
+                &smoke.directory.join("circulation-regions-gui.csv")
+            ));
+            assert!(!lab.perform(FileAction::Csv, &path));
+            let before = lab.brain.circulation.scenario.clone();
+            lab.brain.circulation.invalidate();
+            assert!(!lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("circulation-stale.csv")
+            ));
+            assert!(lab.perform(FileAction::Open, &path));
+            assert_eq!(lab.brain.circulation.scenario, before);
+            assert_eq!(lab.brain.circulation.time_min, 0.0);
+            assert!(!lab.brain.circulation.playing);
+            assert!(lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("circulation-replay.csv")
+            ));
+            assert_eq!(
+                std::fs::read(smoke.directory.join("circulation-gui.csv")).unwrap(),
+                std::fs::read(smoke.directory.join("circulation-replay.csv")).unwrap()
+            );
+        }
+        780 => {
+            std::fs::write(smoke.directory.join("circulation-passed.txt"),"Closed three-substance circulation; capillary and venous views; replay from t=0; invalid/stale/input overwrite export guards; GUI and replay CSV identical.\n").unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}

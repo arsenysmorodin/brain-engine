@@ -1,10 +1,11 @@
 pub mod caffeine;
+pub mod circulation;
 mod controls;
 mod render;
 mod simulation;
 mod vascular;
 pub use controls::{inspector, sidebar, viewport};
-pub use render::{BrainViewport, setup, sync};
+pub use render::{BrainViewport, setup, sync, sync_flow};
 pub use simulation::SimulationLab;
 
 use bevy::prelude::*;
@@ -36,6 +37,8 @@ pub struct BrainLab {
     pub target_size: UVec2,
     pub simulation: SimulationLab,
     pub caffeine: caffeine::CaffeineLab,
+    pub circulation: circulation::CirculationLab,
+    pub flow_geometry: circulation::FlowGeometry,
 }
 impl BrainLab {
     pub fn new() -> Result<Self, Error> {
@@ -83,7 +86,7 @@ impl BrainLab {
             })
             .collect();
         let vascular_atlas = neuro_domain::VascularAtlas::bundled()?;
-        let vascular_meshes = vascular_atlas
+        let vascular_meshes: Vec<DisplayMesh> = vascular_atlas
             .geometry()?
             .meshes
             .into_iter()
@@ -125,7 +128,7 @@ impl BrainLab {
                 }
             })
             .collect();
-        let centers = (0..atlas.regions.len())
+        let centers: Vec<Vec3> = (0..atlas.regions.len())
             .map(|n| {
                 let mut sum = Vec3::ZERO;
                 let mut count = 0;
@@ -140,6 +143,8 @@ impl BrainLab {
             .collect();
         let simulation = SimulationLab::new(&atlas)?;
         let caffeine = caffeine::CaffeineLab::new(&atlas)?;
+        let circulation = circulation::CirculationLab::new(&atlas)?;
+        let flow_geometry = circulation::FlowGeometry::new(&atlas, &centers, &vascular_meshes);
         Ok(Self {
             atlas,
             scene: BrainScene::default(),
@@ -154,6 +159,8 @@ impl BrainLab {
             target_size: UVec2::new(1000, 800),
             simulation,
             caffeine,
+            circulation,
+            flow_geometry,
         })
     }
     pub fn offset(&self, r: &BrainRegion) -> Vec3 {

@@ -7,6 +7,16 @@ use neuro_domain::{
 };
 
 pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    if lab.circulation.mode {
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut lab.circulation.show_regions, false, "Настройки");
+            ui.selectable_value(&mut lab.circulation.show_regions, true, "Области");
+        });
+        if !lab.circulation.show_regions {
+            super::circulation::sidebar(ui, lab);
+            return;
+        }
+    }
     if lab.caffeine.mode {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut lab.caffeine.show_regions, false, "Настройки");
@@ -134,7 +144,9 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
     let before = lab.scene.clone();
-    let mut mode = if lab.caffeine.mode {
+    let mut mode = if lab.circulation.mode {
+        3
+    } else if lab.caffeine.mode {
         2
     } else if lab.simulation.mode {
         1
@@ -147,7 +159,12 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         ui.selectable_value(&mut mode, 0, "Анатомия");
         ui.selectable_value(&mut mode, 1, "Симуляция");
         ui.selectable_value(&mut mode, 2, "Кофеин");
+        ui.selectable_value(&mut mode, 3, "Контур и смеси");
     });
+    lab.circulation.mode = mode == 3;
+    if mode != 3 {
+        lab.circulation.playing = false;
+    }
     lab.simulation.mode = mode == 1;
     lab.caffeine.mode = mode == 2;
     if mode != 1 {
@@ -155,6 +172,11 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     }
     if mode != 2 {
         lab.caffeine.playing = false;
+    }
+    if lab.circulation.mode {
+        super::circulation::viewport(ui, lab, viewport);
+        lab.dirty |= lab.scene != before;
+        return;
     }
     if lab.caffeine.mode {
         super::caffeine::viewport(ui, lab, viewport);
@@ -310,6 +332,16 @@ pub(super) fn interact(ui: &egui::Ui, response: &egui::Response, lab: &mut Brain
         let local = (pointer - response.rect.min) / response.rect.size();
         let ndc = Vec2::new(local.x * 2.0 - 1.0, 1.0 - local.y * 2.0);
         let aspect = response.rect.width() / response.rect.height();
+        if lab.circulation.mode {
+            lab.circulation.selected_path = lab.flow_geometry.pick(lab, ndc, aspect);
+            if let Some(i) = lab.circulation.selected_path {
+                if let Some(r) = lab.flow_geometry.paths[i].region {
+                    lab.scene.selected_region = Some(lab.atlas.regions[r].id.clone());
+                }
+                lab.circulation.revision += 1;
+                return;
+            }
+        }
         if let Some(v) = lab.pick_vessel(ndc, aspect) {
             lab.caffeine.selected_vessel = Some(v);
             lab.caffeine.selection = None;
@@ -340,6 +372,10 @@ pub(super) fn zoom(scene: &mut BrainScene, scroll: f32) {
     scene.camera.distance = (scene.camera.distance * (-scroll * 0.0018).exp()).clamp(0.2, 15.0);
 }
 pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    if lab.circulation.mode {
+        super::circulation::inspector(ui, lab);
+        return;
+    }
     if lab.caffeine.mode {
         let before = lab.scene.clone();
         super::caffeine::inspector(ui, lab);

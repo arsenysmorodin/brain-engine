@@ -515,6 +515,8 @@ pub enum WorkspaceDocument {
     Network(crate::NetworkScenario),
     Caffeine(crate::CaffeineScenario),
     CaffeineProject(crate::CaffeineProject),
+    Circulation(crate::CirculationScenario),
+    CirculationProject(crate::CirculationProject),
     Experiment(crate::Experiment),
 }
 impl WorkspaceDocument {
@@ -523,6 +525,12 @@ impl WorkspaceDocument {
         let value: serde_json::Value = serde_json::from_str(&text)?;
         if let Some(kind) = value.get("document_kind") {
             match kind.as_str() {
+                Some("circulation_project") => {
+                    crate::CirculationProject::from_json(&text, atlas).map(Self::CirculationProject)
+                }
+                Some("circulation_scenario") => {
+                    crate::CirculationScenario::from_json(&text, atlas).map(Self::Circulation)
+                }
                 Some("caffeine_project") => {
                     crate::CaffeineProject::from_json(&text, atlas).map(Self::CaffeineProject)
                 }
