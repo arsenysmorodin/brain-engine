@@ -27,6 +27,7 @@ pub struct BrainCameraEntity;
 #[derive(Component)]
 pub struct BrainPart {
     region: usize,
+    vessel: bool,
 }
 
 pub fn setup(
@@ -115,10 +116,28 @@ pub fn setup(
         commands.spawn((
             BrainPart {
                 region: source.region,
+                vessel: false,
             },
             Mesh3d(meshes.add(mesh)),
             MeshMaterial3d(material),
             Transform::default(),
+        ));
+    }
+    for source in &lab.brain.vascular_meshes {
+        commands.spawn((
+            BrainPart {
+                region: source.region,
+                vessel: true,
+            },
+            Mesh3d(meshes.add(display_mesh(source))),
+            MeshMaterial3d(materials.add(StandardMaterial {
+                base_color: Color::srgb_u8(217, 104, 103),
+                perceptual_roughness: 0.4,
+                reflectance: 0.3,
+                ..default()
+            })),
+            Transform::default(),
+            Visibility::Hidden,
         ));
     }
 }
@@ -196,8 +215,33 @@ pub fn sync(
     }
     *transform = camera_transform(lab.brain.scene.camera);
     for (part, mut visibility, mut transform, handle) in &mut parts {
+        if part.vessel {
+            let v = &lab.brain.vascular_atlas.vessels[part.region];
+            let side_visible = !matches!(
+                (lab.brain.scene.hemisphere, v.hemisphere),
+                (
+                    neuro_domain::HemisphereView::Left,
+                    neuro_domain::Hemisphere::Right
+                ) | (
+                    neuro_domain::HemisphereView::Right,
+                    neuro_domain::Hemisphere::Left
+                )
+            );
+            *visibility = if caffeine.mode && caffeine.show_vessels && side_visible {
+                Visibility::Visible
+            } else {
+                Visibility::Hidden
+            };
+            if let Some(material) = materials.get_mut(&handle.0) {
+                let rgb = super::vascular::vessel_rgb(&lab.brain, part.region);
+                material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
+            }
+            continue;
+        }
         let region = &lab.brain.atlas.regions[part.region];
-        *visibility = if lab.brain.scene.visible(region) {
+        *visibility = if lab.brain.scene.visible(region)
+            && (!caffeine.mode || caffeine.tissue_opacity > 0.0)
+        {
             Visibility::Visible
         } else {
             Visibility::Hidden
@@ -217,7 +261,22 @@ pub fn sync(
             } else {
                 [184, 194, 207]
             };
-            material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
+            let alpha = if caffeine.mode {
+                if selected {
+                    caffeine.tissue_opacity.max(0.6)
+                } else {
+                    caffeine.tissue_opacity
+                }
+            } else {
+                1.0
+            };
+            material.base_color =
+                Color::srgba_u8(rgb[0], rgb[1], rgb[2], (alpha * 255.0).round() as u8);
+            material.alpha_mode = if alpha < 0.999 {
+                AlphaMode::Blend
+            } else {
+                AlphaMode::Opaque
+            };
             material.emissive = if caffeine.mode {
                 LinearRgba::BLACK
             } else if simulation.mode {

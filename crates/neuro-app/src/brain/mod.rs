@@ -2,6 +2,7 @@ pub mod caffeine;
 mod controls;
 mod render;
 mod simulation;
+mod vascular;
 pub use controls::{inspector, sidebar, viewport};
 pub use render::{BrainViewport, setup, sync};
 pub use simulation::SimulationLab;
@@ -26,6 +27,8 @@ pub struct BrainLab {
     pub scene: BrainScene,
     pub meshes: Vec<DisplayMesh>,
     pub centers: Vec<Vec3>,
+    pub vascular_atlas: neuro_domain::VascularAtlas,
+    pub vascular_meshes: Vec<DisplayMesh>,
     pub search: String,
     pub group: Option<neuro_domain::BrainGroup>,
     pub dirty: bool,
@@ -79,6 +82,49 @@ impl BrainLab {
                 }
             })
             .collect();
+        let vascular_atlas = neuro_domain::VascularAtlas::bundled()?;
+        let vascular_meshes = vascular_atlas
+            .geometry()?
+            .meshes
+            .into_iter()
+            .map(|m| {
+                let region = vascular_atlas
+                    .vessels
+                    .iter()
+                    .position(|v| v.mesh_ids.contains(&m.id))
+                    .expect("validated vessel ownership");
+                let positions: Vec<_> = m
+                    .positions
+                    .into_iter()
+                    .map(|p| {
+                        let p = (Vec3::from_array(p) - center) * scale;
+                        Vec3::new(-p.x, p.z, p.y)
+                    })
+                    .collect();
+                // Hide the extracranial neck portions. No rescaling or deformation.
+                let floor = (min.z - center.z) * scale;
+                let indices = m
+                    .indices
+                    .as_chunks::<3>()
+                    .0
+                    .iter()
+                    .filter(|t| t.iter().all(|&i| positions[i as usize].y >= floor))
+                    .flatten()
+                    .copied()
+                    .collect();
+                let (min, max) = positions.iter().fold(
+                    (Vec3::splat(f32::INFINITY), Vec3::splat(f32::NEG_INFINITY)),
+                    |(a, b), p| (a.min(*p), b.max(*p)),
+                );
+                DisplayMesh {
+                    region,
+                    positions,
+                    indices,
+                    min,
+                    max,
+                }
+            })
+            .collect();
         let centers = (0..atlas.regions.len())
             .map(|n| {
                 let mut sum = Vec3::ZERO;
@@ -99,6 +145,8 @@ impl BrainLab {
             scene: BrainScene::default(),
             meshes,
             centers,
+            vascular_atlas,
+            vascular_meshes,
             search: String::new(),
             group: None,
             dirty: false,
@@ -176,6 +224,42 @@ impl BrainLab {
             }
             self.scene.camera.distance = distance.clamp(0.2, 15.0);
         }
+    }
+    pub fn pick_vessel(&self, ndc: Vec2, aspect: f32) -> Option<usize> {
+        if !self.caffeine.mode || !self.caffeine.show_vessels || self.caffeine.tissue_opacity >= 0.8
+        {
+            return None;
+        }
+        let camera = camera_transform(self.scene.camera);
+        let origin = camera.translation;
+        let tan = (FIELD_OF_VIEW * 0.5).tan();
+        let direction =
+            (camera.rotation * Vec3::new(ndc.x * tan * aspect, ndc.y * tan, -1.0)).normalize();
+        let mut nearest = f32::INFINITY;
+        let mut selected = None;
+        for m in &self.vascular_meshes {
+            let v = &self.vascular_atlas.vessels[m.region];
+            if matches!(
+                (self.scene.hemisphere, v.hemisphere),
+                (HemisphereView::Left, Hemisphere::Right)
+                    | (HemisphereView::Right, Hemisphere::Left)
+            ) {
+                continue;
+            }
+            if ray_box(origin, direction, m.min, m.max).is_none() {
+                continue;
+            }
+            for triangle in m.indices.as_chunks::<3>().0 {
+                let [a, b, c] = triangle.map(|i| m.positions[i as usize]);
+                if let Some(d) = ray_triangle(origin, direction, a, b, c)
+                    && d < nearest
+                {
+                    nearest = d;
+                    selected = Some(m.region);
+                }
+            }
+        }
+        selected
     }
     pub fn pick(&self, ndc: Vec2, aspect: f32) -> Option<String> {
         let camera = camera_transform(self.scene.camera);
@@ -281,6 +365,38 @@ fn ray_triangle(origin: Vec3, direction: Vec3, a: Vec3, b: Vec3, c: Vec3) -> Opt
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn vascular_pick_uses_real_triangles_and_respects_mode_and_hemisphere() {
+        let mut lab = BrainLab::new().unwrap();
+        lab.caffeine.mode = true;
+        lab.caffeine.tissue_opacity = 0.0;
+        let v = lab
+            .vascular_atlas
+            .vessels
+            .iter()
+            .position(|v| v.id == "FMA50030")
+            .unwrap();
+        let m = lab.vascular_meshes.iter().find(|m| m.region == v).unwrap();
+        let point = m
+            .indices
+            .as_chunks::<3>()
+            .0
+            .iter()
+            .find_map(|t| {
+                let [a, b, c] = t.map(|i| m.positions[i as usize]);
+                ((b - a).cross(c - a).length_squared() > 1e-12).then_some((a + b + c) / 3.0)
+            })
+            .unwrap();
+        lab.scene.camera.target = point.to_array();
+        lab.scene.camera.distance = 0.1;
+        assert!(lab.pick_vessel(Vec2::ZERO, 1.0).is_some());
+        lab.caffeine.show_vessels = false;
+        assert!(lab.pick_vessel(Vec2::ZERO, 1.0).is_none());
+        lab.caffeine.show_vessels = true;
+        lab.caffeine.mode = false;
+        assert!(lab.pick_vessel(Vec2::ZERO, 1.0).is_none());
+        assert_eq!(lab.vascular_meshes.len(), 127);
+    }
     #[test]
     fn ray_selection_obeys_visibility_and_uses_actual_geometry() {
         let mut lab = BrainLab::new().unwrap();

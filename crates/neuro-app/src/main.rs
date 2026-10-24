@@ -34,6 +34,7 @@ enum FileAction {
     Save,
     Open,
     Csv,
+    RegionalCsv,
 }
 impl FileAction {
     fn title(self) -> &'static str {
@@ -41,6 +42,7 @@ impl FileAction {
             Self::Save => "Сохранить сценарий",
             Self::Open => "Открыть сценарий",
             Self::Csv => "Экспорт численных результатов",
+            Self::RegionalCsv => "Экспорт региональной перфузии",
         }
     }
 }
@@ -172,6 +174,7 @@ impl Lab {
             &self.last_scenario_path
         };
         self.file_path = match action {
+            FileAction::RegionalCsv => cwd.join("neuro-caffeine-regions.csv"),
             FileAction::Csv => cwd.join(if caffeine {
                 "neuro-caffeine-pk.csv"
             } else if network {
@@ -361,7 +364,12 @@ impl Lab {
                     }
                 },
             },
-            FileAction::Csv => {
+            FileAction::Csv | FileAction::RegionalCsv => {
+                neuro_domain::require(
+                    !matches!(action, FileAction::RegionalCsv)
+                        || (self.view == View::Brain && self.brain.caffeine.mode),
+                    "Региональный CSV доступен в режиме кофеина",
+                )?;
                 for scenario_path in [
                     &self.last_scenario_path,
                     &self.response.last_scenario_path,
@@ -387,12 +395,20 @@ impl Lab {
                         self.brain.caffeine.error.is_none(),
                         "Исправьте параметры кофеина перед экспортом",
                     )?;
-                    self.brain
-                        .caffeine
-                        .trace
-                        .as_ref()
-                        .ok_or_else(|| neuro_domain::Error::Validation("Нет трассы PK".into()))?
-                        .export_csv(path)?;
+                    let t =
+                        self.brain.caffeine.trace.as_ref().ok_or_else(|| {
+                            neuro_domain::Error::Validation("Нет трассы PK".into())
+                        })?;
+                    if matches!(action, FileAction::RegionalCsv) {
+                        let p = t.perfusion.as_ref().ok_or_else(|| {
+                            neuro_domain::Error::Validation(
+                                "Региональная доставка выключена".into(),
+                            )
+                        })?;
+                        neuro_domain::atomic_write(path, p.regional_csv(&t.scenario).as_bytes())?;
+                    } else {
+                        t.export_csv(path)?;
+                    }
                 } else if self.view == View::Brain && self.brain.simulation.mode {
                     neuro_domain::require(
                         self.brain.simulation.error.is_none(),
@@ -458,7 +474,7 @@ impl Lab {
                             "Каталог областей экспортирован",
                         FileAction::Save => "Сценарий сохранён",
                         FileAction::Open => "Сценарий открыт и пересчитан",
-                        FileAction::Csv => "Результаты экспортированы",
+                        FileAction::Csv | FileAction::RegionalCsv => "Результаты экспортированы",
                     },
                     path.display()
                 );
@@ -545,7 +561,24 @@ fn ui(
                 ui.add_space(16.0);
                 muted(ui, "Среда моделирования мозга");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("Экспорт CSV").clicked() {
+                    if lab.view == View::Brain && lab.brain.caffeine.mode {
+                        ui.menu_button("Экспорт CSV", |ui| {
+                            if ui.button("Общая фармакокинетика").clicked() {
+                                lab.open_dialog(FileAction::Csv);
+                                ui.close();
+                            }
+                            if ui
+                                .add_enabled(
+                                    lab.brain.caffeine.scenario.perfusion.is_some(),
+                                    egui::Button::new("Региональный кровоток и доставка"),
+                                )
+                                .clicked()
+                            {
+                                lab.open_dialog(FileAction::RegionalCsv);
+                                ui.close();
+                            }
+                        });
+                    } else if ui.button("Экспорт CSV").clicked() {
                         lab.open_dialog(FileAction::Csv);
                     }
                     if ui.button("Открыть").clicked() {
@@ -590,7 +623,7 @@ fn ui(
             });
         });
     let previous_view = lab.view;
-    egui::SidePanel::left("catalog").exact_width(if lab.view==View::Brain {245.0}else{205.0}).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
+    egui::SidePanel::left("catalog").exact_width(if lab.view==View::Brain {270.0}else{205.0}).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
         if ui.add_sized([ui.available_width(),36.0],egui::Button::new("Мозг · 3D").selected(lab.view==View::Brain)).clicked() {lab.view=View::Brain;}
         if lab.view==View::Brain {
             if ui.add_sized([ui.available_width(),32.0],egui::Button::new("Кофеин · PK и мозг").selected(lab.brain.caffeine.mode)).clicked() {lab.brain.caffeine.mode=true;lab.brain.simulation.mode=false;lab.brain.simulation.playing=false;}

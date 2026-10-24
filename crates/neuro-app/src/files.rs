@@ -13,18 +13,21 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
             FileAction::Save => "Сохранить проект кофеина",
             FileAction::Open => "Открыть проект или протокол кофеина",
             FileAction::Csv => "Экспорт всей фармакокинетической трассы",
+            FileAction::RegionalCsv => "Экспорт регионального кровотока и доставки",
         }
     } else if lab.view == View::Brain && lab.brain.simulation.mode {
         match action {
             FileAction::Save => "Сохранить проект мозга",
             FileAction::Open => "Открыть проект, сеть или сцену",
             FileAction::Csv => "Экспорт вычисленной трассы E/I",
+            FileAction::RegionalCsv => "Экспорт региональной перфузии",
         }
     } else if lab.view == View::Brain {
         match action {
             FileAction::Save => "Сохранить сцену мозга",
             FileAction::Open => "Открыть сцену или сценарий",
             FileAction::Csv => "Экспорт областей мозга",
+            FileAction::RegionalCsv => "Экспорт региональной перфузии",
         }
     } else {
         action.title()
@@ -45,10 +48,10 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
         if exists { ui.colored_label(PURPLE, "Файл уже существует. Подтверждение заменит его содержимое."); }
         if lab.status_error { ui.colored_label(ERROR, &lab.status); }
         ui.horizontal(|ui| {
-            let label = if exists { "Заменить файл" } else { match action { FileAction::Save => "Сохранить JSON", FileAction::Open => "Открыть файл", FileAction::Csv => "Экспортировать CSV" } };
+            let label = if exists { "Заменить файл" } else { match action { FileAction::Save => "Сохранить JSON", FileAction::Open => "Открыть файл", FileAction::Csv | FileAction::RegionalCsv => "Экспортировать CSV" } };
             submitted = ui.button(label).clicked(); cancel = ui.button("Отмена").clicked();
         });
-        muted(ui, if lab.view == View::Brain && lab.brain.caffeine.mode { "Проект хранит сцену, дозы, параметры PK и гипотезу E/I с её сетью. Открытие пересчитывает PK с t=0 на паузе. CSV содержит всю PK-трассу, включая будущие относительно кадра точки." } else { "JSON проекта хранит сцену, сеть и протокол; открытие запускает их с t = 0 на паузе. CSV сети — вся вычисленная трасса, включая состояния после выбранного кадра истории." });
+        muted(ui, if lab.view == View::Brain && lab.brain.caffeine.mode { "Проект хранит сцену, дозы, параметры PK, региональную перфузию и гипотезу E/I с её сетью. Открытие пересчитывает PK с t=0 на паузе. CSV содержит всю выбранную трассу, включая будущие относительно кадра точки." } else { "JSON проекта хранит сцену, сеть и протокол; открытие запускает их с t = 0 на паузе. CSV сети — вся вычисленная трасса, включая состояния после выбранного кадра истории." });
     });
     if submitted {
         let path = PathBuf::from(lab.file_path.trim());

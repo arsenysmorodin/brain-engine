@@ -105,7 +105,7 @@ mod tests {
         let a = VascularAtlas::bundled().unwrap();
         let g = a.geometry().unwrap();
         assert_eq!(g.meshes.len(), a.meshes.len());
-        assert_eq!(a.vessels.len(), 23);
+        assert_eq!(a.vessels.len(), 85);
         let mut bytes = include_bytes!("../../../assets/brain/arteries.bin").to_vec();
         bytes.pop();
         assert!(BrainGeometry::decode_meshes(&bytes, &a.meshes).is_err());

@@ -187,7 +187,9 @@ fn simulate_with_step(
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct CaffeineNetworkComparison {
     pub pk_time_min: f64,
-    pub driver_brain_proxy_mg_l: f64,
+    pub driver_basis: String,
+    /// Present only when the common Ce is actually used as the neural driver.
+    pub driver_brain_proxy_mg_l: Option<f64>,
     pub hypothesis: String,
     pub regional_drivers_mg_l: Vec<(String, f64)>,
     pub baseline: NetworkTrace,
@@ -244,7 +246,7 @@ pub fn compare_caffeine_network(
             amplitude: drive,
         });
     }
-    Ok(CaffeineNetworkComparison { regional_drivers_mg_l, pk_time_min:point.time_min,driver_brain_proxy_mg_l:point.brain_proxy_mg_l,hypothesis:"Непроверенная гипотеза: P_extra = g_A1*fit_A1(Ce) + g_A2A*fit_A2A(Ce) в стриатуме. PET-функции перенесены с плазмы на региональную Ct при включённой перфузии, иначе на условный Ce. Одинаковый нейронный протокол с/без входа; это не предсказание поведения, BOLD или клинического эффекта.".into(),baseline:simulate_network(h.network.clone(),atlas)?,caffeine_hypothesis:simulate_network(network,atlas)? })
+    Ok(CaffeineNetworkComparison { regional_drivers_mg_l, driver_basis:if trace.perfusion.is_some() {"regional_tissue_ct"}else{"common_effect_site_ce"}.into(), pk_time_min:point.time_min,driver_brain_proxy_mg_l:trace.perfusion.is_none().then_some(point.brain_proxy_mg_l),hypothesis:"Непроверенная гипотеза: P_extra = g_A1*fit_A1(Cdriver) + g_A2A*fit_A2A(Cdriver) в стриатуме. PET-функции перенесены с плазмы на региональную Ct при включённой перфузии, иначе на условный Ce. Одинаковый нейронный протокол с/без входа; это не предсказание поведения, BOLD или клинического эффекта.".into(),baseline:simulate_network(h.network.clone(),atlas)?,caffeine_hypothesis:simulate_network(network,atlas)? })
 }
 
 #[cfg(test)]

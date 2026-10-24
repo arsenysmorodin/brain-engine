@@ -192,6 +192,55 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         regions.push(json!({"id":id,"name":russian,"name_en":english,"hemisphere":side,"mesh_ids":mesh_ids,"supply":territory}));
     }
 
+    // Include uniquely named left/right cortical and cerebellar branches from
+    // official composition sets; never guess a branch identity from a file name.
+    let mut sets = BTreeMap::<String, (String, std::collections::BTreeSet<String>)>::new();
+    for line in elements.lines() {
+        let f: Vec<_> = line.split('\t').collect();
+        if f.len() == 3 {
+            let e = sets
+                .entry(f[0].into())
+                .or_insert_with(|| (f[1].into(), Default::default()));
+            e.1.insert(f[2].into());
+        }
+    }
+    let mut assigned: std::collections::BTreeSet<String> = regions
+        .iter()
+        .flat_map(|r| r["mesh_ids"].as_array().unwrap())
+        .map(|id| id.as_str().unwrap().to_string())
+        .collect();
+    for (parent, family) in [
+        ("FMA50031", "aca"),
+        ("FMA50081", "mca"),
+        ("FMA50586", "pca"),
+        ("FMA50576", "vertebrobasilar"),
+    ] {
+        let wanted = &sets.get(parent).ok_or("Missing official branch set")?.1;
+        let mut candidates: Vec<_> = sets
+            .iter()
+            .filter(|(_, (name, ids))| {
+                (name.contains("left") || name.contains("right"))
+                    && !ids.is_empty()
+                    && ids.is_subset(wanted)
+            })
+            .collect();
+        candidates.sort_by_key(|(id, (_, ids))| (ids.len(), *id));
+        for (id, (name, ids)) in candidates {
+            if !ids.is_disjoint(&assigned) {
+                continue;
+            }
+            let left = name.contains("left");
+            let side = if left { "left" } else { "right" };
+            let supply = if family == "vertebrobasilar" {
+                family.into()
+            } else {
+                format!("{family}_{side}")
+            };
+            assigned.extend(ids.iter().cloned());
+            regions.push(json!({"id":id,"name":name,"name_en":name,"hemisphere":side,"mesh_ids":ids,"supply":supply}));
+        }
+    }
+
     let tail = fs::read(root.join("isa-tail.bin"))?;
     let tail_offset = ARCHIVE_SIZE - tail.len();
     let eocd = tail
@@ -342,7 +391,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let brain: Value = serde_json::from_str(&fs::read_to_string("data/brain-atlas.json")?)?;
     let mut source = brain["source"].clone();
     source["changes"] = json!(
-        "Выбраны 23 артериальные структуры по официальным таблицам FMA. OBJ триангулирован в f32, без сглаживания и деформации. Геометрия вне границ мозга скрывается только при отображении. Русские названия добавлены NeuroLab. Кровоток, капилляры и венозная сеть в исходных данных не измерены."
+        "Выбраны магистральные артерии и именованные корковые/мозжечковые ветви по официальным таблицам FMA. OBJ триангулирован в f32, без сглаживания и деформации. Геометрия вне границ мозга скрывается только при отображении. Русские названия добавлены NeuroLab. Кровоток, капилляры и венозная сеть в исходных данных не измерены."
     );
     let atlas = json!({"format_version":1,"atlas_id":"bodyparts3d_cerebral_arteries_4.0","atlas_revision":1,"source":source,"vessels":regions,"meshes":mesh_manifest,"total_vertices":total_vertices,"total_triangles":total_triangles});
     fs::write(

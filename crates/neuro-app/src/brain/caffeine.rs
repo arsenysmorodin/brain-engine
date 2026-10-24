@@ -13,7 +13,7 @@ use neuro_engine::{
 };
 use std::path::PathBuf;
 
-type PlotSeries = (Color32, Vec<(f64, f64)>);
+pub(super) type PlotSeries = (Color32, Vec<(f64, f64)>);
 
 pub const BLOOD: Color32 = Color32::from_rgb(255, 178, 82);
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -22,6 +22,10 @@ pub enum CaffeineLayer {
     A2a,
     BrainProxy,
     DeltaE,
+    Tissue,
+    Cbf,
+    Delivery,
+    Territories,
 }
 impl CaffeineLayer {
     pub fn label(self) -> &'static str {
@@ -30,6 +34,10 @@ impl CaffeineLayer {
             Self::A2a => "A2A · PET в PD",
             Self::BrainProxy => "Условный Ce · мг/л",
             Self::DeltaE => "ΔE · гипотеза",
+            Self::Tissue => "Кофеин в ткани · мг/л",
+            Self::Cbf => "Кровоток · мл/100 г/мин",
+            Self::Delivery => "Доставка · мкг/100 г/мин",
+            Self::Territories => "Артериальные бассейны",
         }
     }
 }
@@ -39,6 +47,9 @@ pub enum CaffeinePlot {
     Occupancy,
     Mass,
     Neural,
+    RegionalConcentration,
+    RegionalFlow,
+    RegionalFlux,
 }
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MapSelection {
@@ -60,6 +71,12 @@ pub struct CaffeineLab {
     pub route: bool,
     pub show_plot: bool,
     pub show_regions: bool,
+    pub vascular_panel: bool,
+    pub show_vessels: bool,
+    pub tissue_opacity: f32,
+    pub selected_vessel: Option<usize>,
+    pub vessel_search: String,
+    pub perfusion_knowledge: neuro_domain::PerfusionKnowledge,
     pub selection: Option<MapSelection>,
     pub revision: u64,
     pub error: Option<String>,
@@ -79,7 +96,7 @@ impl CaffeineLab {
         let trace = simulate_caffeine(scenario.clone(), atlas)?;
         Ok(Self {
             mode: false,
-            scenario,
+            scenario: scenario.clone(),
             knowledge: CaffeineKnowledge::bundled()?,
             trace: Some(trace),
             comparison: None,
@@ -87,11 +104,25 @@ impl CaffeineLab {
             neural_time_ms: 180.0,
             playing: false,
             speed_min_s: 30.0,
-            layer: CaffeineLayer::A1,
-            plot: CaffeinePlot::Concentration,
+            layer: if scenario.perfusion.is_some() {
+                CaffeineLayer::Tissue
+            } else {
+                CaffeineLayer::A1
+            },
+            plot: if scenario.perfusion.is_some() {
+                CaffeinePlot::RegionalConcentration
+            } else {
+                CaffeinePlot::Concentration
+            },
             route: false,
-            show_plot: true,
+            show_plot: false,
             show_regions: false,
+            vascular_panel: true,
+            show_vessels: true,
+            tissue_opacity: 0.22,
+            selected_vessel: None,
+            vessel_search: String::new(),
+            perfusion_knowledge: neuro_domain::PerfusionKnowledge::bundled()?,
             selection: Some(MapSelection::Node(2)),
             revision: 0,
             error: None,
@@ -104,6 +135,25 @@ impl CaffeineLab {
             clock_min: 0.0,
         })
     }
+    pub fn time_grid(&self, t: f64) -> f64 {
+        if self.scenario.perfusion.is_some() && t <= 5.0 {
+            0.05
+        } else {
+            CAFFEINE_SAMPLE_MIN
+        }
+    }
+    pub fn regional(
+        &self,
+        id: &str,
+    ) -> Option<(
+        &neuro_domain::RegionalPerfusion,
+        neuro_engine::RegionalPerfusionSample,
+    )> {
+        let config = self.scenario.perfusion.as_ref()?;
+        let trace = self.trace.as_ref()?.perfusion.as_ref()?;
+        let i = config.regions.iter().position(|r| r.region_id == id)?;
+        Some((&config.regions[i], trace.at(self.time_min).regions[i]))
+    }
     pub fn refresh(&mut self, atlas: &BrainAtlas) {
         self.playing = false;
         self.comparison = None;
@@ -112,7 +162,9 @@ impl CaffeineLab {
         self.revision = self.revision.wrapping_add(1);
         match simulate_caffeine(self.scenario.clone(), atlas) {
             Ok(trace) => {
-                self.time_min = self.time_min.min(self.scenario.duration_min);
+                self.time_min = trace
+                    .at(self.time_min.min(self.scenario.duration_min))
+                    .time_min;
                 self.clock_min = self.time_min;
                 self.trace = Some(trace);
                 self.error = None;
@@ -127,8 +179,11 @@ impl CaffeineLab {
         self.trace.as_ref().map(|t| *t.at(self.time_min))
     }
     pub fn set_time(&mut self, time_min: f64) {
-        let t = (time_min.clamp(0.0, self.scenario.duration_min) / CAFFEINE_SAMPLE_MIN).round()
-            * CAFFEINE_SAMPLE_MIN;
+        if !time_min.is_finite() {
+            return;
+        }
+        let grid = self.time_grid(time_min);
+        let t = (time_min.clamp(0.0, self.scenario.duration_min) / grid).round() * grid;
         if t != self.time_min {
             self.time_min = t;
             self.comparison = None;
@@ -143,7 +198,8 @@ impl CaffeineLab {
         }
         self.clock_min = (self.clock_min + seconds.clamp(0.0, 0.1) * self.speed_min_s)
             .min(self.scenario.duration_min);
-        let t = (self.clock_min / CAFFEINE_SAMPLE_MIN).floor() * CAFFEINE_SAMPLE_MIN;
+        let grid = self.time_grid(self.clock_min);
+        let t = (self.clock_min / grid).floor() * grid;
         if t != self.time_min {
             self.time_min = t;
             self.comparison = None;
@@ -166,6 +222,7 @@ impl CaffeineLab {
                     self.layer = CaffeineLayer::DeltaE;
                     self.route = false;
                     self.plot = CaffeinePlot::Neural;
+                    self.show_plot = true;
                     self.selection = None;
                 }
                 Err(e) => self.neural_error = Some(e.to_string()),
@@ -201,9 +258,20 @@ impl CaffeineLab {
             CaffeineLayer::A2a => caffeine_a2a_scope(r).then_some(s.a2a_pd_occupancy),
             CaffeineLayer::BrainProxy => caffeine_a1_scope(r).then_some(s.brain_proxy_mg_l),
             CaffeineLayer::DeltaE => self.neural_values(&r.id).map(|(b, c)| c.e - b.e),
+            CaffeineLayer::Tissue => self.regional(&r.id).map(|(_, s)| s.tissue_mg_l),
+            CaffeineLayer::Cbf => self.regional(&r.id).map(|(_, s)| s.cbf_ml_100g_min),
+            CaffeineLayer::Delivery => self
+                .regional(&r.id)
+                .map(|(_, s)| s.cbf_ml_100g_min * s.arterial_mg_l),
+            CaffeineLayer::Territories => None,
         }
     }
     pub fn region_rgb(&self, r: &BrainRegion) -> [u8; 3] {
+        if self.layer == CaffeineLayer::Territories {
+            return self.regional(&r.id).map_or([65, 69, 77], |(r, _)| {
+                super::vascular::territory_rgb(r.territory)
+            });
+        }
         self.region_value(r).map_or([65, 69, 77], |v| {
             if self.layer == CaffeineLayer::DeltaE {
                 let base = [50.0, 61.0, 76.0];
@@ -216,10 +284,11 @@ impl CaffeineLab {
                     (base[i] + v.abs().min(1.0).sqrt() * (target[i] - base[i])) as u8
                 })
             } else {
-                super::simulation::heat_rgb(if self.layer == CaffeineLayer::BrainProxy {
-                    v / 10.0
-                } else {
-                    v
+                super::simulation::heat_rgb(match self.layer {
+                    CaffeineLayer::BrainProxy | CaffeineLayer::Tissue => v / 10.0,
+                    CaffeineLayer::Cbf => v / 100.0,
+                    CaffeineLayer::Delivery => v / 300.0,
+                    _ => v,
                 })
             }
         })
@@ -256,7 +325,7 @@ impl CaffeineLab {
 fn hours(t: f64) -> String {
     format!("{:02}:{:04.1}", (t / 60.0).floor() as u32, t % 60.0)
 }
-fn parameter(
+pub(super) fn parameter(
     ui: &mut egui::Ui,
     label: &str,
     value: &mut f64,
@@ -265,33 +334,42 @@ fn parameter(
 ) {
     let width = ui.available_width();
     ui.horizontal(|ui| {
-        ui.add_sized([width - 70.0, 30.0], egui::Label::new(label).wrap())
-            .on_hover_text(match label {
-                "Vd, л/кг" => {
-                    "Кажущийся объём распределения на килограмм массы; не объём крови."
-                }
-                "Биодоступность F" => {
-                    "Доля всасывающейся дозы, достигающая системной камеры: 0–1."
-                }
-                "t½ всасыв., мин" => "За это время половина массы покидает депо ЖКТ.",
-                "t½ элимин., ч" => {
-                    "Полувремя элиминации исходного кофеина после завершения всасывания."
-                }
-                "t½ Ce, мин" => {
-                    "Условное полувремя уравновешивания места эффекта; измерений ткани здесь нет."
-                }
-                _ => label,
-            });
+        ui.add_sized(
+            [(width - 90.0).max(60.0), 30.0],
+            egui::Label::new(label).wrap(),
+        )
+        .on_hover_text(match label {
+            "Vd, л/кг" => "Кажущийся объём распределения на килограмм массы; не объём крови.",
+            "Биодоступность F" => {
+                "Доля всасывающейся дозы, достигающая системной камеры: 0–1."
+            }
+            "t½ всасыв., мин" => "За это время половина массы покидает депо ЖКТ.",
+            "t½ элимин., ч" => {
+                "Полувремя элиминации исходного кофеина после завершения всасывания."
+            }
+            "t½ Ce, мин" => {
+                "Условное полувремя уравновешивания места эффекта; измерений ткани здесь нет."
+            }
+            _ => label,
+        });
         ui.add_sized(
             [60.0, 28.0],
             egui::DragValue::new(value)
                 .range(range)
                 .speed(speed)
-                .max_decimals(3),
+                .max_decimals(2),
         );
     });
 }
 pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    ui.horizontal(|ui| {
+        ui.selectable_value(&mut lab.caffeine.vascular_panel, true, "Кровоснабжение");
+        ui.selectable_value(&mut lab.caffeine.vascular_panel, false, "Протокол");
+    });
+    if lab.caffeine.vascular_panel {
+        super::vascular::sidebar(ui, lab);
+        return;
+    }
     let c = &mut lab.caffeine;
     let before = c.scenario.clone();
     egui::ScrollArea::vertical().id_salt("caffeine-protocol-scroll").auto_shrink([false, false]).show(ui, |ui| {
@@ -387,6 +465,20 @@ pub fn transport(ui: &mut egui::Ui, c: &mut CaffeineLab) {
             c.playing = false;
             c.set_time(0.0);
         }
+        let mut time = c.time_min;
+        if ui
+            .add(
+                egui::DragValue::new(&mut time)
+                    .range(0.0..=c.scenario.duration_min)
+                    .speed(0.05)
+                    .max_decimals(2)
+                    .suffix(" мин"),
+            )
+            .changed()
+        {
+            c.playing = false;
+            c.set_time(time);
+        }
         ui.label(format!(
             "{} / {:.0} ч",
             hours(c.time_min),
@@ -395,7 +487,7 @@ pub fn transport(ui: &mut egui::Ui, c: &mut CaffeineLab) {
         egui::ComboBox::from_id_salt("caffeine-speed")
             .selected_text(format!("{} мин/с", c.speed_min_s))
             .show_ui(ui, |ui| {
-                for speed in [5.0, 15.0, 30.0, 60.0] {
+                for speed in [0.05, 0.5, 5.0, 15.0, 30.0, 60.0] {
                     ui.selectable_value(&mut c.speed_min_s, speed, format!("{speed} мин/с"));
                 }
             });
@@ -407,12 +499,12 @@ pub fn transport(ui: &mut egui::Ui, c: &mut CaffeineLab) {
             ui.add(
                 egui::Slider::new(&mut t, 0.0..=c.scenario.duration_min)
                     .show_value(false)
-                    .step_by(0.5),
+                    .step_by(0.05),
             )
         })
         .inner;
     if response
-        .on_hover_text("Время после начала сценария; шаг записи 0.5 мин")
+        .on_hover_text("Время сценария; первые 5 мин записаны через 3 с, далее через 30 с")
         .changed()
     {
         c.playing = false;
@@ -427,6 +519,7 @@ pub fn transport(ui: &mut egui::Ui, c: &mut CaffeineLab) {
     }
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
+    let scene_before = lab.scene.clone();
     transport(ui, &mut lab.caffeine);
     let route_before = lab.caffeine.route;
     ui.horizontal_wrapped(|ui| {
@@ -438,6 +531,10 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
                 .selected_text(lab.caffeine.layer.label())
                 .show_ui(ui, |ui| {
                     for l in [
+                        CaffeineLayer::Tissue,
+                        CaffeineLayer::Cbf,
+                        CaffeineLayer::Delivery,
+                        CaffeineLayer::Territories,
                         CaffeineLayer::A1,
                         CaffeineLayer::A2a,
                         CaffeineLayer::BrainProxy,
@@ -455,43 +552,52 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     if lab.caffeine.route && !route_before {
         lab.caffeine.show_plot = false;
     }
+    if !lab.caffeine.route {
+        super::vascular::view_controls(ui, lab);
+    }
     let height =
-        (ui.available_height() - if lab.caffeine.show_plot { 310.0 } else { 130.0 }).max(70.0);
+        (ui.available_height() - if lab.caffeine.show_plot { 223.0 } else { 60.0 }).max(100.0);
     if lab.caffeine.route {
         pathway::show(ui, &mut lab.caffeine, height);
     } else {
-        ui.horizontal_wrapped(|ui| {
-            if ui.small_button("Слева").clicked() {
-                lab.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
-                lab.scene.camera.pitch = 0.0;
-            }
-            if ui.small_button("По центру").clicked() {
-                lab.scene.camera = BrainCamera::default();
-            }
-            if ui
-                .small_button("Стриатум")
-                .on_hover_text("Показать внутренние структуры, где применена модель A2A")
-                .clicked()
-            {
-                lab.scene.layers.cortex = false;
-                lab.scene.layers.deep = true;
-                lab.scene.isolate = false;
-                lab.scene.hidden_regions.clear();
-                lab.scene.camera = BrainCamera::default();
-            }
-            let mut sep = lab.scene.separation;
-            if ui
-                .add(
-                    egui::Slider::new(&mut sep, 0.0..=1.0)
-                        .show_value(false)
-                        .text("Полушария"),
-                )
-                .changed()
-            {
-                lab.scene.separation = sep;
-            }
-        });
-        let size = egui::vec2(ui.available_width(), (height - 30.0).max(60.0));
+        if !lab.caffeine.show_vessels {
+            ui.horizontal_wrapped(|ui| {
+                if ui.small_button("Слева").clicked() {
+                    lab.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+                    lab.scene.camera.pitch = 0.0;
+                }
+                if ui.small_button("По центру").clicked() {
+                    lab.scene.camera = BrainCamera::default();
+                }
+                if ui
+                    .small_button("Стриатум")
+                    .on_hover_text("Показать внутренние структуры, где применена модель A2A")
+                    .clicked()
+                {
+                    lab.scene.layers.cortex = false;
+                    lab.scene.layers.deep = true;
+                    lab.scene.isolate = false;
+                    lab.scene.hidden_regions.clear();
+                    lab.scene.camera = BrainCamera::default();
+                }
+                let mut sep = lab.scene.separation;
+                if ui
+                    .add_enabled(
+                        !lab.caffeine.show_vessels,
+                        egui::Slider::new(&mut sep, 0.0..=1.0)
+                            .show_value(false)
+                            .text("Полушария"),
+                    )
+                    .changed()
+                {
+                    lab.scene.separation = sep;
+                }
+            });
+        }
+        let size = egui::vec2(
+            ui.available_width(),
+            (height - if lab.caffeine.show_vessels { 0.0 } else { 30.0 }).max(100.0),
+        );
         let ppp = ui.ctx().pixels_per_point();
         let scale = (1600.0 / (size.x * ppp).max(size.y * ppp)).min(1.0);
         lab.target_size = UVec2::new(
@@ -530,31 +636,39 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
             }
         }
         legend(ui, &lab.caffeine);
-        muted(
-            ui,
-            match lab.caffeine.layer {
-                CaffeineLayer::A1 => {
-                    "Общая оценка A1 перенесена на серое вещество; региональные различия неизвестны."
-                }
-                CaffeineLayer::A2a => {
-                    "Стриатальная модель A2A: пациенты с болезнью Паркинсона, n=5."
-                }
-                CaffeineLayer::BrainProxy => {
-                    "Ce — условное место эффекта; региональный кровоток не рассчитан."
-                }
-                CaffeineLayer::DeltaE => {
-                    "ΔE — разность двух нейронных расчётов при замороженном Ce; гипотеза."
-                }
-            },
-        );
+        if !matches!(
+            lab.caffeine.layer,
+            CaffeineLayer::Tissue
+                | CaffeineLayer::Cbf
+                | CaffeineLayer::Delivery
+                | CaffeineLayer::Territories
+        ) {
+            muted(
+                ui,
+                match lab.caffeine.layer {
+                    CaffeineLayer::A1 => "Общая PET-оценка A1, региональные плотности неизвестны.",
+                    CaffeineLayer::A2a => "Стриатальная A2A: PET в PD, n=5.",
+                    CaffeineLayer::BrainProxy => {
+                        "Общий условный Ce; местные Ct показаны в слое кофеина в ткани."
+                    }
+                    _ => {
+                        "ΔE: два протокола с/без входа по местной Ct (или Ce), непроверенная гипотеза."
+                    }
+                },
+            );
+        }
     }
     ui.add_space(3.0);
     if lab.caffeine.show_plot {
         plot(ui, lab);
     }
-    ui.label(RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Региональная перфузия и плотности рецепторов не заданы").size(10.5).color(MUTED));
+    lab.dirty |= lab.scene != scene_before;
+    ui.label(RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Артерии и ткань · расчётная перфузия · плотности рецепторов неизвестны").size(10.5).color(MUTED));
 }
 fn legend(ui: &mut egui::Ui, c: &CaffeineLab) {
+    if super::vascular::legend(ui, c) {
+        return;
+    }
     ui.horizontal_wrapped(|ui| {
         ui.small(c.layer.label());
         if c.layer == CaffeineLayer::DeltaE {
@@ -581,18 +695,65 @@ fn legend(ui: &mut egui::Ui, c: &CaffeineLab) {
         );
     });
 }
+fn plot_label(p: CaffeinePlot) -> &'static str {
+    match p {
+        CaffeinePlot::RegionalConcentration => "Кофеин в ткани",
+        CaffeinePlot::RegionalFlow => "Кровоток",
+        CaffeinePlot::RegionalFlux => "Приток / отток",
+        CaffeinePlot::Concentration => "Плазма и Ce",
+        CaffeinePlot::Occupancy => "Занятость A1 / A2A",
+        CaffeinePlot::Mass => "Общий баланс массы",
+        CaffeinePlot::Neural => "Сравнение E/I",
+    }
+}
 fn plot(ui: &mut egui::Ui, lab: &mut BrainLab) {
     let c = &mut lab.caffeine;
-    ui.horizontal_wrapped(|ui| {
-        for (p, label) in [
-            (CaffeinePlot::Concentration, "Концентрации"),
-            (CaffeinePlot::Occupancy, "A1 / A2A"),
-            (CaffeinePlot::Mass, "Баланс массы"),
-            (CaffeinePlot::Neural, "Сравнение E/I"),
-        ] {
-            ui.selectable_value(&mut c.plot, p, label);
+    ui.horizontal(|ui| {
+        ui.label("График");
+        egui::ComboBox::from_id_salt("caffeine-plot-kind")
+            .selected_text(plot_label(c.plot))
+            .show_ui(ui, |ui| {
+                for p in [
+                    CaffeinePlot::RegionalConcentration,
+                    CaffeinePlot::RegionalFlow,
+                    CaffeinePlot::RegionalFlux,
+                    CaffeinePlot::Concentration,
+                    CaffeinePlot::Occupancy,
+                    CaffeinePlot::Mass,
+                    CaffeinePlot::Neural,
+                ] {
+                    ui.selectable_value(&mut c.plot, p, plot_label(p));
+                }
+            });
+        if matches!(
+            c.plot,
+            CaffeinePlot::RegionalConcentration
+                | CaffeinePlot::RegionalFlow
+                | CaffeinePlot::RegionalFlux
+        ) {
+            let early = c.time_min <= 5.0;
+            if ui
+                .small_button(if early {
+                    "Полный горизонт"
+                } else {
+                    "Первые 5 мин"
+                })
+                .clicked()
+            {
+                c.playing = false;
+                c.set_time(if early { 60.0 } else { 1.0 });
+            }
         }
     });
+    if matches!(
+        c.plot,
+        CaffeinePlot::RegionalConcentration
+            | CaffeinePlot::RegionalFlow
+            | CaffeinePlot::RegionalFlux
+    ) {
+        super::vascular::plot(ui, c, lab.scene.selected_region.as_deref());
+        return;
+    }
     if c.plot == CaffeinePlot::Neural {
         neural_plot(ui, c, lab.scene.selected_region.as_deref(), &lab.atlas);
         return;
@@ -710,24 +871,24 @@ fn plot(ui: &mut egui::Ui, lab: &mut BrainLab) {
         ymax,
         c.time_min,
         &lines,
-        true,
+        "h",
     );
     if let Some(t) = picked {
         c.playing = false;
         c.set_time(t);
     }
 }
-fn chart(
+pub(super) fn chart(
     ui: &mut egui::Ui,
     id: &str,
     xmax: f64,
     ymax: f64,
     cursor: f64,
     lines: &[PlotSeries],
-    hours_axis: bool,
+    axis: &str,
 ) -> Option<f64> {
     let (outer, response) = ui.allocate_exact_size(
-        egui::vec2(ui.available_width(), 105.0),
+        egui::vec2(ui.available_width(), 90.0),
         egui::Sense::click_and_drag(),
     );
     let rect = Rect::from_min_max(
@@ -761,10 +922,10 @@ fn chart(
             } else {
                 Align2::CENTER_TOP
             },
-            if hours_axis {
-                format!("{:.0} ч", t / 60.0)
-            } else {
-                format!("{t:.0} мс")
+            match axis {
+                "h" => format!("{:.0} ч", t / 60.0),
+                "min" => format!("{t:.1} мин"),
+                _ => format!("{t:.0} мс"),
             },
             FontId::proportional(10.0),
             MUTED,
@@ -780,7 +941,7 @@ fn chart(
         [at(cursor, 0.0), at(cursor, ymax)],
         Stroke::new(1.0_f32, TEXT),
     );
-    response.clone().on_hover_text(if hours_axis {
+    response.clone().on_hover_text(if axis != "ms" {
         "Щелчок или перетаскивание выбирает время PK"
     } else {
         "Выбор миллисекунды нейронного сравнения"
@@ -859,13 +1020,16 @@ fn neural_plot(ui: &mut egui::Ui, c: &mut CaffeineLab, id: Option<&str>, atlas: 
         1.0,
         c.neural_time_ms,
         &lines,
-        false,
+        "ms",
     ) {
         c.neural_time_ms = (t / network.sample_ms).round() * network.sample_ms;
         c.revision = c.revision.wrapping_add(1);
     }
 }
 pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    if super::vascular::inspector(ui, lab) {
+        return;
+    }
     let c = &mut lab.caffeine;
     tag(ui, "Кофеин · PK и PET-оценки", TEAL);
     ui.add_space(7.0);
@@ -979,6 +1143,12 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 ui.label(if caffeine_a2a_scope(r){"Область отображения стриатальной PET-модели A2A (PD, n=5). Это не отдельное региональное измерение."}else{"Для этой структуры количественная оценка A2A не задана. Серый цвет не означает отсутствие рецептора или эффекта."});
                 sources.push("ishibashi2022".into());
             }
+            CaffeineLayer::Tissue
+            | CaffeineLayer::Cbf
+            | CaffeineLayer::Delivery
+            | CaffeineLayer::Territories => {
+                ui.label("Выберите участок с заданной перфузией.");
+            }
             CaffeineLayer::BrainProxy => {
                 ui.label("Одинаковый условный Ce во всём отображаемом сером веществе. Региональная доставка кофеина неизвестна.");
             }
@@ -1047,7 +1217,7 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
     ui.add_space(9.0);
     muted(
         ui,
-        "Занятость не равна активации или бодрости. Индивидуальная кинетика, метаболиты, сосуды и региональные плотности не рассчитаны.",
+        "Занятость не равна активации или бодрости. Индивидуальная кинетика, метаболиты и региональные плотности не заданы.",
     );
 }
 pub fn kind_label(kind: &str) -> &'static str {
@@ -1069,6 +1239,44 @@ pub fn kind_color(kind: &str) -> Color32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn regional_layers_use_local_values_and_early_clock_invalidates_neural_results() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut c = CaffeineLab::new(&a).unwrap();
+        c.mode = true;
+        c.set_time(0.15);
+        assert!((c.sample().unwrap().time_min - 0.15).abs() < 1e-12);
+        c.speed_min_s = 0.5;
+        c.playing = true;
+        c.tick(0.1);
+        assert!((c.time_min - 0.2).abs() < 1e-12);
+        let r = a.region("FMA72976").unwrap();
+        c.layer = CaffeineLayer::Tissue;
+        assert_eq!(
+            c.region_value(r),
+            Some(c.regional(&r.id).unwrap().1.tissue_mg_l)
+        );
+        c.layer = CaffeineLayer::Delivery;
+        let (_, s) = c.regional(&r.id).unwrap();
+        assert_eq!(c.region_value(r), Some(s.cbf_ml_100g_min * s.arterial_mg_l));
+        c.scenario
+            .perfusion
+            .as_mut()
+            .unwrap()
+            .regions
+            .iter_mut()
+            .find(|p| p.region_id == r.id)
+            .unwrap()
+            .flow_fraction = 0.0;
+        c.refresh(&a);
+        assert!(!c.playing);
+        assert_eq!(c.regional(&r.id).unwrap().1.tissue_mg, 0.0);
+        c.layer = CaffeineLayer::Cbf;
+        assert_eq!(c.region_value(r), Some(0.0));
+        c.scenario.perfusion.as_mut().unwrap().regions[0].transit_sec = f64::NAN;
+        c.refresh(&a);
+        assert!(c.trace.is_none() && c.region_value(r).is_none());
+    }
     #[test]
     fn caffeine_pause_invalidation_and_unknown_regions_are_explicit() {
         let a = BrainAtlas::bundled().unwrap();

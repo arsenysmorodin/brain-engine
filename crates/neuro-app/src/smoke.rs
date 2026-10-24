@@ -472,6 +472,196 @@ fn run(
                 ));
         }
         580 => {
+            lab.response.dirty = false;
+            let a = lab.brain.atlas.clone();
+            lab.brain.caffeine = crate::brain::caffeine::CaffeineLab::new(&a).unwrap();
+            lab.brain.caffeine.mode = true;
+            lab.brain.caffeine.set_time(60.0);
+            lab.brain.caffeine.show_plot = false;
+            lab.brain.caffeine.tissue_opacity = 0.12;
+            lab.brain.scene = neuro_domain::BrainScene::default();
+            lab.status =
+                "Артериальная сеть · цвет Ca; региональная доставка по редактируемым допущениям."
+                    .into();
+        }
+        590 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("vascular-overview.png")));
+        }
+        600 => {
+            lab.brain.caffeine.layer = crate::brain::caffeine::CaffeineLayer::Territories;
+            lab.brain.caffeine.selected_vessel = lab
+                .brain
+                .vascular_atlas
+                .vessels
+                .iter()
+                .position(|v| v.id == "FMA50542");
+            lab.brain.caffeine.tissue_opacity = 0.07;
+            lab.brain.caffeine.revision += 1;
+            lab.brain.scene.camera.pitch = -0.7;
+            lab.brain.scene.camera.yaw = std::f32::consts::PI;
+        }
+        610 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("vascular-circle-of-willis.png"),
+                ));
+        }
+        620 => {
+            let a = lab.brain.atlas.clone();
+            let c = &mut lab.brain.caffeine;
+            c.scenario
+                .perfusion
+                .as_mut()
+                .unwrap()
+                .regions
+                .iter_mut()
+                .find(|r| r.region_id == "FMA72976")
+                .unwrap()
+                .flow_fraction = 0.3;
+            c.refresh(&a);
+            c.set_time(1.5);
+            c.selected_vessel = None;
+            c.selection = None;
+            c.layer = crate::brain::caffeine::CaffeineLayer::Tissue;
+            c.show_plot = true;
+            c.plot = crate::brain::caffeine::CaffeinePlot::RegionalConcentration;
+            c.tissue_opacity = 0.25;
+            lab.brain.scene.selected_region = Some("FMA72976".into());
+            lab.brain.scene.camera = neuro_domain::BrainCamera::default();
+            lab.brain.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+            lab.brain.scene.camera.pitch = 0.0;
+            assert!(
+                lab.brain
+                    .caffeine
+                    .regional("FMA72976")
+                    .unwrap()
+                    .1
+                    .tissue_mg_l
+                    < lab
+                        .brain
+                        .caffeine
+                        .regional("FMA72975")
+                        .unwrap()
+                        .1
+                        .tissue_mg_l
+            );
+        }
+        630 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("vascular-regional-delivery.png"),
+                ));
+        }
+        640 => {
+            lab.brain.caffeine.set_time(60.0);
+            lab.brain.caffeine.layer = crate::brain::caffeine::CaffeineLayer::Cbf;
+            lab.brain.caffeine.plot = crate::brain::caffeine::CaffeinePlot::RegionalFlow;
+            lab.brain.caffeine.tissue_opacity = 0.8;
+            lab.brain.caffeine.revision += 1;
+            let project = smoke.directory.join("perfusion-project.json");
+            let regional = smoke.directory.join("perfusion-gui.csv");
+            assert!(lab.perform(FileAction::Save, &project));
+            assert!(lab.perform(FileAction::RegionalCsv, &regional));
+            let expected = lab
+                .brain
+                .caffeine
+                .trace
+                .as_ref()
+                .unwrap()
+                .perfusion
+                .as_ref()
+                .unwrap()
+                .regional_csv(&lab.brain.caffeine.scenario);
+            assert_eq!(std::fs::read_to_string(&regional).unwrap(), expected);
+            assert!(!lab.perform(FileAction::RegionalCsv, &project));
+            let a = lab.brain.atlas.clone();
+            lab.brain.caffeine.scenario.perfusion = None;
+            lab.brain.caffeine.refresh(&a);
+            assert!(!lab.perform(
+                FileAction::RegionalCsv,
+                &smoke.directory.join("missing-perfusion.csv")
+            ));
+            assert!(lab.perform(FileAction::Open, &project));
+            assert_eq!(lab.brain.caffeine.time_min, 0.0);
+            assert!(lab.brain.caffeine.scenario.perfusion.is_some());
+            assert!(!lab.brain.caffeine.playing);
+            lab.brain.caffeine.set_time(60.0);
+            lab.brain.caffeine.layer = crate::brain::caffeine::CaffeineLayer::Cbf;
+            lab.brain.caffeine.plot = crate::brain::caffeine::CaffeinePlot::RegionalFlow;
+            lab.brain.caffeine.show_plot = true;
+        }
+        650 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("vascular-regional-flow.png"),
+                ));
+        }
+        660 => {
+            let a = lab.brain.atlas.clone();
+            let c = &mut lab.brain.caffeine;
+            c.scenario.neural_hypothesis.enabled = true;
+            c.refresh(&a);
+            c.set_time(2.0);
+            c.compute_neural(&a);
+            std::fs::write(
+                smoke.directory.join("perfusion-neural-gui.json"),
+                serde_json::to_vec_pretty(c.comparison.as_ref().unwrap()).unwrap(),
+            )
+            .unwrap();
+            assert!(lab.perform(
+                FileAction::Save,
+                &smoke.directory.join("perfusion-neural-project.json")
+            ));
+            let id = lab
+                .brain
+                .caffeine
+                .scenario
+                .neural_hypothesis
+                .network
+                .populations[0]
+                .region_id
+                .clone();
+            let c = &mut lab.brain.caffeine;
+            let x = c
+                .scenario
+                .perfusion
+                .as_mut()
+                .unwrap()
+                .regions
+                .iter_mut()
+                .find(|r| r.region_id == id)
+                .unwrap();
+            x.flow_fraction = f64::NAN;
+            c.refresh(&a);
+            assert!(c.trace.is_none() && c.comparison.is_none());
+            assert!(!lab.perform(
+                FileAction::RegionalCsv,
+                &smoke.directory.join("perfusion-invalid.csv")
+            ));
+            assert!(lab.perform(
+                FileAction::Open,
+                &smoke.directory.join("perfusion-neural-project.json")
+            ));
+            lab.brain.caffeine.set_time(60.0);
+            lab.brain.caffeine.compute_neural(&a);
+            lab.brain.caffeine.neural_time_ms = 100.0;
+            lab.brain.caffeine.tissue_opacity = 1.0;
+            lab.brain.caffeine.revision += 1;
+        }
+        670 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("vascular-neural-effect.png"),
+                ));
+        }
+        680 => {
+            std::fs::write(smoke.directory.join("perfusion-passed.txt"),"127 arterial meshes / 85 named structures; regional flow reduction and local Ct; 3 s early playback; regional CSV and project replay; input overwrite blocked; disabled/NaN perfusion blocks regional export; regional E/I drivers replay.\n").unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}

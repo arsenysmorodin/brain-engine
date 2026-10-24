@@ -9,7 +9,7 @@ use neuro_domain::{
 pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
     if lab.caffeine.mode {
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut lab.caffeine.show_regions, false, "Протокол");
+            ui.selectable_value(&mut lab.caffeine.show_regions, false, "Настройки");
             ui.selectable_value(&mut lab.caffeine.show_regions, true, "Области");
         });
         ui.add_space(8.0);
@@ -95,6 +95,8 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 {
                     lab.scene.selected_region = Some(r.id);
                     lab.caffeine.selection = None;
+                    lab.caffeine.selected_vessel = None;
+                    lab.caffeine.revision += 1;
                     lab.reveal_selected();
                 }
             }
@@ -306,6 +308,16 @@ pub(super) fn interact(ui: &egui::Ui, response: &egui::Response, lab: &mut Brain
         && let Some(pointer) = response.interact_pointer_pos()
     {
         let local = (pointer - response.rect.min) / response.rect.size();
+        let ndc = Vec2::new(local.x * 2.0 - 1.0, 1.0 - local.y * 2.0);
+        let aspect = response.rect.width() / response.rect.height();
+        if let Some(v) = lab.pick_vessel(ndc, aspect) {
+            lab.caffeine.selected_vessel = Some(v);
+            lab.caffeine.selection = None;
+            lab.caffeine.revision += 1;
+            return;
+        }
+        lab.caffeine.selected_vessel = None;
+        lab.caffeine.revision += 1;
         lab.scene.selected_region = lab.pick(
             Vec2::new(local.x * 2.0 - 1.0, 1.0 - local.y * 2.0),
             response.rect.width() / response.rect.height(),
