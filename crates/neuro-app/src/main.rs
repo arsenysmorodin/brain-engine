@@ -1,3 +1,4 @@
+mod brain;
 mod experiment;
 mod files;
 mod inspector;
@@ -11,13 +12,14 @@ use bevy::{
     winit::{UpdateMode, WinitSettings},
 };
 use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, egui};
-use neuro_domain::{Catalog, Experiment, Parameters, Scenario};
+use neuro_domain::{Catalog, Experiment, Parameters, Scenario, WorkspaceDocument};
 use neuro_engine::{Evaluation, evaluate};
 use std::path::{Path, PathBuf};
 use theme::*;
 
 #[derive(Clone, Copy, PartialEq)]
 enum View {
+    Brain,
     Map,
     Experiment,
     Response,
@@ -44,6 +46,7 @@ impl FileAction {
 }
 #[derive(Resource)]
 struct Lab {
+    brain: brain::BrainLab,
     catalog: Catalog,
     scenario: Scenario,
     evaluation: Option<Evaluation>,
@@ -63,14 +66,26 @@ struct Lab {
     initialized: bool,
 }
 impl Lab {
+    fn activate(&mut self, view: View) {
+        self.view = view;
+        self.status_error = false;
+        self.status = match view {
+            View::Brain => "Мозг: выберите область на поверхности или в списке.",
+            View::Map => "Карта механизмов: выберите сущность или связь.",
+            View::Experiment => "Конкурентное связывание: абстрактные лиганды A и B.",
+            View::Response => "Операционный ответ: абстрактный агонист.",
+        }
+        .into();
+    }
     fn new() -> Result<Self, neuro_domain::Error> {
         let scenario = Scenario::default();
         Ok(Self {
+            brain: brain::BrainLab::new()?,
             catalog: Catalog::bundled()?,
             evaluation: Some(evaluate(&scenario)?),
             scenario,
             response: response::ResponseLab::new()?,
-            view: View::Map,
+            view: View::Brain,
             selection: Selection::Entity("caffeine".into()),
             map: map::MapState::default(),
             draft_a: "1".into(),
@@ -138,26 +153,35 @@ impl Lab {
             };
         }
         let response = self.view == View::Response;
-        let last_path = if response {
+        let brain = self.view == View::Brain;
+        let last_path = if brain {
+            &self.brain.last_scene_path
+        } else if response {
             &self.response.last_scenario_path
         } else {
             &self.last_scenario_path
         };
         self.file_path = match action {
-            FileAction::Csv => cwd.join(if response {
+            FileAction::Csv => cwd.join(if brain {
+                "neuro-brain-regions.csv"
+            } else if response {
                 "neuro-response-results.csv"
             } else {
                 "neuro-results.csv"
             }),
             FileAction::Open => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if response {
+                cwd.join(if brain {
+                    "scenes/brain.json"
+                } else if response {
                     "scenarios/response.json"
                 } else {
                     "scenarios/competition.json"
                 })
             }),
             FileAction::Save => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if response {
+                cwd.join(if brain {
+                    "neuro-brain-scene.json"
+                } else if response {
                     "neuro-response-scenario.json"
                 } else {
                     "neuro-scenario.json"
@@ -173,7 +197,7 @@ impl Lab {
         action: FileAction,
         path: &Path,
     ) -> Result<(), neuro_domain::Error> {
-        if !matches!(action, FileAction::Open) {
+        if self.view != View::Brain && !matches!(action, FileAction::Open) {
             neuro_domain::require(
                 if self.view == View::Response {
                     self.response.parameter_error.is_none()
@@ -185,7 +209,11 @@ impl Lab {
         }
         match action {
             FileAction::Save => {
-                if self.view == View::Response {
+                if self.view == View::Brain {
+                    self.brain.scene.save(path, &self.brain.atlas)?;
+                    self.brain.last_scene_path = Some(path.into());
+                    self.brain.dirty = false;
+                } else if self.view == View::Response {
                     self.response.scenario.save(path)?;
                     self.response.last_scenario_path = Some(path.into());
                     self.response.dirty = false;
@@ -195,34 +223,46 @@ impl Lab {
                     self.dirty = false;
                 }
             }
-            FileAction::Open => match Experiment::load(path)? {
-                Experiment::Binding(scenario) => {
-                    let result = evaluate(&scenario)?;
-                    self.draft_a = scenario.parameters.a.to_string();
-                    self.draft_b = scenario.parameters.b.to_string();
-                    self.scenario = scenario;
-                    self.evaluation = Some(result);
-                    self.parameter_error = None;
-                    self.last_scenario_path = Some(path.into());
-                    self.dirty = false;
-                    self.view = View::Experiment;
+            FileAction::Open => match WorkspaceDocument::load(path, &self.brain.atlas)? {
+                WorkspaceDocument::Brain(scene) => {
+                    self.brain.scene = scene;
+                    self.brain.last_scene_path = Some(path.into());
+                    self.brain.dirty = false;
+                    self.view = View::Brain;
                 }
-                Experiment::Response(scenario) => {
-                    let result = neuro_engine::evaluate_response(&scenario)?;
-                    self.response.draft_x = scenario.parameters.x.to_string();
-                    self.response.draft_tau = scenario.parameters.tau.to_string();
-                    self.response.scenario = scenario;
-                    self.response.evaluation = Some(result);
-                    self.response.parameter_error = None;
-                    self.response.last_scenario_path = Some(path.into());
-                    self.response.dirty = false;
-                    self.view = View::Response;
-                }
+                WorkspaceDocument::Experiment(experiment) => match experiment {
+                    Experiment::Binding(scenario) => {
+                        let result = evaluate(&scenario)?;
+                        self.draft_a = scenario.parameters.a.to_string();
+                        self.draft_b = scenario.parameters.b.to_string();
+                        self.scenario = scenario;
+                        self.evaluation = Some(result);
+                        self.parameter_error = None;
+                        self.last_scenario_path = Some(path.into());
+                        self.dirty = false;
+                        self.view = View::Experiment;
+                    }
+                    Experiment::Response(scenario) => {
+                        let result = neuro_engine::evaluate_response(&scenario)?;
+                        self.response.draft_x = scenario.parameters.x.to_string();
+                        self.response.draft_tau = scenario.parameters.tau.to_string();
+                        self.response.scenario = scenario;
+                        self.response.evaluation = Some(result);
+                        self.response.parameter_error = None;
+                        self.response.last_scenario_path = Some(path.into());
+                        self.response.dirty = false;
+                        self.view = View::Response;
+                    }
+                },
             },
             FileAction::Csv => {
-                for scenario_path in [&self.last_scenario_path, &self.response.last_scenario_path]
-                    .into_iter()
-                    .flatten()
+                for scenario_path in [
+                    &self.last_scenario_path,
+                    &self.response.last_scenario_path,
+                    &self.brain.last_scene_path,
+                ]
+                .into_iter()
+                .flatten()
                 {
                     neuro_domain::require(
                         path.canonicalize()
@@ -232,7 +272,9 @@ impl Lab {
                         "CSV не должен перезаписывать сценарий",
                     )?;
                 }
-                if self.view == View::Response {
+                if self.view == View::Brain {
+                    neuro_domain::atomic_write(path, self.brain.atlas.csv().as_bytes())?;
+                } else if self.view == View::Response {
                     self.response
                         .evaluation
                         .as_ref()
@@ -258,6 +300,10 @@ impl Lab {
                 self.status = format!(
                     "{}: {}",
                     match action {
+                        FileAction::Save if self.view == View::Brain => "Сцена мозга сохранена",
+                        FileAction::Open if self.view == View::Brain => "Сцена мозга открыта",
+                        FileAction::Csv if self.view == View::Brain =>
+                            "Каталог областей экспортирован",
                         FileAction::Save => "Сценарий сохранён",
                         FileAction::Open => "Сценарий открыт и пересчитан",
                         FileAction::Csv => "Результаты экспортированы",
@@ -306,14 +352,16 @@ fn main() {
             ..default()
         }))
         .add_plugins(EguiPlugin::default())
-        .add_systems(Startup, |mut commands: Commands| {
-            commands.spawn(Camera2d);
-        })
-        .add_systems(EguiPrimaryContextPass, ui);
+        .add_systems(Startup, brain::setup)
+        .add_systems(EguiPrimaryContextPass, (ui, brain::sync).chain());
     smoke::configure(&mut app);
     app.run();
 }
-fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
+fn ui(
+    mut contexts: EguiContexts,
+    mut lab: ResMut<Lab>,
+    viewport: Res<brain::BrainViewport>,
+) -> Result {
     let ctx = contexts.ctx_mut()?;
     if !lab.initialized {
         configure(ctx);
@@ -335,7 +383,7 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new("NeuroLab").size(24.0).strong());
                 ui.add_space(16.0);
-                muted(ui, "Личная исследовательская лаборатория");
+                muted(ui, "Среда моделирования мозга");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if ui.button("Экспорт CSV").clicked() {
                         lab.open_dialog(FileAction::Csv);
@@ -362,6 +410,9 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
                         .size(12.0)
                         .color(if lab.status_error { ERROR } else { MUTED }),
                 );
+                if lab.brain.dirty {
+                    ui.colored_label(PURPLE, "Сцена мозга не сохранена");
+                }
                 if lab.dirty || lab.response.dirty {
                     let models = match (lab.dirty, lab.response.dirty) {
                         (true, true) => "A/B и ответ",
@@ -372,7 +423,19 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
                 }
             });
         });
-    egui::SidePanel::left("catalog").exact_width(205.0).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
+    let previous_view = lab.view;
+    egui::SidePanel::left("catalog").exact_width(if lab.view==View::Brain {245.0}else{205.0}).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
+        if ui.add_sized([ui.available_width(),36.0],egui::Button::new("Мозг · 3D").selected(lab.view==View::Brain)).clicked() {lab.view=View::Brain;}
+        if lab.view==View::Brain {
+            ui.collapsing("Другие разделы",|ui| {
+                if ui.button("Карта механизмов").clicked() {lab.view=View::Map;}
+                if ui.button("Связывание A / B").clicked() {lab.view=View::Experiment;}
+                if ui.button("Функциональный ответ").clicked() {lab.view=View::Response;}
+            });
+            ui.separator();
+            brain::sidebar(ui,&mut lab.brain);
+            return;
+        }
         ui.add_space(9.0); ui.label(egui::RichText::new("Каталог").size(18.0)); ui.add_space(8.0);
         for entity in lab.catalog.entities.clone() {
             let selected = matches!(&lab.selection, Selection::Entity(id) if id == &entity.id) && lab.view == View::Map;
@@ -389,6 +452,10 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
         ui.label(egui::RichText::new("Карта — опубликованные сведения.\n\nЭксперименты — отдельные математические демонстрации.").size(12.0).color(MUTED));
         ui.add_space(18.0); ui.separator(); ui.add_space(10.0); muted(ui, "Без облака и API-ключей");
     });
+    if lab.view != previous_view {
+        let view = lab.view;
+        lab.activate(view);
+    }
     egui::SidePanel::right("inspector")
         .exact_width(325.0)
         .resizable(false)
@@ -401,6 +468,7 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
     egui::CentralPanel::default()
         .frame(egui::Frame::new().fill(BACKGROUND).inner_margin(24))
         .show(ctx, |ui| match lab.view {
+            View::Brain => brain::viewport(ui, &mut lab.brain, &viewport),
             View::Map => {
                 ui.heading("Кофеин и аденозин");
                 muted(ui, "Молекулярные мишени и происхождение утверждений");
@@ -471,6 +539,7 @@ mod tests {
         let response = directory.join("response.json");
         let csv = directory.join("response.csv");
         let mut lab = Lab::new().unwrap();
+        lab.view = View::Experiment;
         lab.scenario.parameters = Parameters { a: 3.0, b: 6.0 };
         lab.refresh();
         lab.file_operation(FileAction::Save, &binding).unwrap();

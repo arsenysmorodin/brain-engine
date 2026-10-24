@@ -2,6 +2,10 @@ use crate::{Lab, Selection, View, theme::*};
 use bevy_egui::egui;
 
 pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
+    if lab.view == View::Brain {
+        crate::brain::inspector(ui, &mut lab.brain);
+        return;
+    }
     if lab.view == View::Response {
         crate::response::inspector(ui, &lab.response);
         return;

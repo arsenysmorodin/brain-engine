@@ -392,7 +392,7 @@ impl Default for BrainCamera {
         Self {
             yaw: -2.2,
             pitch: 0.24,
-            distance: 5.5,
+            distance: 4.6,
             target: [0.0; 3],
         }
     }
@@ -466,7 +466,7 @@ impl BrainScene {
                 && c.pitch.is_finite()
                 && c.pitch.abs() <= 1.5
                 && c.distance.is_finite()
-                && (1.0..=15.0).contains(&c.distance)
+                && (0.2..=15.0).contains(&c.distance)
                 && c.target.iter().all(|v| v.is_finite() && v.abs() <= 10.0)
                 && self.separation.is_finite()
                 && (0.0..=1.0).contains(&self.separation),
@@ -505,6 +505,24 @@ impl BrainScene {
                 HemisphereView::Left => r.hemisphere != Hemisphere::Right,
                 HemisphereView::Right => r.hemisphere != Hemisphere::Left,
             }
+    }
+}
+
+/// The workspace can contain either anatomical view state or a numerical scenario.
+#[derive(Clone, Debug, PartialEq)]
+pub enum WorkspaceDocument {
+    Brain(BrainScene),
+    Experiment(crate::Experiment),
+}
+impl WorkspaceDocument {
+    pub fn load(path: impl AsRef<Path>, atlas: &BrainAtlas) -> Result<Self, Error> {
+        let text = read_small_file(path.as_ref())?;
+        let value: serde_json::Value = serde_json::from_str(&text)?;
+        if value.get("document_kind").is_some() {
+            BrainScene::from_json(&text, atlas).map(Self::Brain)
+        } else {
+            crate::Experiment::from_json(&text).map(Self::Experiment)
+        }
     }
 }
 

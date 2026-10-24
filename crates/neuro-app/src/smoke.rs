@@ -39,6 +39,14 @@ fn run(
         25 => {
             commands
                 .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("brain-overview.png")));
+        }
+        30 => {
+            lab.view = View::Map;
+        }
+        35 => {
+            commands
+                .spawn(Screenshot::primary_window())
                 .observe(save_to_disk(smoke.directory.join("map.png")));
         }
         40 => {
@@ -150,7 +158,80 @@ fn run(
                 .observe(save_to_disk(smoke.directory.join("response-invalid.png")));
         }
         200 => {
-            std::fs::write(smoke.directory.join("passed.txt"), "GUI startup; claim selection; binding save/mutate/reload/CSV; corrupt file and NaN rejection; response save/mutate/reload/CSV; independent states; tau=0 undefined EC50; invalid response blocks saving: passed\n").expect("smoke report");
+            lab.activate(View::Brain);
+            lab.brain.scene = neuro_domain::BrainScene::default();
+        }
+        220 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("brain.png")));
+        }
+        235 => {
+            lab.brain.scene.selected_region = Some("FMA258716".into());
+            lab.brain.scene.layers.cortex = false;
+            lab.brain.scene.layers.cerebellum = false;
+            lab.brain.scene.separation = 0.35;
+        }
+        250 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("brain-deep.png")));
+        }
+        265 => {
+            lab.brain.scene.isolate = true;
+            lab.brain.focus_selected();
+            let mesh = lab
+                .brain
+                .meshes
+                .iter()
+                .find(|m| lab.brain.atlas.regions[m.region].id == "FMA258716")
+                .unwrap();
+            let t = &mesh.indices[..3];
+            let point = t.iter().map(|&i| mesh.positions[i as usize]).sum::<Vec3>() / 3.0
+                + lab
+                    .brain
+                    .offset(lab.brain.atlas.region("FMA258716").unwrap());
+            let camera = crate::brain::camera_transform(lab.brain.scene.camera);
+            let local = camera.rotation.inverse() * (point - camera.translation);
+            let tan = (crate::brain::FIELD_OF_VIEW * 0.5).tan();
+            let ndc = Vec2::new(local.x / (-local.z * tan * 1.2), local.y / (-local.z * tan));
+            assert_eq!(lab.brain.pick(ndc, 1.2).as_deref(), Some("FMA258716"));
+            let path = smoke.directory.join("brain-scene.json");
+            let scene = lab.brain.scene.clone();
+            assert!(lab.perform(FileAction::Save, &path));
+            lab.brain.scene.camera.distance = 12.0;
+            lab.brain.scene.selected_region = None;
+            lab.brain.scene.isolate = false;
+            assert!(lab.perform(FileAction::Open, &path));
+            assert_eq!(lab.brain.scene, scene);
+            assert!(lab.perform(FileAction::Csv, &smoke.directory.join("brain-regions.csv")));
+        }
+        280 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("brain-selected.png")));
+        }
+        295 => {
+            let mut bad = lab.brain.scene.clone();
+            bad.atlas_revision = 99;
+            let path = smoke.directory.join("brain-unknown-version.json");
+            std::fs::write(&path, serde_json::to_vec(&bad).unwrap()).unwrap();
+            let scene = lab.brain.scene.clone();
+            assert!(!lab.perform(FileAction::Open, &path));
+            assert_eq!(lab.brain.scene, scene);
+        }
+        310 => {
+            lab.brain.scene.selected_region = Some("FMA67944".into());
+            lab.brain.scene.isolate = true;
+            lab.brain.focus_selected();
+        }
+        330 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("brain-cerebellum.png")));
+        }
+        350 => {
+            std::fs::write(smoke.directory.join("passed.txt"), "Native brain startup; overview/deep/isolated scenes; ray picks selected thalamus; brain save/mutate/reload/CSV; unknown atlas rejected without mutation; binding and response save/mutate/reload/CSV; invalid numerical inputs rejected: passed\n").expect("smoke report");
             exit.write(AppExit::Success);
         }
         _ => {}

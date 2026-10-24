@@ -18,7 +18,11 @@
 
 `data/operational-model.json`: Jakubík et al. (2019), [полный текст](https://pmc.ncbi.nlm.nih.gov/articles/PMC6420642/), DOI 10.1038/s41598-019-40993-w, PMID 30874590. Проверены уравнения 1–3, параметры теоретического примера рис. 1 и [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), 24.10.2026. Использована нормированная модель без шума; рисунки, авторский код и экспериментальные таблицы не импортированы. Основа Black & Leff (1983), DOI 10.1098/rspb.1983.0093, проверена по аннотации. Формулы, изменения нормировки, границы проверки и критерий ошибки описаны в [response-model.md](response-model.md). Атрибуция встроена в интерфейс и копируется в Resources/licenses пакета.
 
-## Шрифт
+## Анатомическая 3D-основа
+
+BodyParts3D 4.0 / DBCLS: официальный архив IS-A OBJ, таблицы FMA и состава объектов. [Данные](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html), [актуальная лицензия CC BY 4.0](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html), проверено 24.10.2026. Выбраны 58 структур / 63 меша; происхождение, исходные файлы, CRC32, изменения и границы записаны в `data/brain-atlas.json`. Атрибуция доступна в сцене, инспекторе и лицензиях `.app`. [Подробный протокол и SHA-256](brain-atlas.md).
+
+## Шрифты
 
 Встроен Noto Sans, Google / Noto Project Authors. Кириллица, латиница и научные символы. Исходный TTF без изменений, не подмножество.
 

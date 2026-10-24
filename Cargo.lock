@@ -2642,6 +2642,7 @@ dependencies = [
  "bevy_egui",
  "neuro-domain",
  "neuro-engine",
+ "serde_json",
 ]
 
 [[package]]

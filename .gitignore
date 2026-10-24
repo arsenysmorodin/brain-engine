@@ -7,4 +7,6 @@
 /neuro-results.csv
 /neuro-response-scenario.json
 /neuro-response-results.csv
+/neuro-brain-scene.json
+/neuro-brain-regions.csv
 *.tmp

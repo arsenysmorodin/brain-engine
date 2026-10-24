@@ -10,6 +10,7 @@ neuro-domain.workspace = true
 neuro-engine.workspace = true
 bevy.workspace = true
 bevy_egui.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true

@@ -1,4 +1,4 @@
-use crate::{FileAction, Lab, theme::*};
+use crate::{FileAction, Lab, View, theme::*};
 use bevy_egui::egui;
 use std::path::{Path, PathBuf};
 pub fn show(ctx: &egui::Context, lab: &mut Lab) {
@@ -8,11 +8,20 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
     let mut open = true;
     let mut submitted = false;
     let mut cancel = false;
-    egui::Window::new(action.title()).open(&mut open).collapsible(false).resizable(true).default_width(650.0).show(ctx, |ui| {
+    let title = if lab.view == View::Brain {
+        match action {
+            FileAction::Save => "Сохранить сцену мозга",
+            FileAction::Open => "Открыть сцену или сценарий",
+            FileAction::Csv => "Экспорт областей мозга",
+        }
+    } else {
+        action.title()
+    };
+    egui::Window::new(title).open(&mut open).collapsible(false).resizable(true).default_width(650.0).show(ctx, |ui| {
         ui.label("Полный путь к файлу");
         ui.add(egui::TextEdit::singleline(&mut lab.file_path).desired_width(f32::INFINITY));
         if matches!(action, FileAction::Open) {
-            if lab.dirty || lab.response.dirty { ui.colored_label(PURPLE, "Открытие заменит параметры модели из файла; другая модель сохранится в памяти."); }
+            if lab.dirty || lab.response.dirty || lab.brain.dirty { ui.colored_label(PURPLE, "Открытие заменит сцену или параметры соответствующей модели. Другие разделы сохранятся в памяти."); }
             if let Some(parent) = Path::new(&lab.file_path).parent() && let Ok(entries) = std::fs::read_dir(parent) {
                 let mut files: Vec<_> = entries.filter_map(Result::ok).map(|e| e.path()).filter(|p| p.extension().is_some_and(|e| e == "json")).take(128).collect(); files.sort();
                 egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {
@@ -24,10 +33,10 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
         if exists { ui.colored_label(PURPLE, "Файл уже существует. Подтверждение заменит его содержимое."); }
         if lab.status_error { ui.colored_label(ERROR, &lab.status); }
         ui.horizontal(|ui| {
-            let label = if exists { "Заменить файл" } else { match action { FileAction::Save => "Сохранить JSON", FileAction::Open => "Открыть и пересчитать", FileAction::Csv => "Экспортировать CSV" } };
+            let label = if exists { "Заменить файл" } else { match action { FileAction::Save => "Сохранить JSON", FileAction::Open => "Открыть файл", FileAction::Csv => "Экспортировать CSV" } };
             submitted = ui.button(label).clicked(); cancel = ui.button("Отмена").clicked();
         });
-        muted(ui, "JSON сохраняет параметры, версию модели и диапазон графика. CSV содержит текущую точку и кривые.");
+        muted(ui, "JSON сохраняет сцену мозга или сценарий эксперимента. CSV — каталог областей мозга либо численные результаты выбранного эксперимента.");
     });
     if submitted {
         let path = PathBuf::from(lab.file_path.trim());

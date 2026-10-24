@@ -1,0 +1,14 @@
+{
+  "format_version": 1,
+  "document_kind": "brain_scene",
+  "atlas_id": "bodyparts3d_brain_4.0",
+  "atlas_revision": 1,
+  "selected_region": null,
+  "camera": { "yaw": -2.2, "pitch": 0.24, "distance": 4.6, "target": [0.0, 0.0, 0.0] },
+  "layers": { "cortex": true, "deep": true, "cerebellum": true, "brainstem": true, "white_matter": false, "cavities": false },
+  "hemisphere": "both",
+  "color_mode": "groups",
+  "separation": 0.0,
+  "isolate": false,
+  "hidden_regions": []
+}
