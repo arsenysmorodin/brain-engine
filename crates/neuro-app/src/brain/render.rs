@@ -20,7 +20,7 @@ pub struct BrainViewport {
     size: UVec2,
     last_scene: Option<BrainScene>,
     active: bool,
-    last_simulation: Option<(bool, u64)>,
+    last_simulation: Option<(bool, u64, bool, u64)>,
 }
 #[derive(Component)]
 pub struct BrainCameraEntity;
@@ -182,7 +182,13 @@ pub fn sync(
         }
     }
     let simulation = &lab.brain.simulation;
-    let simulation_revision = (simulation.mode, simulation.revision);
+    let caffeine = &lab.brain.caffeine;
+    let simulation_revision = (
+        simulation.mode,
+        simulation.revision,
+        caffeine.mode,
+        caffeine.revision,
+    );
     if viewport.last_scene.as_ref() == Some(&lab.brain.scene)
         && viewport.last_simulation == Some(simulation_revision)
     {
@@ -200,7 +206,9 @@ pub fn sync(
         if let Some(material) = materials.get_mut(&handle.0) {
             let selected = lab.brain.scene.selected_region.as_ref() == Some(&region.id);
             let activity = simulation.state(&region.id);
-            let rgb = if simulation.mode {
+            let rgb = if caffeine.mode {
+                caffeine.region_rgb(region)
+            } else if simulation.mode {
                 activity.map_or([65, 69, 77], |s| super::simulation::heat_rgb(s.e))
             } else if selected {
                 [112, 234, 214]
@@ -210,7 +218,9 @@ pub fn sync(
                 [184, 194, 207]
             };
             material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
-            material.emissive = if simulation.mode {
+            material.emissive = if caffeine.mode {
+                LinearRgba::BLACK
+            } else if simulation.mode {
                 let glow = activity.map_or(0.0, |s| s.e as f32 * 0.3);
                 LinearRgba::rgb(
                     glow * rgb[0] as f32 / 255.0,

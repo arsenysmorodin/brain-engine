@@ -1,3 +1,4 @@
+pub mod caffeine;
 mod controls;
 mod render;
 mod simulation;
@@ -31,6 +32,7 @@ pub struct BrainLab {
     pub last_scene_path: Option<PathBuf>,
     pub target_size: UVec2,
     pub simulation: SimulationLab,
+    pub caffeine: caffeine::CaffeineLab,
 }
 impl BrainLab {
     pub fn new() -> Result<Self, Error> {
@@ -91,6 +93,7 @@ impl BrainLab {
             })
             .collect();
         let simulation = SimulationLab::new(&atlas)?;
+        let caffeine = caffeine::CaffeineLab::new(&atlas)?;
         Ok(Self {
             atlas,
             scene: BrainScene::default(),
@@ -102,6 +105,7 @@ impl BrainLab {
             last_scene_path: None,
             target_size: UVec2::new(1000, 800),
             simulation,
+            caffeine,
         })
     }
     pub fn offset(&self, r: &BrainRegion) -> Vec3 {
@@ -219,6 +223,7 @@ pub fn advance_network(
 ) {
     if lab.view == crate::View::Brain && windows.iter().any(|w| w.focused) {
         lab.brain.simulation.tick(time.delta_secs_f64());
+        lab.brain.caffeine.tick(time.delta_secs_f64());
     }
 }
 pub fn camera_transform(camera: BrainCamera) -> Transform {

@@ -7,6 +7,17 @@ use neuro_domain::{
 };
 
 pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    if lab.caffeine.mode {
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut lab.caffeine.show_regions, false, "Протокол");
+            ui.selectable_value(&mut lab.caffeine.show_regions, true, "Области");
+        });
+        ui.add_space(8.0);
+        if !lab.caffeine.show_regions {
+            super::caffeine::sidebar(ui, lab);
+            return;
+        }
+    }
     ui.label(RichText::new("Области мозга").size(18.0).strong());
     ui.add_space(5.0);
     ui.add(
@@ -83,6 +94,7 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
                     .clicked()
                 {
                     lab.scene.selected_region = Some(r.id);
+                    lab.caffeine.selection = None;
                     lab.reveal_selected();
                 }
             }
@@ -106,20 +118,46 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
         lab.scene.isolate = false;
     }
     ui.add_space(5.0);
-    muted(ui, "Цвет обозначает анатомический раздел.");
+    muted(
+        ui,
+        if lab.caffeine.mode {
+            "Цвет: выбранная оценка кофеина. Серый — значение не задано."
+        } else if lab.simulation.mode {
+            "Цвет: рассчитанная активность E."
+        } else {
+            "Цвет обозначает анатомический раздел."
+        },
+    );
     lab.dirty |= lab.scene != before;
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
     let before = lab.scene.clone();
-    let mode_before = lab.simulation.mode;
+    let mut mode = if lab.caffeine.mode {
+        2
+    } else if lab.simulation.mode {
+        1
+    } else {
+        0
+    };
     ui.horizontal_wrapped(|ui| {
         ui.heading("Мозг человека");
         ui.add_space(10.0);
-        ui.selectable_value(&mut lab.simulation.mode, false, "Анатомия");
-        ui.selectable_value(&mut lab.simulation.mode, true, "Симуляция");
+        ui.selectable_value(&mut mode, 0, "Анатомия");
+        ui.selectable_value(&mut mode, 1, "Симуляция");
+        ui.selectable_value(&mut mode, 2, "Кофеин");
     });
-    if mode_before && !lab.simulation.mode {
+    lab.simulation.mode = mode == 1;
+    lab.caffeine.mode = mode == 2;
+    if mode != 1 {
         lab.simulation.playing = false;
+    }
+    if mode != 2 {
+        lab.caffeine.playing = false;
+    }
+    if lab.caffeine.mode {
+        super::caffeine::viewport(ui, lab, viewport);
+        lab.dirty |= lab.scene != before;
+        return;
     }
     ui.horizontal_wrapped(|ui| {
         for (label, yaw, pitch) in [
@@ -244,7 +282,7 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     );
     lab.dirty |= lab.scene != before;
 }
-fn interact(ui: &egui::Ui, response: &egui::Response, lab: &mut BrainLab) {
+pub(super) fn interact(ui: &egui::Ui, response: &egui::Response, lab: &mut BrainLab) {
     if response.dragged_by(egui::PointerButton::Primary) {
         let delta = ui.input(|i| i.pointer.delta());
         orbit(&mut lab.scene, Vec2::new(delta.x, delta.y));
@@ -290,6 +328,12 @@ pub(super) fn zoom(scene: &mut BrainScene, scroll: f32) {
     scene.camera.distance = (scene.camera.distance * (-scroll * 0.0018).exp()).clamp(0.2, 15.0);
 }
 pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
+    if lab.caffeine.mode {
+        let before = lab.scene.clone();
+        super::caffeine::inspector(ui, lab);
+        lab.dirty |= lab.scene != before;
+        return;
+    }
     let before = lab.scene.clone();
     if lab.simulation.mode {
         super::simulation::inspector(ui, lab);

@@ -323,6 +323,155 @@ fn run(
         450 => {
             std::fs::write(smoke.directory.join("network-passed.txt"),"E/I activity at 80/180/240 ms; project roundtrip resets to paused t=0; deterministic replay CSV identical; history frame 240 ms; invalid topology leaves previous state intact; invalid parameters block output and clear activity; legacy smoke also passed\n").unwrap();
             std::fs::write(smoke.directory.join("passed.txt"), "Native brain startup; overview/deep/isolated scenes; ray picks selected thalamus; brain save/mutate/reload/CSV; unknown atlas rejected without mutation; binding and response save/mutate/reload/CSV; invalid numerical inputs rejected: passed\n").expect("smoke report");
+        }
+        460 => {
+            lab.activate(View::Brain);
+            lab.brain.simulation.mode = false;
+            lab.brain.simulation.playing = false;
+            lab.brain.scene = neuro_domain::BrainScene::default();
+            lab.brain.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+            lab.brain.scene.camera.pitch = 0.0;
+            lab.brain.caffeine =
+                crate::brain::caffeine::CaffeineLab::new(&lab.brain.atlas).unwrap();
+            lab.brain.caffeine.mode = true;
+            lab.brain
+                .caffeine
+                .scenario
+                .doses
+                .push(neuro_domain::CaffeineDose {
+                    time_min: 240.0,
+                    amount_mg: 100.0,
+                });
+            let atlas = lab.brain.atlas.clone();
+            lab.brain.caffeine.refresh(&atlas);
+            lab.brain.caffeine.set_time(60.0);
+            assert!(lab.brain.caffeine.sample().unwrap().plasma_mg_l > 1.0);
+        }
+        470 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("caffeine-brain-60min.png"),
+                ));
+        }
+        480 => {
+            lab.brain.caffeine.show_plot = false;
+            lab.brain.caffeine.route = true;
+            lab.brain.caffeine.selection = Some(crate::brain::caffeine::MapSelection::Link(1));
+        }
+        490 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("caffeine-pathway.png")));
+        }
+        500 => {
+            lab.brain.caffeine.show_plot = true;
+            lab.brain.caffeine.route = false;
+            lab.brain.caffeine.layer = crate::brain::caffeine::CaffeineLayer::A2a;
+            lab.brain.caffeine.plot = crate::brain::caffeine::CaffeinePlot::Occupancy;
+            lab.brain.caffeine.revision += 1;
+            lab.brain.caffeine.selection = None;
+            lab.brain.scene.layers.cortex = false;
+            lab.brain.scene.layers.cerebellum = false;
+            lab.brain.scene.layers.brainstem = false;
+            lab.brain.scene.selected_region = Some("FMA72829".into());
+            lab.brain.scene.camera = neuro_domain::BrainCamera::default();
+        }
+        510 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("caffeine-a2a.png")));
+        }
+        520 => {
+            let atlas = lab.brain.atlas.clone();
+            lab.brain.caffeine.scenario.neural_hypothesis.enabled = true;
+            lab.brain.caffeine.refresh(&atlas);
+            lab.brain.caffeine.set_time(60.0);
+            lab.brain.caffeine.compute_neural(&atlas);
+            assert!(lab.brain.caffeine.comparison.is_some());
+            std::fs::write(
+                smoke.directory.join("caffeine-neural-gui.json"),
+                serde_json::to_vec_pretty(lab.brain.caffeine.comparison.as_ref().unwrap()).unwrap(),
+            )
+            .unwrap();
+            lab.brain.scene.layers.cortex = true;
+            lab.brain.scene.selected_region = Some("FMA72976".into());
+            lab.brain.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+            lab.brain.scene.camera.pitch = 0.0;
+        }
+        530 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("caffeine-neural-hypothesis.png"),
+                ));
+        }
+        540 => {
+            let project = smoke.directory.join("caffeine-project.json");
+            let csv = smoke.directory.join("caffeine-gui.csv");
+            let scenario = lab.brain.caffeine.scenario.clone();
+            let trace = lab.brain.caffeine.trace.as_ref().unwrap().csv();
+            assert!(lab.perform(FileAction::Save, &project));
+            assert!(lab.perform(FileAction::Csv, &csv));
+            assert_eq!(std::fs::read_to_string(&csv).unwrap(), trace);
+            assert!(!lab.perform(FileAction::Csv, &project));
+            lab.brain.caffeine.scenario.doses.clear();
+            let atlas = lab.brain.atlas.clone();
+            lab.brain.caffeine.refresh(&atlas);
+            assert!(lab.perform(FileAction::Open, &project));
+            assert_eq!(lab.brain.caffeine.scenario, scenario);
+            assert_eq!(lab.brain.caffeine.time_min, 0.0);
+            assert!(!lab.brain.caffeine.playing && lab.brain.caffeine.comparison.is_none());
+            assert_eq!(lab.brain.caffeine.trace.as_ref().unwrap().csv(), trace);
+            let before = lab.brain.caffeine.scenario.clone();
+            let bad = smoke.directory.join("caffeine-invalid.json");
+            let mut invalid = before.clone();
+            invalid.parameters.bioavailability = 1.5;
+            std::fs::write(&bad, serde_json::to_string_pretty(&invalid).unwrap()).unwrap();
+            assert!(!lab.perform(FileAction::Open, &bad));
+            assert_eq!(lab.brain.caffeine.scenario, before);
+            lab.brain.caffeine.scenario.parameters.body_mass_kg = f64::NAN;
+            lab.brain.caffeine.refresh(&atlas);
+            assert!(lab.brain.caffeine.trace.is_none());
+            assert!(!lab.perform(
+                FileAction::Save,
+                &smoke.directory.join("caffeine-invalid-project.json")
+            ));
+            assert!(!lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("caffeine-invalid.csv")
+            ));
+            lab.brain.caffeine.scenario = before;
+            lab.brain.caffeine.refresh(&atlas);
+            lab.brain.caffeine.set_time(300.0);
+            lab.brain.caffeine.route = false;
+            lab.brain.caffeine.show_plot = true;
+            lab.brain.caffeine.plot = crate::brain::caffeine::CaffeinePlot::Mass;
+        }
+        550 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("caffeine-mass.png")));
+        }
+        560 => {
+            std::fs::write(smoke.directory.join("caffeine-passed.txt"),"Caffeine two-dose PK; 60 min brain / pathway / striatal PET / optional E/I comparison; project roundtrip resets paused t=0; CSV identical after replay; invalid input preserves previous scenario; NaN clears PK and blocks save/export; input protected from CSV overwrite.\n").unwrap();
+            lab.brain.caffeine.show_plot = false;
+            lab.brain.caffeine.layer = crate::brain::caffeine::CaffeineLayer::A1;
+            lab.brain.caffeine.revision += 1;
+            lab.brain.scene = neuro_domain::BrainScene::default();
+            lab.brain.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+            lab.brain.scene.camera.pitch = 0.0;
+            lab.status_error = false;
+            lab.status = "Кофеин: крупный 3D-мозг; график скрыт отдельным переключателем.".into();
+        }
+        570 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("caffeine-brain-focus.png"),
+                ));
+        }
+        580 => {
             exit.write(AppExit::Success);
         }
         _ => {}

@@ -69,6 +69,7 @@ impl Lab {
     fn activate(&mut self, view: View) {
         if view != View::Brain {
             self.brain.simulation.playing = false;
+            self.brain.caffeine.playing = false;
         }
         self.view = view;
         self.status_error = false;
@@ -158,7 +159,10 @@ impl Lab {
         let response = self.view == View::Response;
         let brain = self.view == View::Brain;
         let network = brain && self.brain.simulation.mode;
-        let last_path = if network {
+        let caffeine = brain && self.brain.caffeine.mode;
+        let last_path = if caffeine {
+            &self.brain.caffeine.last_path
+        } else if network {
             &self.brain.simulation.last_path
         } else if brain {
             &self.brain.last_scene_path
@@ -168,7 +172,9 @@ impl Lab {
             &self.last_scenario_path
         };
         self.file_path = match action {
-            FileAction::Csv => cwd.join(if network {
+            FileAction::Csv => cwd.join(if caffeine {
+                "neuro-caffeine-pk.csv"
+            } else if network {
                 "neuro-brain-trace.csv"
             } else if brain {
                 "neuro-brain-regions.csv"
@@ -178,7 +184,9 @@ impl Lab {
                 "neuro-results.csv"
             }),
             FileAction::Open => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if network {
+                cwd.join(if caffeine {
+                    "scenarios/caffeine.json"
+                } else if network {
                     "scenarios/brain-network.json"
                 } else if brain {
                     "scenes/brain.json"
@@ -189,7 +197,9 @@ impl Lab {
                 })
             }),
             FileAction::Save => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if network {
+                cwd.join(if caffeine {
+                    "neuro-caffeine-project.json"
+                } else if network {
                     "neuro-brain-project.json"
                 } else if brain {
                     "neuro-brain-scene.json"
@@ -221,7 +231,20 @@ impl Lab {
         }
         match action {
             FileAction::Save => {
-                if self.view == View::Brain && self.brain.simulation.mode {
+                if self.view == View::Brain && self.brain.caffeine.mode {
+                    neuro_domain::require(
+                        self.brain.caffeine.trace.is_some() && self.brain.caffeine.error.is_none(),
+                        "Исправьте параметры кофеина перед сохранением",
+                    )?;
+                    neuro_domain::CaffeineProject::new(
+                        self.brain.scene.clone(),
+                        self.brain.caffeine.scenario.clone(),
+                    )
+                    .save(path, &self.brain.atlas)?;
+                    self.brain.caffeine.last_path = Some(path.into());
+                    self.brain.caffeine.dirty = false;
+                    self.brain.dirty = false;
+                } else if self.view == View::Brain && self.brain.simulation.mode {
                     neuro_domain::require(
                         self.brain.simulation.error.is_none(),
                         "Исправьте параметры сети перед сохранением",
@@ -249,7 +272,35 @@ impl Lab {
                 }
             }
             FileAction::Open => match WorkspaceDocument::load(path, &self.brain.atlas)? {
+                WorkspaceDocument::CaffeineProject(project) => {
+                    let mut caffeine = brain::caffeine::CaffeineLab::from_scenario(
+                        project.scenario,
+                        &self.brain.atlas,
+                    )?;
+                    caffeine.mode = true;
+                    caffeine.last_path = Some(path.into());
+                    caffeine.revision = self.brain.caffeine.revision.wrapping_add(1);
+                    self.brain.scene = project.scene;
+                    self.brain.caffeine = caffeine;
+                    self.brain.simulation.mode = false;
+                    self.brain.simulation.playing = false;
+                    self.brain.dirty = false;
+                    self.view = View::Brain;
+                }
+                WorkspaceDocument::Caffeine(scenario) => {
+                    let mut caffeine =
+                        brain::caffeine::CaffeineLab::from_scenario(scenario, &self.brain.atlas)?;
+                    caffeine.mode = true;
+                    caffeine.source_path = Some(path.into());
+                    caffeine.revision = self.brain.caffeine.revision.wrapping_add(1);
+                    self.brain.caffeine = caffeine;
+                    self.brain.simulation.mode = false;
+                    self.brain.simulation.playing = false;
+                    self.view = View::Brain;
+                }
                 WorkspaceDocument::Brain(scene) => {
+                    self.brain.caffeine.mode = false;
+                    self.brain.caffeine.playing = false;
                     self.brain.simulation.playing = false;
                     self.brain.simulation.mode = false;
                     self.brain.scene = scene;
@@ -258,6 +309,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Project(project) => {
+                    self.brain.caffeine.mode = false;
+                    self.brain.caffeine.playing = false;
                     let mut simulation =
                         brain::SimulationLab::from_scenario(project.network, &self.brain.atlas)?;
                     simulation.mode = true;
@@ -269,6 +322,8 @@ impl Lab {
                     self.view = View::Brain;
                 }
                 WorkspaceDocument::Network(network) => {
+                    self.brain.caffeine.mode = false;
+                    self.brain.caffeine.playing = false;
                     let mut simulation =
                         brain::SimulationLab::from_scenario(network, &self.brain.atlas)?;
                     simulation.mode = true;
@@ -281,6 +336,7 @@ impl Lab {
                     Experiment::Binding(scenario) => {
                         let result = evaluate(&scenario)?;
                         self.brain.simulation.playing = false;
+                        self.brain.caffeine.playing = false;
                         self.draft_a = scenario.parameters.a.to_string();
                         self.draft_b = scenario.parameters.b.to_string();
                         self.scenario = scenario;
@@ -293,6 +349,7 @@ impl Lab {
                     Experiment::Response(scenario) => {
                         let result = neuro_engine::evaluate_response(&scenario)?;
                         self.brain.simulation.playing = false;
+                        self.brain.caffeine.playing = false;
                         self.response.draft_x = scenario.parameters.x.to_string();
                         self.response.draft_tau = scenario.parameters.tau.to_string();
                         self.response.scenario = scenario;
@@ -311,6 +368,8 @@ impl Lab {
                     &self.brain.last_scene_path,
                     &self.brain.simulation.last_path,
                     &self.brain.simulation.source_path,
+                    &self.brain.caffeine.last_path,
+                    &self.brain.caffeine.source_path,
                 ]
                 .into_iter()
                 .flatten()
@@ -323,7 +382,18 @@ impl Lab {
                         "CSV не должен перезаписывать сценарий",
                     )?;
                 }
-                if self.view == View::Brain && self.brain.simulation.mode {
+                if self.view == View::Brain && self.brain.caffeine.mode {
+                    neuro_domain::require(
+                        self.brain.caffeine.error.is_none(),
+                        "Исправьте параметры кофеина перед экспортом",
+                    )?;
+                    self.brain
+                        .caffeine
+                        .trace
+                        .as_ref()
+                        .ok_or_else(|| neuro_domain::Error::Validation("Нет трассы PK".into()))?
+                        .export_csv(path)?;
+                } else if self.view == View::Brain && self.brain.simulation.mode {
                     neuro_domain::require(
                         self.brain.simulation.error.is_none(),
                         "Нет корректной трассы сети для экспорта",
@@ -365,6 +435,14 @@ impl Lab {
                 self.status = format!(
                     "{}: {}",
                     match action {
+                        FileAction::Save
+                            if self.view == View::Brain && self.brain.caffeine.mode =>
+                            "Проект кофеина сохранён (PK при открытии с t=0)",
+                        FileAction::Open
+                            if self.view == View::Brain && self.brain.caffeine.mode =>
+                            "Кофеин: PK пересчитана, t=0, пауза",
+                        FileAction::Csv if self.view == View::Brain && self.brain.caffeine.mode =>
+                            "Вся трасса PK экспортирована",
                         FileAction::Save
                             if self.view == View::Brain && self.brain.simulation.mode =>
                             "Проект мозга сохранён (при открытии время = 0)",
@@ -444,6 +522,7 @@ fn ui(
     viewport: Res<brain::BrainViewport>,
 ) -> Result {
     let ctx = contexts.ctx_mut()?;
+    let previous_brain_mode = (lab.brain.simulation.mode, lab.brain.caffeine.mode);
     if !lab.initialized {
         configure(ctx);
         lab.initialized = true;
@@ -494,6 +573,9 @@ fn ui(
                 if lab.brain.dirty {
                     ui.colored_label(PURPLE, "Сцена мозга не сохранена");
                 }
+                if lab.brain.caffeine.dirty {
+                    ui.colored_label(PURPLE, "Протокол кофеина не сохранён");
+                }
                 if lab.brain.simulation.dirty {
                     ui.colored_label(PURPLE, "Сеть не сохранена");
                 }
@@ -511,6 +593,7 @@ fn ui(
     egui::SidePanel::left("catalog").exact_width(if lab.view==View::Brain {245.0}else{205.0}).resizable(false).frame(egui::Frame::new().fill(SURFACE).inner_margin(18)).show(ctx, |ui| {
         if ui.add_sized([ui.available_width(),36.0],egui::Button::new("Мозг · 3D").selected(lab.view==View::Brain)).clicked() {lab.view=View::Brain;}
         if lab.view==View::Brain {
+            if ui.add_sized([ui.available_width(),32.0],egui::Button::new("Кофеин · PK и мозг").selected(lab.brain.caffeine.mode)).clicked() {lab.brain.caffeine.mode=true;lab.brain.simulation.mode=false;lab.brain.simulation.playing=false;}
             ui.collapsing("Другие разделы",|ui| {
                 if ui.button("Карта механизмов").clicked() {lab.view=View::Map;}
                 if ui.button("Связывание A / B").clicked() {lab.view=View::Experiment;}
@@ -586,6 +669,17 @@ fn ui(
                     });
             }
         });
+    if previous_brain_mode != (lab.brain.simulation.mode, lab.brain.caffeine.mode) {
+        lab.status_error = false;
+        lab.status = if lab.brain.caffeine.mode {
+            "Кофеин: настройте приём, запустите шкалу времени или выберите узел карты."
+        } else if lab.brain.simulation.mode {
+            "Сеть E/I: запуск, выбор области и редактирование связей."
+        } else {
+            "Анатомия: выбор области на мозге или в списке."
+        }
+        .into();
+    }
     files::show(ctx, &mut lab);
     Ok(())
 }

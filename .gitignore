@@ -12,3 +12,6 @@
 /neuro-brain-project.json
 /neuro-brain-trace.csv
 *.tmp
+
+/neuro-caffeine-project.json
+/neuro-caffeine-pk.csv
