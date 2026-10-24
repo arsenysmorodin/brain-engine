@@ -1,0 +1,9 @@
+#!/bin/sh
+# Optional helper for this checkout's isolated toolchain; the app itself is Rust.
+set -eu
+task_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export RUSTUP_HOME="$task_root/.local/rustup"
+export CARGO_HOME="$task_root/.local/cargo"
+export RUSTUP_TOOLCHAIN=stable
+export PATH="$CARGO_HOME/bin:$PATH"
+exec "$CARGO_HOME/bin/cargo" "$@"

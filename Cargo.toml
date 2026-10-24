@@ -1,0 +1,25 @@
+[workspace]
+members = ["crates/neuro-domain", "crates/neuro-engine", "crates/neuro-app", "crates/neuro-cli"]
+default-members = ["crates/neuro-domain", "crates/neuro-engine", "crates/neuro-cli"]
+resolver = "3"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.89"
+license = "MIT"
+
+[workspace.dependencies]
+neuro-domain = { path = "crates/neuro-domain" }
+neuro-engine = { path = "crates/neuro-engine" }
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = { version = "=1.0.145", features = ["float_roundtrip"] }
+thiserror = "=2.0.17"
+bevy = { version = "=0.18.1", default-features = false, features = ["std", "async_executor", "bevy_log", "bevy_winit", "bevy_render", "bevy_core_pipeline", "bevy_color", "bevy_window", "multi_threaded", "png", "x11"] }
+bevy_egui = { version = "=0.39.1", default-features = false, features = ["render", "default_fonts", "open_url"] }
+
+[workspace.lints.clippy]
+all = "warn"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

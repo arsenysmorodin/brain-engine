@@ -1,0 +1,5 @@
+/target/
+/.local/
+/output/
+.DS_Store
+*.tmp

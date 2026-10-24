@@ -1,0 +1,15 @@
+[package]
+name = "neuro-app"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+neuro-domain.workspace = true
+neuro-engine.workspace = true
+bevy.workspace = true
+bevy_egui.workspace = true
+
+[lints]
+workspace = true

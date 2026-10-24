@@ -1,0 +1,73 @@
+{
+  "format_version": 1,
+  "entities": [
+    {"id":"caffeine","name":"Кофеин","kind":"Вещество"},
+    {"id":"adenosine","name":"Аденозин","kind":"Эндогенный лиганд"},
+    {"id":"a1","name":"Аденозиновый рецептор A1","kind":"Рецептор"},
+    {"id":"a2a","name":"Аденозиновый рецептор A2A","kind":"Рецептор"}
+  ],
+  "sources": [
+    {
+      "id":"elmenhorst2011",
+      "title":"Elmenhorst et al. (2011). Adenosine A(1) receptors in human brain and transfected CHO cells: Inhibition of [(3)H]CPFPX binding by adenosine and caffeine.",
+      "url":"https://pubmed.ncbi.nlm.nih.gov/21056087/",
+      "doi":"10.1016/j.neulet.2010.10.068","pmid":"21056087",
+      "verification":"abstract_verified","checked_on":"2026-10-24",
+      "rights_note":"Библиографическая ссылка и собственный краткий пересказ фактов. Текст и иллюстрации публикации не включены; лицензия полного текста не установлена."
+    },
+    {
+      "id":"cheng2017",
+      "title":"Cheng et al. (2017). Structures of Human A1 and A2A Adenosine Receptors with Xanthines Reveal Determinants of Selectivity.",
+      "url":"https://pubmed.ncbi.nlm.nih.gov/28712806/",
+      "doi":"10.1016/j.str.2017.06.012","pmid":"28712806",
+      "verification":"abstract_verified","checked_on":"2026-10-24",
+      "rights_note":"Библиографическая ссылка и собственный краткий пересказ фактов. Структуры, иллюстрации и текст статьи не скопированы; лицензия полного текста не установлена."
+    },
+    {
+      "id":"lebon2011",
+      "title":"Lebon et al. (2011). Agonist-bound adenosine A2A receptor structures reveal common features of GPCR activation.",
+      "url":"https://pubmed.ncbi.nlm.nih.gov/21593763/",
+      "doi":"10.1038/nature10136","pmid":"21593763",
+      "verification":"abstract_verified","checked_on":"2026-10-24",
+      "rights_note":"Библиографическая ссылка и собственный краткий пересказ фактов. Не включены текст, координаты структур и изображения публикации."
+    }
+  ],
+  "claims": [
+    {
+      "id":"caffeine-a1","subject":"caffeine","relation":"antagonist","object":"a1",
+      "explanation":"Кофеин — антагонист A1; конкурирует за связывание с радиолигандом.",
+      "source_ids":["elmenhorst2011"],
+      "evidence":"Первичный эксперимент: радиолигандное связывание; антагонизм указан в аннотации.",
+      "context":"Гомогенаты серого вещества мозга человека и CHO-клетки с A1; вытеснение [3H]CPFPX.",
+      "species":"Homo sapiens; гетерологическая экспрессия в CHO-клетках.",
+      "limitations":"Вытеснение радиолиганда не измеряет функциональный ответ. Числа Ki и IC50 из статьи не используются как Kd. Эффект на внимание не рассчитывается."
+    },
+    {
+      "id":"caffeine-a2a","subject":"caffeine","relation":"antagonist","object":"a2a",
+      "explanation":"Кофеин — антагонист A2A; получена структура комплекса с человеческим рецептором.",
+      "source_ids":["cheng2017"],
+      "evidence":"Первичные структурные данные: рентгеновская кристаллография; антагонизм указан в аннотации.",
+      "context":"Структурный анализ человеческого A2A в комплексе с кофеином.",
+      "species":"Homo sapiens; экспериментальная рецепторная конструкция.",
+      "limitations":"Структура комплекса сама по себе не определяет величину антагонизма in vivo; возможны эффекты конструкции и кристаллизации. Kd и субъективные эффекты здесь неизвестны."
+    },
+    {
+      "id":"adenosine-a1","subject":"adenosine","relation":"agonist","object":"a1",
+      "explanation":"Аденозин — эндогенный агонист A1; вытесняет радиолиганд из рецептора.",
+      "source_ids":["elmenhorst2011"],
+      "evidence":"Первичный эксперимент связывания; статус агониста описан авторами, а не выведен из вытеснения.",
+      "context":"Мозговая ткань человека и CHO-клетки с A1; конкуренция с [3H]CPFPX.",
+      "species":"Homo sapiens; гетерологическая экспрессия в CHO-клетках.",
+      "limitations":"Связывание не задаёт функциональный ответ клетки. Перенос на конкретную область мозга и поведение требует отдельной модели."
+    },
+    {
+      "id":"adenosine-a2a","subject":"adenosine","relation":"agonist","object":"a2a",
+      "explanation":"Аденозин — агонист A2A; исследована структура агонист-связанного рецептора.",
+      "source_ids":["lebon2011"],
+      "evidence":"Первичные структурные данные об агонист-связанной конформации.",
+      "context":"Структуры стабилизированного человеческого A2A с агонистами, включая аденозин.",
+      "species":"Homo sapiens; стабилизированная рецепторная конструкция.",
+      "limitations":"Стабилизированная конформация не воспроизводит весь цикл активации или клеточную среду. Из неё не рассчитывается активность мозга."
+    }
+  ]
+}

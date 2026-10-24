@@ -1,0 +1,9 @@
+{
+  "format_version": 1,
+  "model_id": "competitive_binding_equilibrium_v1",
+  "model_revision": 1,
+  "data_kind": "illustrative",
+  "name": "Конкурентное связывание A и B",
+  "parameters": {"a": 1.0, "b": 1.0},
+  "plot": {"max_a": 100.0, "samples": 257}
+}
