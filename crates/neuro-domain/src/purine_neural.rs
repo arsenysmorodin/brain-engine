@@ -42,3 +42,21 @@ impl PurineNeuralHypothesis {
         self.network.validate(atlas)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn optional_hypothesis_is_versioned_finite_and_round_trips_with_the_project() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut s = crate::CirculationScenario::reference(&a, 4);
+        s.neural_hypothesis = Some(PurineNeuralHypothesis::reference(&a).unwrap());
+        let json = serde_json::to_string(&s).unwrap();
+        assert_eq!(crate::CirculationScenario::from_json(&json, &a).unwrap(), s);
+        s.neural_hypothesis.as_mut().unwrap().model_revision = 99;
+        assert!(s.validate(&a).is_err());
+        s.neural_hypothesis.as_mut().unwrap().model_revision = 1;
+        s.neural_hypothesis.as_mut().unwrap().drive_gains[2] = f64::INFINITY;
+        assert!(s.validate(&a).is_err());
+    }
+}

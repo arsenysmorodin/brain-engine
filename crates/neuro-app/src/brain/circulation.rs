@@ -1,4 +1,8 @@
 pub(super) mod geometry;
+mod pathway;
+pub use pathway::MapSelection as PurinePathSelection;
+pub use plots::PurinePlot;
+mod plots;
 use super::{BrainLab, BrainViewport};
 use crate::theme::*;
 use bevy::prelude::UVec2;
@@ -14,6 +18,9 @@ pub const DRUG_COLORS: [Color32; 3] = [Color32::from_rgb(255, 178, 82), TEAL, PU
 pub enum TissueLayer {
     Concentration,
     Flow,
+    DeltaE,
+    A1,
+    A2a,
 }
 pub struct CirculationLab {
     pub mode: bool,
@@ -34,6 +41,15 @@ pub struct CirculationLab {
     pub opacity: f32,
     pub show_regions: bool,
     pub early: bool,
+    pub route: bool,
+    pub show_plot: bool,
+    pub plot: PurinePlot,
+    pub map_selection: Option<PurinePathSelection>,
+    pub map_pan: egui::Vec2,
+    pub map_zoom: f32,
+    pub comparison: Option<neuro_engine::PurineNetworkComparison>,
+    pub neural_time_ms: f64,
+    pub neural_error: Option<String>,
     pub selected_path: Option<usize>,
     pub revision: u64,
     pub dirty: bool,
@@ -63,6 +79,15 @@ impl CirculationLab {
             opacity: 0.13,
             show_regions: false,
             early: true,
+            route: false,
+            show_plot: false,
+            plot: PurinePlot::Plasma,
+            map_selection: None,
+            map_pan: egui::Vec2::ZERO,
+            map_zoom: 1.0,
+            comparison: None,
+            neural_time_ms: 180.0,
+            neural_error: None,
             selected_path: None,
             revision: 0,
             dirty: false,
@@ -80,6 +105,8 @@ impl CirculationLab {
         Ok(c)
     }
     pub fn refresh(&mut self, atlas: &BrainAtlas) {
+        self.comparison = None;
+        self.neural_error = None;
         self.playing = false;
         self.time_min = 0.0;
         self.visual_phase = 0.0;
@@ -98,6 +125,8 @@ impl CirculationLab {
         }
     }
     pub fn invalidate(&mut self) {
+        self.comparison = None;
+        self.neural_error = None;
         self.playing = false;
         self.trace = None;
         self.needs_run = true;
@@ -112,7 +141,12 @@ impl CirculationLab {
             0.0
         };
         if let Some(tr) = &self.trace {
-            self.time_min = tr.at(t).time_min;
+            let next = tr.at(t).time_min;
+            if next != self.time_min {
+                self.comparison = None;
+                self.neural_error = None;
+            }
+            self.time_min = next;
             self.revision = self.revision.wrapping_add(1);
         }
     }
@@ -124,12 +158,26 @@ impl CirculationLab {
         self.clock_min =
             (self.clock_min + dt.min(0.1) * self.speed).min(self.scenario.duration_min);
         if let Some(t) = &self.trace {
-            self.time_min = t.at(self.clock_min).time_min;
+            let next = t.at(self.clock_min).time_min;
+            if next != self.time_min {
+                self.comparison = None;
+                self.neural_error = None;
+            }
+            self.time_min = next;
             self.revision = self.revision.wrapping_add(1);
         }
         if self.clock_min >= self.scenario.duration_min {
             self.playing = false;
         }
+    }
+    pub fn interactions_applied(&self) -> bool {
+        let present = Purine::ALL.map(|p| {
+            self.scenario
+                .doses
+                .iter()
+                .any(|d| d.substance == p && d.amount_mg > 0.0)
+        });
+        self.scenario.interaction_profile_active() && present[0] && (present[1] || present[2])
     }
     pub fn frame(&self) -> Option<&CirculationFrame> {
         self.trace.as_ref().map(|t| t.at(self.time_min))
@@ -141,15 +189,92 @@ impl CirculationLab {
             .iter()
             .position(|r| r.region_id == id)
     }
+    pub fn sync_neural_settings(&mut self, atlas: &BrainAtlas) {
+        self.playing = false;
+        self.comparison = None;
+        self.neural_error = None;
+        self.dirty = true;
+        self.revision = self.revision.wrapping_add(1);
+        match self.scenario.validate(atlas) {
+            Ok(()) => {
+                if let Some(tr) = &mut self.trace {
+                    tr.scenario.neural_hypothesis = self.scenario.neural_hypothesis.clone();
+                }
+            }
+            Err(e) => {
+                self.trace = None;
+                self.needs_run = true;
+                self.error = Some(e.to_string());
+            }
+        }
+    }
+    pub fn compute_neural(&mut self, atlas: &BrainAtlas) {
+        self.playing = false;
+        let result = self
+            .trace
+            .as_ref()
+            .ok_or_else(|| {
+                Error::Validation("Пересчитайте протокол PK перед сравнением E/I".into())
+            })
+            .and_then(|t| neuro_engine::compare_purine_network(t, self.time_min, atlas));
+        match result {
+            Ok(c) => {
+                self.neural_time_ms = self.neural_time_ms.min(c.baseline.elapsed_ms);
+                self.comparison = Some(c);
+                self.neural_error = None;
+                self.layer = TissueLayer::DeltaE;
+                self.plot = PurinePlot::Neural;
+                self.show_plot = true;
+                self.route = false;
+            }
+            Err(e) => {
+                self.comparison = None;
+                self.neural_error = Some(e.to_string());
+            }
+        }
+        self.revision = self.revision.wrapping_add(1);
+    }
+    pub fn neural_states(
+        &self,
+        id: &str,
+    ) -> Option<(neuro_domain::PopulationState, neuro_domain::PopulationState)> {
+        let c = self.comparison.as_ref()?;
+        let n = c
+            .baseline
+            .scenario
+            .populations
+            .iter()
+            .position(|p| p.region_id == id)?;
+        let i = (self.neural_time_ms / c.baseline.scenario.sample_ms).round() as usize;
+        let i = i.min(c.baseline.samples.len() - 1);
+        Some((
+            c.baseline.samples[i].states[n],
+            c.with_hypothesis.samples[i].states[n],
+        ))
+    }
     pub fn region_rgb(&self, r: &BrainRegion) -> [u8; 3] {
-        let value = self.frame().and_then(|f| {
-            self.bed_index(&r.id).map(|i| {
+        if self.layer == TissueLayer::DeltaE {
+            return self
+                .neural_states(&r.id)
+                .map_or([65, 69, 77], |(base, with)| {
+                    let delta = with.e - base.e;
+                    let color = if delta < 0.0 { PURPLE } else { DRUG_COLORS[0] }.to_array();
+                    let t = delta.abs().sqrt();
+                    std::array::from_fn(|i| (32.0 + (color[i] as f64 - 32.0) * t) as u8)
+                });
+        }
+        let value = self.frame().and_then(|f| match self.layer {
+            TissueLayer::A1 => neuro_domain::caffeine_a1_scope(r)
+                .then(|| neuro_engine::caffeine_pet_estimates(f.systemic[0].central_mg_l).0),
+            TissueLayer::A2a => neuro_domain::caffeine_a2a_scope(r)
+                .then(|| neuro_engine::caffeine_pet_estimates(f.systemic[0].central_mg_l).1),
+            _ => self.bed_index(&r.id).map(|i| {
                 if self.layer == TissueLayer::Flow {
                     f.cbf_ml_100g_min[i] / 100.0
                 } else {
                     f.regions[i][self.selected.index()].tissue_mg_l / 5.0
                 }
-            })
+            }),
         });
         value.map_or([65, 69, 77], |v| self.heat(v))
     }
@@ -235,6 +360,15 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
         if c.scenario.interactions&&!c.scenario.interaction_profile_active(){ui.colored_label(PURPLE,"Разнесённые/повторные дозы: профиль взаимодействий не применяется.");}
         changed|=ui.add(egui::DragValue::new(&mut c.scenario.duration_min).range(5.0..=2880.0).speed(30.0).suffix(" мин длительность")).changed();
         ui.collapsing("PK и обмен в мозге",|ui|{let p=&mut c.scenario.parameters[c.selected.index()];muted(ui,"Редактируется выбранное над мозгом вещество.");for (label,value,min,max) in [("V/F, л",&mut p.apparent_volume_l,10.0,1000.0),("CL/F, л/ч",&mut p.apparent_clearance_l_h,0.1,500.0),("t½ всасывания, мин",&mut p.absorption_half_min,0.5,60.0),("Kp ткани/крови",&mut p.tissue_blood_partition,0.1,3.0),("Обмен, мин⁻¹",&mut p.exchange_min_inv,0.0,5.0)]{ui.label(label);changed|=ui.add(egui::DragValue::new(value).speed(0.05).range(min..=max)).changed();}muted(ui,"Kp и обмен — допущения. V/F и CL/F — кажущиеся параметры; F неизвестна.");});
+        let before_h=c.scenario.neural_hypothesis.clone();
+        ui.collapsing("Учебная гипотеза Ct → E/I",|ui|{
+            if c.scenario.neural_hypothesis.is_none(){c.scenario.neural_hypothesis=neuro_domain::PurineNeuralHypothesis::reference(&lab.atlas).ok();}
+            if let Some(h)=&mut c.scenario.neural_hypothesis{ui.checkbox(&mut h.enabled,"Включить учебную гипотезу");muted(ui,"g и S — условные параметры. Это не измеренная рецепторная занятость или эффект M/T у человека.");
+                for p in Purine::ALL{ui.colored_label(DRUG_COLORS[p.index()],p.label());ui.horizontal(|ui|{ui.add(egui::DragValue::new(&mut h.drive_gains[p.index()]).range(-5.0..=5.0).speed(0.05).prefix("g = "));ui.add(egui::DragValue::new(&mut h.concentration_scales_mg_l[p.index()]).range(0.01..=100.0).speed(0.05).prefix("S = ").suffix(" мг/л"));});}
+                if ui.small_button("Взять текущую сеть E/I").clicked(){h.network=lab.simulation.scenario.clone();}
+            }
+        });
+        if before_h!=c.scenario.neural_hypothesis{c.sync_neural_settings(&lab.atlas);}
         ui.collapsing("Кровоток и сосудистые объёмы",|ui|{changed|=ui.checkbox(&mut c.scenario.beds.vasoconstriction_enabled,"Сосудистая гипотеза кофеина").changed();muted(ui,"Максимальное снижение CBF и C50 не калиброваны.");changed|=ui.add(egui::Slider::new(&mut c.scenario.beds.max_flow_reduction,0.0..=0.8).text("Снижение")).changed();changed|=ui.add(egui::DragValue::new(&mut c.scenario.beds.flow_half_effect_mg_l).range(0.1..=20.0).suffix(" мг/л C50")).changed();changed|=ui.add(egui::Slider::new(&mut c.scenario.capillary_volume_fraction,0.01..=0.1).text("Vc/Vt")).changed();changed|=ui.add(egui::Slider::new(&mut c.scenario.venous_volume_fraction,0.01..=0.1).text("Vv/Vt")).changed();});
         if changed{c.invalidate();}
         ui.add_space(7.0);if ui.add_sized([ui.available_width(),32.0],egui::Button::new(if c.needs_run{"Пересчитать протокол"}else{"Рассчитать с начала"})).clicked(){c.refresh(&lab.atlas);}
@@ -273,33 +407,69 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         lab.circulation.layer,
         lab.circulation.particles,
     );
+    let was_route = lab.circulation.route;
     ui.horizontal_wrapped(|ui| {
+        let c = &mut lab.circulation;
+        ui.selectable_value(&mut c.route, false, "3D-мозг");
+        ui.selectable_value(&mut c.route, true, "Путь вещества");
         for p in Purine::ALL {
             ui.selectable_value(
-                &mut lab.circulation.selected,
+                &mut c.selected,
                 p,
                 RichText::new(p.label()).color(DRUG_COLORS[p.index()]),
             );
         }
-        ui.selectable_value(
-            &mut lab.circulation.layer,
-            TissueLayer::Concentration,
-            "Ct ткани",
-        );
-        ui.selectable_value(&mut lab.circulation.layer, TissueLayer::Flow, "CBF");
+        if !c.route {
+            egui::ComboBox::from_id_salt("purine-layer")
+                .selected_text(match c.layer {
+                    TissueLayer::Concentration => "Ct ткани",
+                    TissueLayer::Flow => "CBF",
+                    TissueLayer::DeltaE => "ΔE: гипотеза",
+                    TissueLayer::A1 => "A1: PET",
+                    TissueLayer::A2a => "A2A: PET в PD",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut c.layer, TissueLayer::Concentration, "Ct ткани, мг/л");
+                    ui.selectable_value(&mut c.layer, TissueLayer::Flow, "CBF, мл/(100 г·мин)");
+                    ui.selectable_value(&mut c.layer, TissueLayer::DeltaE, "ΔE: учебная гипотеза");
+                    if c.selected == Purine::Caffeine {
+                        ui.selectable_value(&mut c.layer, TissueLayer::A1, "Кофеин: A1 PET");
+                        ui.selectable_value(&mut c.layer, TissueLayer::A2a, "Кофеин: A2A PET в PD");
+                    }
+                });
+        }
     });
-    ui.horizontal_wrapped(|ui| {
-        let c = &mut lab.circulation;
-        ui.checkbox(&mut c.arteries, "Артерии");
-        ui.checkbox(&mut c.capillaries, "Капилляры");
-        ui.checkbox(&mut c.veins, "Вены");
-        ui.checkbox(&mut c.particles, "Направление");
-        ui.add(
-            egui::Slider::new(&mut c.opacity, 0.0..=1.0)
-                .text("Ткань")
-                .show_value(false),
-        );
-    });
+    if !lab
+        .circulation
+        .scenario
+        .doses
+        .iter()
+        .any(|d| d.substance == lab.circulation.selected && d.amount_mg > 0.0)
+    {
+        ui.colored_label(PURPLE,"В текущем протоколе это вещество не принимается. Добавьте его через «Запустить симуляцию».");
+    }
+    if lab.circulation.selected != Purine::Caffeine
+        && matches!(lab.circulation.layer, TissueLayer::A1 | TissueLayer::A2a)
+    {
+        lab.circulation.layer = TissueLayer::Concentration;
+    }
+    if lab.circulation.route && !was_route {
+        lab.circulation.show_plot = false;
+    }
+    if !lab.circulation.route {
+        ui.horizontal_wrapped(|ui| {
+            let c = &mut lab.circulation;
+            ui.checkbox(&mut c.arteries, "Артерии");
+            ui.checkbox(&mut c.capillaries, "Капилляры");
+            ui.checkbox(&mut c.veins, "Вены");
+            ui.checkbox(&mut c.particles, "Направление");
+            ui.add(
+                egui::Slider::new(&mut c.opacity, 0.0..=1.0)
+                    .text("Ткань")
+                    .show_value(false),
+            );
+        });
+    }
     ui.horizontal_wrapped(|ui| {
         let c = &mut lab.circulation;
         if ui
@@ -369,117 +539,72 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     {
         c.revision = c.revision.wrapping_add(1);
     }
-    let size = egui::vec2(
-        ui.available_width(),
-        (ui.available_height() - 305.0).max(100.0),
-    );
-    let ppp = ui.ctx().pixels_per_point();
-    let scale = (1600.0 / (size.x * ppp).max(size.y * ppp)).min(1.0);
-    lab.target_size = UVec2::new(
-        (size.x * ppp * scale).round().max(64.0) as u32,
-        (size.y * ppp * scale).round().max(64.0) as u32,
-    );
-    let response = ui.add(
-        egui::Image::new((viewport.texture, size))
-            .sense(egui::Sense::click_and_drag())
-            .corner_radius(12),
-    );
-    super::controls::interact(ui, &response, lab);
-    ui.horizontal_wrapped(|ui| {
-        ui.colored_label(Color32::from_rgb(180, 90, 80), "Артериальный вход");
-        ui.label("→ капилляры ⇄ ткань →");
-        ui.colored_label(Color32::from_rgb(120, 160, 240), "Венозный возврат");
+    ui.horizontal(|ui| {
+        ui.checkbox(&mut lab.circulation.show_plot, "График");
+        if lab.circulation.layer == TissueLayer::DeltaE {
+            muted(ui, "ΔE всей смеси: −1…+1; серый — нет E/I-данных.");
+        }
     });
-    muted(
-        ui,
-        if lab.circulation.layer == TissueLayer::Flow {
-            "Ткань: 0…100+ мл/(100 г·мин). Сосуды: 0…5+ мг/л выбранного вещества."
+    let height = (ui.available_height()
+        - if lab.circulation.show_plot {
+            285.0
         } else {
-            "Ткань и сосуды: 0…5+ мг/л выбранного вещества. Серый: нет данных. Цвет не обозначает активность нейронов."
-        },
-    );
-    plot(ui, lab);
-    ui.label(RichText::new("BodyParts3D © DBCLS · CC BY 4.0. Капилляры и вены: схематическая геометрия, увеличенный калибр.").size(10.0).color(MUTED));
-}
-fn plot(ui: &mut egui::Ui, lab: &mut BrainLab) {
-    let c = &mut lab.circulation;
-    ui.horizontal_wrapped(|ui| {
-        ui.label("Cp плазмы, мг/л");
-        ui.selectable_value(&mut c.early, true, "Первые 5 мин");
-        ui.selectable_value(&mut c.early, false, "Весь протокол");
-    });
-    let Some(trace) = &c.trace else {
-        muted(ui, "Нет вычисленной трассы. Пересчитайте протокол.");
-        return;
-    };
-    let xmax = if c.early {
-        5.0
-    } else {
-        c.scenario.duration_min
-    };
-    let lines: Vec<_> = Purine::ALL
-        .iter()
-        .map(|p| {
-            (
-                DRUG_COLORS[p.index()],
-                trace
-                    .frames
-                    .iter()
-                    .filter(|f| f.time_min <= xmax)
-                    .map(|f| (f.time_min, f.systemic[p.index()].central_mg_l))
-                    .collect::<Vec<_>>(),
-            )
+            75.0
         })
-        .collect();
-    let ymax = lines
-        .iter()
-        .flat_map(|(_, p)| p.iter().map(|(_, y)| *y))
-        .fold(0.1_f64, f64::max)
-        * 1.1;
-    if let Some(t) = super::caffeine::chart(
-        ui,
-        "circulation-plot",
-        xmax,
-        ymax,
-        c.time_min.min(xmax),
-        &lines,
-        if c.early || xmax <= 120.0 { "min" } else { "h" },
-    ) {
-        c.playing = false;
-        c.set_time(t);
-    }
-    let mut t = c.time_min;
-    if ui
-        .add(
-            egui::Slider::new(&mut t, 0.0..=c.scenario.duration_min)
-                .show_value(false)
-                .text("Время протокола"),
-        )
-        .changed()
-    {
-        c.playing = false;
-        c.set_time(t);
-    }
-    if let Some(f) = c.frame() {
-        let s = f.systemic[c.selected.index()];
+    .max(100.0);
+    if lab.circulation.route {
+        pathway::show(ui, lab, height);
+    } else {
+        let size = egui::vec2(ui.available_width(), height);
+        let ppp = ui.ctx().pixels_per_point();
+        let scale = (1600.0 / (size.x * ppp).max(size.y * ppp)).min(1.0);
+        lab.target_size = UVec2::new(
+            (size.x * ppp * scale).round().max(64.0) as u32,
+            (size.y * ppp * scale).round().max(64.0) as u32,
+        );
+        let response = ui.add(
+            egui::Image::new((viewport.texture, size))
+                .sense(egui::Sense::click_and_drag())
+                .corner_radius(12),
+        );
+        super::controls::interact(ui, &response, lab);
+        ui.horizontal_wrapped(|ui| {
+            ui.colored_label(Color32::from_rgb(180, 90, 80), "Артериальный вход");
+            ui.label("→ капилляры ⇄ ткань →");
+            ui.colored_label(Color32::from_rgb(120, 160, 240), "Венозный возврат");
+        });
         muted(
             ui,
-            format!(
-                "Баланс: ЖКТ {:.2} + организм {:.2} + мозг {:.3} + устранено {:.2} = {:.2} мг; ошибка {:.1e} мг",
-                s.gut_mg,
-                s.rest_mg,
-                s.brain_mg,
-                s.eliminated_mg,
-                s.administered_mg,
-                s.balance_error_mg
-            ),
+            match lab.circulation.layer {
+                TissueLayer::Flow => {
+                    "CBF: 0…100+ мл/(100 г·мин). Сосудистое действие M/T в модели не задано."
+                }
+                TissueLayer::DeltaE => {
+                    "ΔE: два одинаковых протокола с/без условного входа всех принятых веществ."
+                }
+                TissueLayer::A1 => {
+                    "A1: PET-оценка кофеина по общей Cp, не региональная плотность рецепторов."
+                }
+                TissueLayer::A2a => {
+                    "A2A: PET кофеина в стриатуме пациентов с болезнью Паркинсона, n=5."
+                }
+                _ => {
+                    "Ткань и сосуды: 0…5+ мг/л выбранного вещества. Цвет не обозначает активность нейронов."
+                }
+            },
         );
     }
+    if lab.circulation.show_plot {
+        plots::show(ui, lab);
+    }
+
+    ui.label(RichText::new("BodyParts3D © DBCLS · CC BY 4.0. Капилляры и вены: схематическая геометрия, увеличенный калибр.").size(10.0).color(MUTED));
 }
 pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
     let c = &mut lab.circulation;
     ui.heading(c.selected.label());
     muted(ui, format!("Время PK: {:.2} мин", c.time_min));
+    pathway::inspector(ui, c);
     if let Some(i) = c.selected_path {
         ui.label(&lab.flow_geometry.paths[i].name);
         muted(ui, lab.flow_geometry.paths[i].stage.label());
@@ -494,6 +619,29 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
             sys.return_mg_min
         ));
         ui.label(format!("AUC = {:.3} мг·мин/л", sys.auc_mg_min_l));
+        if let Some(tr) = &c.trace {
+            let peak = tr.frames.iter().max_by(|a, b| {
+                a.systemic[d]
+                    .central_mg_l
+                    .total_cmp(&b.systemic[d].central_mg_l)
+            });
+            if let Some(peak) = peak.filter(|p| p.systemic[d].central_mg_l > 0.0) {
+                ui.label(format!(
+                    "Cmax = {:.4} мг/л; Tmax = {:.2} мин",
+                    peak.systemic[d].central_mg_l, peak.time_min
+                ));
+                muted(
+                    ui,
+                    "Пик за весь рассчитанный сценарий, включая будущие кадры.",
+                );
+            } else {
+                muted(
+                    ui,
+                    "Cmax/Tmax: ненулевая концентрация в этом сценарии ещё не возникает.",
+                );
+            }
+        }
+
         if let Some(id) = &lab.scene.selected_region
             && let Some(i) = c.bed_index(id)
         {
@@ -561,27 +709,77 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         ui,
         "Полувремя CL/V — ориентир общего распределения; хвост многокомпартментной трассы может отличаться.",
     );
-    if c.scenario.interaction_profile_active() && c.scenario.interactions {
+    if c.interactions_applied() {
         ui.colored_label(
             PURPLE,
             "Парные отношения применены; иные дозы и тройное сочетание — экстраполяция.",
         );
     }
     ui.separator();
-    ui.label(RichText::new("Нейронное действие").strong());
+    ui.label(RichText::new("Действие и E/I").strong());
     muted(
         ui,
-        "Для M/T нет проверенной количественной модели действия в мозге человека. Совместную занятость рецепторов и сумму активности по этим концентрациям определить нельзя. Это неизвестность, а не отсутствие эффекта.",
+        if c.selected == Purine::Caffeine {
+            "Для кофеина доступны отдельные PET-оценки. Учебный вход Ct → E/I — другая, непроверенная модель."
+        } else {
+            "Известны качественные механизмы M/T; человеческая количественная PET/нейронная калибровка неизвестна. Учебная гипотеза задаётся отдельно в настройках слева."
+        },
     );
-    muted(
-        ui,
-        "Кофеин: прежние PET и гипотеза E/I доступны в разделе «Кофеин». Они не переносятся на M/T.",
-    );
-    ui.add_space(7.0);
-    muted(
-        ui,
-        "Наведите курсор на научное обозначение для объяснения. Словарь доступен в верхней панели.",
-    );
+    let enabled = c
+        .scenario
+        .neural_hypothesis
+        .as_ref()
+        .is_some_and(|h| h.enabled);
+    if ui
+        .add_enabled(
+            enabled && c.trace.is_some(),
+            egui::Button::new("Сравнить E/I: учебная гипотеза"),
+        )
+        .clicked()
+    {
+        c.compute_neural(&lab.atlas);
+    }
+    if !enabled {
+        muted(
+            ui,
+            "Для сравнения включите «Учебная гипотеза Ct → E/I» слева.",
+        );
+    }
+    if let Some(error) = &c.neural_error {
+        ui.colored_label(ERROR, error);
+    }
+    if let Some(comparison) = &c.comparison {
+        muted(
+            ui,
+            format!("Замороженный PK-снимок: {:.2} мин", comparison.pk_time_min),
+        );
+        let mut t = c.neural_time_ms;
+        if ui
+            .add(
+                egui::Slider::new(&mut t, 0.0..=comparison.baseline.elapsed_ms)
+                    .text("Время сети, мс"),
+            )
+            .changed()
+        {
+            c.neural_time_ms = t;
+            c.revision = c.revision.wrapping_add(1);
+        }
+        if let Some(id) = &lab.scene.selected_region
+            && let Some((base, with)) = c.neural_states(id)
+        {
+            ui.label(format!(
+                "E: {:.4} → {:.4}; ΔE = {:+.4}",
+                base.e,
+                with.e,
+                with.e - base.e
+            ));
+            ui.label(format!("I: {:.4} → {:.4}", base.i, with.i));
+        }
+        muted(
+            ui,
+            "Это условное сравнение, не измеренный эффект, синергия или прогноз поведения.",
+        );
+    }
 }
 
 #[cfg(test)]
@@ -681,5 +879,54 @@ mod animation_tests {
         c.playing = true;
         c.tick(0.1, false);
         assert_eq!(c.visual_phase, phase);
+    }
+}
+
+#[cfg(test)]
+mod parity_tests {
+    use super::*;
+    #[test]
+    fn neural_settings_preserve_pk_but_invalidate_comparisons_on_time_or_dose_changes() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut s = CirculationScenario::reference(&a, 2);
+        s.duration_min = 5.0;
+        let mut c = CirculationLab::from_scenario(s, &a).unwrap();
+        let pk = c.trace.as_ref().unwrap().csv();
+        let mut h = neuro_domain::PurineNeuralHypothesis::reference(&a).unwrap();
+        h.enabled = true;
+        c.scenario.neural_hypothesis = Some(h);
+        c.sync_neural_settings(&a);
+        assert_eq!(pk, c.trace.as_ref().unwrap().csv());
+        c.set_time(4.0);
+        c.compute_neural(&a);
+        assert!(c.comparison.is_some());
+        assert_eq!(c.layer as u8, TissueLayer::DeltaE as u8);
+        assert!(
+            c.comparison
+                .as_ref()
+                .unwrap()
+                .regional_drivers
+                .iter()
+                .any(|d| d.substance_drives[1] > 0.0)
+        );
+        c.set_time(4.5);
+        assert!(c.comparison.is_none());
+        c.compute_neural(&a);
+        c.scenario.doses[0].amount_mg = 50.0;
+        c.invalidate();
+        assert!(c.trace.is_none() && c.comparison.is_none());
+    }
+    #[test]
+    fn invalid_neural_parameters_cannot_leave_an_exportable_old_result() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut s = CirculationScenario::reference(&a, 4);
+        s.duration_min = 5.0;
+        let mut c = CirculationLab::from_scenario(s, &a).unwrap();
+        let mut h = neuro_domain::PurineNeuralHypothesis::reference(&a).unwrap();
+        h.enabled = true;
+        h.concentration_scales_mg_l[2] = f64::NAN;
+        c.scenario.neural_hypothesis = Some(h);
+        c.sync_neural_settings(&a);
+        assert!(c.trace.is_none() && c.needs_run && c.error.is_some());
     }
 }

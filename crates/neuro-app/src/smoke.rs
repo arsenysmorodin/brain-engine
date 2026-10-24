@@ -20,7 +20,9 @@ pub fn configure(app: &mut App) {
             std::process::exit(1);
         }
         app.insert_resource(Smoke {
-            frame: if std::env::args().any(|a| a == "--circulation-only") {
+            frame: if std::env::args().any(|a| a == "--launcher-only") {
+                900
+            } else if std::env::args().any(|a| a == "--circulation-only") {
                 680
             } else {
                 0
@@ -812,6 +814,294 @@ fn run(
                 "Native hover tooltip over Cp; searchable learning glossary; screenshot review.\n",
             )
             .unwrap();
+        }
+
+        905 => {
+            lab.glossary.open = false;
+            lab.open_launcher();
+            let d = lab.launcher.as_mut().unwrap();
+            d.duration = "120".into();
+            d.rows = vec![crate::launcher::DoseDraft {
+                substance: neuro_domain::Purine::Methylliberine,
+                amount: "100".into(),
+                time: "30".into(),
+            }];
+        }
+        910 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("launcher-methylliberine.png"),
+                ));
+        }
+        915 => {
+            lab.launcher.as_mut().unwrap().rows[0].amount = "bad".into();
+            let before = lab.brain.circulation.scenario.clone();
+            let error = lab.launch_simulation().unwrap_err();
+            assert_eq!(lab.brain.circulation.scenario, before);
+            lab.launcher.as_mut().unwrap().error = Some(error.to_string());
+        }
+        920 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("launcher-invalid.png")));
+        }
+        925 => {
+            lab.launcher.as_mut().unwrap().rows[0].amount = "100".into();
+            lab.launch_simulation().unwrap();
+            assert!(lab.brain.circulation.playing);
+            lab.brain.scene = Default::default();
+            lab.brain.scene.selected_region = Some("FMA72976".into());
+            let c = &mut lab.brain.circulation;
+            c.playing = false;
+            c.set_time(35.0);
+            c.early = false;
+            c.plot = crate::brain::circulation::PurinePlot::Regional;
+            c.show_plot = true;
+            assert_eq!(c.selected, neuro_domain::Purine::Methylliberine);
+            assert_eq!(
+                c.trace.as_ref().unwrap().at(29.5).systemic[1].administered_mg,
+                0.0
+            );
+        }
+        926 => {
+            lab.brain.circulation.show_plot = false;
+        }
+        927 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("methylliberine-default-3d.png"),
+                ));
+        }
+        928 => {
+            lab.brain.circulation.show_plot = true;
+        }
+        930 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("methylliberine-regional-pk.png"),
+                ));
+        }
+        935 => {
+            let c = &mut lab.brain.circulation;
+            c.route = true;
+            c.show_plot = false;
+            c.map_selection = Some(crate::brain::circulation::PurinePathSelection::Node(8));
+        }
+        940 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("methylliberine-pathway.png"),
+                ));
+        }
+        945 => {
+            let a = lab.brain.atlas.clone();
+            let c = &mut lab.brain.circulation;
+            let mut h = neuro_domain::PurineNeuralHypothesis::reference(&a).unwrap();
+            h.enabled = true;
+            c.scenario.neural_hypothesis = Some(h);
+            c.sync_neural_settings(&a);
+            c.compute_neural(&a);
+            c.neural_time_ms = 100.0;
+            c.opacity = 1.0;
+            c.arteries = false;
+            c.capillaries = false;
+            c.veins = false;
+            assert!(c.comparison.is_some());
+        }
+        950 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("methylliberine-neural-hypothesis.png"),
+                ));
+        }
+        955 => {
+            let path = smoke.directory.join("methylliberine-neural-project.json");
+            assert!(lab.perform(FileAction::Save, &path));
+            assert!(lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("methylliberine-pk-gui.csv")
+            ));
+            std::fs::write(
+                smoke.directory.join("methylliberine-neural-gui.json"),
+                serde_json::to_vec_pretty(lab.brain.circulation.comparison.as_ref().unwrap())
+                    .unwrap(),
+            )
+            .unwrap();
+        }
+        960 => {
+            lab.open_launcher();
+            let d = lab.launcher.as_mut().unwrap();
+            d.duration = "60".into();
+            d.rows = vec![crate::launcher::DoseDraft {
+                substance: neuro_domain::Purine::Theacrine,
+                amount: "50".into(),
+                time: "10".into(),
+            }];
+            lab.launch_simulation().unwrap();
+            let c = &mut lab.brain.circulation;
+            c.playing = false;
+            c.set_time(30.0);
+            c.early = false;
+            c.plot = crate::brain::circulation::PurinePlot::Mass;
+            c.show_plot = true;
+            assert_eq!(
+                c.trace.as_ref().unwrap().at(9.5).systemic[2].administered_mg,
+                0.0
+            );
+        }
+        970 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("theacrine-mass.png")));
+        }
+        975 => {
+            let c = &mut lab.brain.circulation;
+            c.route = true;
+            c.show_plot = false;
+            c.map_selection = Some(crate::brain::circulation::PurinePathSelection::Node(8));
+        }
+        980 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("theacrine-pathway.png")));
+        }
+        985 => {
+            let a = lab.brain.atlas.clone();
+            let c = &mut lab.brain.circulation;
+            c.compute_neural(&a);
+            assert!(c.comparison.is_some());
+            c.neural_time_ms = 100.0;
+            c.opacity = 1.0;
+            c.arteries = false;
+            c.capillaries = false;
+            c.veins = false;
+        }
+        990 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("theacrine-neural-hypothesis.png"),
+                ));
+        }
+        995 => {
+            lab.open_launcher();
+            let d = lab.launcher.as_mut().unwrap();
+            d.rows = neuro_domain::Purine::ALL
+                .iter()
+                .map(|p| crate::launcher::DoseDraft {
+                    substance: *p,
+                    amount: match p {
+                        neuro_domain::Purine::Caffeine => "150",
+                        neuro_domain::Purine::Methylliberine => "100",
+                        neuro_domain::Purine::Theacrine => "50",
+                    }
+                    .into(),
+                    time: "5".into(),
+                })
+                .collect();
+            d.duration = "120".into();
+        }
+        1000 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("launcher-triple.png")));
+        }
+        1005 => {
+            lab.launch_simulation().unwrap();
+            let c = &mut lab.brain.circulation;
+            c.playing = false;
+            c.set_time(60.0);
+            c.early = false;
+            assert!(c.scenario.interaction_profile_active());
+            c.show_plot = true;
+            assert_eq!(c.scenario.model_revision, 2);
+        }
+        1010 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("triple-unified-pk.png")));
+        }
+        1015 => {
+            let path = smoke.directory.join("launcher-triple-project.json");
+            assert!(lab.perform(FileAction::Save, &path));
+            assert!(lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("launcher-triple-gui.csv")
+            ));
+            assert!(lab.perform(
+                FileAction::RegionalCsv,
+                &smoke.directory.join("launcher-triple-regions-gui.csv")
+            ));
+            assert!(lab.perform(FileAction::Open, &path));
+            assert_eq!(lab.brain.circulation.time_min, 0.0);
+            assert!(!lab.brain.circulation.playing);
+            assert!(lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("launcher-triple-replay.csv")
+            ));
+            assert_eq!(
+                std::fs::read(smoke.directory.join("launcher-triple-gui.csv")).unwrap(),
+                std::fs::read(smoke.directory.join("launcher-triple-replay.csv")).unwrap()
+            );
+            let c = &mut lab.brain.circulation;
+            c.set_time(60.0);
+            c.selected = neuro_domain::Purine::Caffeine;
+            c.layer = crate::brain::circulation::TissueLayer::A1;
+            c.plot = crate::brain::circulation::PurinePlot::Occupancy;
+            c.show_plot = true;
+            c.early = false;
+        }
+        1020 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("caffeine-pet-unified.png"),
+                ));
+        }
+        1030 => {
+            let before = lab.brain.circulation.scenario.clone();
+            lab.open_launcher();
+            lab.launcher.as_mut().unwrap().rows[0].amount = "NaN".into();
+            assert!(lab.launch_simulation().is_err());
+            lab.launcher = None;
+            assert_eq!(lab.brain.circulation.scenario, before);
+            let a = lab.brain.atlas.clone();
+            lab.brain
+                .circulation
+                .scenario
+                .neural_hypothesis
+                .as_mut()
+                .unwrap()
+                .concentration_scales_mg_l[0] = f64::NAN;
+            lab.brain.circulation.sync_neural_settings(&a);
+            assert!(!lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("invalid-neural-pk.csv")
+            ));
+            assert!(lab.perform(
+                FileAction::Open,
+                &smoke.directory.join("launcher-triple-project.json")
+            ));
+        }
+        1040 => {
+            lab.glossary.open = true;
+            lab.glossary.search = "S_d".into();
+            lab.glossary.selected = lab.glossary.terms.iter().position(|t| t.term == "S_d");
+        }
+        1050 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("launcher-learning-scale.png"),
+                ));
+        }
+        1060 => {
+            std::fs::write(smoke.directory.join("launcher-passed.txt"),"Unified launcher: M100 at 30 min, T50 at 10 min, triple at shared 5 min; invalid drafts and cancel preserve results; all compounds share 3D, pathway, PK/mass, optional E/I; caffeine PET stays caffeine-only; project replay and export guards passed.\n").unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}

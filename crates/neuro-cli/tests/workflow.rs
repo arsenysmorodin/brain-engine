@@ -423,3 +423,35 @@ fn closed_circulation_cli_matches_shared_kernel_and_protects_input() {
     );
     assert_eq!(before, fs::read(&input).unwrap());
 }
+
+#[test]
+fn purine_neural_cli_replays_the_same_frozen_regional_snapshot() {
+    let temp = Temp::new();
+    let a = neuro_domain::BrainAtlas::bundled().unwrap();
+    let mut s = neuro_domain::CirculationScenario::reference(&a, 4);
+    s.duration_min = 5.0;
+    let mut h = neuro_domain::PurineNeuralHypothesis::reference(&a).unwrap();
+    h.enabled = true;
+    s.neural_hypothesis = Some(h);
+    let path = temp.0.join("theacrine.json");
+    s.save(&path, &a).unwrap();
+    let trace = neuro_engine::simulate_circulation(s, &a).unwrap();
+    let comparison = neuro_engine::compare_purine_network(&trace, 5.0, &a).unwrap();
+    let result = cli()
+        .arg("circulation")
+        .arg(&path)
+        .arg("--network-at-min")
+        .arg("5")
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let actual: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(
+        actual["network_comparison"],
+        serde_json::to_value(comparison).unwrap()
+    );
+}
