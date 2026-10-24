@@ -1,0 +1,36 @@
+{
+  "id": "perfusion_sources_2026_10_24_v1",
+  "model_id": "caffeine_regional_perfusion_v1",
+  "model_revision": 1,
+  "species": "Homo sapiens; региональные параметры иллюстративны, индивидуальная калибровка отсутствует",
+  "rights": "Собственные пересказы и реализация; изображения, таблицы и полный текст статей не импортированы.",
+  "sources": [
+    {
+      "id": "vidyasagar2013",
+      "title": "Vidyasagar et al. (2013). The effect of black tea and caffeine on regional cerebral blood flow measured with arterial spin labeling",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3677118/",
+      "doi": "10.1038/jcbfm.2013.40",
+      "context": "20 здоровых мужчин, 184 мг кофеина, до и через 2 ч; ASL, снижение среднего серого CBF на 20%, региональные статистические кластеры. Не источник наших CBF0, Kp, массы, транзита, Rmax или C50_flow.",
+      "verification": "Индексированный полный текст и аннотация издателя проверены 2026-10-24; прямой PMC периодически показывает проверку браузера",
+      "rights": "© 2013 ISCBFM; ссылка и собственный пересказ без копирования текста/таблиц/изображений"
+    },
+    {
+      "id": "perthen2008",
+      "title": "Perthen et al. (2008). Caffeine-induced uncoupling of cerebral blood flow and oxygen metabolism",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18191583/",
+      "doi": "10.1016/j.neuroimage.2007.10.049",
+      "context": "10 регулярных потребителей, 200 мг, зрительный ROI; CBF −34.5% ±2.6 SEM, CMRO2 +5.2% ±6.4 SEM, незначимо. Поддерживает разделение потока, метаболизма и активности, не калибрует E/I.",
+      "verification": "Аннотация PubMed проверена 2026-10-24",
+      "rights": "Ссылка и собственный пересказ"
+    },
+    {
+      "id": "gaohua2023",
+      "title": "Gaohua et al. (2023). The Interplay of Permeability, Metabolism, Transporters, and Dosing in Determining Tissue/Plasma Partition",
+      "url": "https://www.mdpi.com/1422-0067/24/22/16224",
+      "doi": "10.3390/ijms242216224",
+      "context": "Теоретическая работа PBPK, Eq. 1 — perfusion-limited баланс. Использован частный неэлиминирующий случай BP=1, CLint=0. Не валидация региональной кинетики кофеина или проницаемости BBB.",
+      "verification": "Индексированный полный текст/PDF проверен 2026-10-24; прямой PMC показывал проверку браузера",
+      "rights": "CC BY 4.0; собственная реализация формулы, без импорта текста"
+    }
+  ]
+}

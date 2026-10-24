@@ -1,0 +1,639 @@
+{
+  "atlas_id": "bodyparts3d_cerebral_arteries_4.0",
+  "atlas_revision": 1,
+  "format_version": 1,
+  "meshes": [
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1654.obj",
+      "id": "FJ1654",
+      "source_crc32": "af0af627",
+      "triangles": 400,
+      "vertices": 213
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1654M.obj",
+      "id": "FJ1654M",
+      "source_crc32": "34c018bc",
+      "triangles": 400,
+      "vertices": 213
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1655.obj",
+      "id": "FJ1655",
+      "source_crc32": "cd3173d6",
+      "triangles": 80,
+      "vertices": 63
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1656.obj",
+      "id": "FJ1656",
+      "source_crc32": "d3c167a8",
+      "triangles": 766,
+      "vertices": 524
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1656M.obj",
+      "id": "FJ1656M",
+      "source_crc32": "e4a4b4b5",
+      "triangles": 766,
+      "vertices": 519
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1660.obj",
+      "id": "FJ1660",
+      "source_crc32": "40199418",
+      "triangles": 1154,
+      "vertices": 579
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1660M.obj",
+      "id": "FJ1660M",
+      "source_crc32": "134e31e3",
+      "triangles": 1154,
+      "vertices": 579
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1672.obj",
+      "id": "FJ1672",
+      "source_crc32": "825dde8e",
+      "triangles": 262,
+      "vertices": 140
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1682.obj",
+      "id": "FJ1682",
+      "source_crc32": "c6604b86",
+      "triangles": 1272,
+      "vertices": 650
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1682M.obj",
+      "id": "FJ1682M",
+      "source_crc32": "44badc76",
+      "triangles": 1272,
+      "vertices": 650
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1692.obj",
+      "id": "FJ1692",
+      "source_crc32": "ec8daac2",
+      "triangles": 800,
+      "vertices": 402
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1692M.obj",
+      "id": "FJ1692M",
+      "source_crc32": "5cffb3c8",
+      "triangles": 800,
+      "vertices": 402
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1694.obj",
+      "id": "FJ1694",
+      "source_crc32": "8167b6dd",
+      "triangles": 4706,
+      "vertices": 2361
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1694M.obj",
+      "id": "FJ1694M",
+      "source_crc32": "d249fd48",
+      "triangles": 4706,
+      "vertices": 2362
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1700.obj",
+      "id": "FJ1700",
+      "source_crc32": "c52e98e5",
+      "triangles": 326,
+      "vertices": 272
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1700M.obj",
+      "id": "FJ1700M",
+      "source_crc32": "d19fed5a",
+      "triangles": 326,
+      "vertices": 274
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1701.obj",
+      "id": "FJ1701",
+      "source_crc32": "509aa681",
+      "triangles": 306,
+      "vertices": 427
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1701M.obj",
+      "id": "FJ1701M",
+      "source_crc32": "6b255f97",
+      "triangles": 306,
+      "vertices": 428
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1702.obj",
+      "id": "FJ1702",
+      "source_crc32": "3a4d456f",
+      "triangles": 240,
+      "vertices": 356
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1702M.obj",
+      "id": "FJ1702M",
+      "source_crc32": "b1483f4f",
+      "triangles": 240,
+      "vertices": 356
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1703.obj",
+      "id": "FJ1703",
+      "source_crc32": "36e6d151",
+      "triangles": 224,
+      "vertices": 348
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1703M.obj",
+      "id": "FJ1703M",
+      "source_crc32": "0a515666",
+      "triangles": 224,
+      "vertices": 344
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1704.obj",
+      "id": "FJ1704",
+      "source_crc32": "fe7d26be",
+      "triangles": 286,
+      "vertices": 261
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1704M.obj",
+      "id": "FJ1704M",
+      "source_crc32": "a7e5f85c",
+      "triangles": 286,
+      "vertices": 258
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1705.obj",
+      "id": "FJ1705",
+      "source_crc32": "0714c3f6",
+      "triangles": 322,
+      "vertices": 277
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1705M.obj",
+      "id": "FJ1705M",
+      "source_crc32": "6aedc827",
+      "triangles": 322,
+      "vertices": 280
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1706.obj",
+      "id": "FJ1706",
+      "source_crc32": "c096ddea",
+      "triangles": 292,
+      "vertices": 290
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1706M.obj",
+      "id": "FJ1706M",
+      "source_crc32": "adf6b42b",
+      "triangles": 292,
+      "vertices": 284
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1707.obj",
+      "id": "FJ1707",
+      "source_crc32": "52062ece",
+      "triangles": 84,
+      "vertices": 122
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1707M.obj",
+      "id": "FJ1707M",
+      "source_crc32": "021d6a8a",
+      "triangles": 84,
+      "vertices": 122
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1708.obj",
+      "id": "FJ1708",
+      "source_crc32": "6301b6d8",
+      "triangles": 86,
+      "vertices": 136
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1708M.obj",
+      "id": "FJ1708M",
+      "source_crc32": "0fbc6993",
+      "triangles": 86,
+      "vertices": 136
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1709.obj",
+      "id": "FJ1709",
+      "source_crc32": "b1ef8f86",
+      "triangles": 176,
+      "vertices": 238
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1709M.obj",
+      "id": "FJ1709M",
+      "source_crc32": "2f5fa82e",
+      "triangles": 176,
+      "vertices": 238
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1710.obj",
+      "id": "FJ1710",
+      "source_crc32": "30361389",
+      "triangles": 166,
+      "vertices": 212
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1710M.obj",
+      "id": "FJ1710M",
+      "source_crc32": "f0daad5a",
+      "triangles": 166,
+      "vertices": 210
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1711.obj",
+      "id": "FJ1711",
+      "source_crc32": "ff23fb91",
+      "triangles": 736,
+      "vertices": 821
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1711M.obj",
+      "id": "FJ1711M",
+      "source_crc32": "226d1964",
+      "triangles": 736,
+      "vertices": 817
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1713.obj",
+      "id": "FJ1713",
+      "source_crc32": "2083f403",
+      "triangles": 204,
+      "vertices": 122
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1713M.obj",
+      "id": "FJ1713M",
+      "source_crc32": "a920756a",
+      "triangles": 204,
+      "vertices": 122
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1714.obj",
+      "id": "FJ1714",
+      "source_crc32": "25bc5df5",
+      "triangles": 544,
+      "vertices": 280
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1714M.obj",
+      "id": "FJ1714M",
+      "source_crc32": "bc4ab4fb",
+      "triangles": 544,
+      "vertices": 280
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1715.obj",
+      "id": "FJ1715",
+      "source_crc32": "ea86ae07",
+      "triangles": 796,
+      "vertices": 668
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1715M.obj",
+      "id": "FJ1715M",
+      "source_crc32": "ac69ce63",
+      "triangles": 796,
+      "vertices": 673
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1723.obj",
+      "id": "FJ1723",
+      "source_crc32": "0d50c692",
+      "triangles": 282,
+      "vertices": 155
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1723M.obj",
+      "id": "FJ1723M",
+      "source_crc32": "d3b0aa7b",
+      "triangles": 282,
+      "vertices": 155
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1725.obj",
+      "id": "FJ1725",
+      "source_crc32": "40141ebd",
+      "triangles": 800,
+      "vertices": 489
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1725M.obj",
+      "id": "FJ1725M",
+      "source_crc32": "5510918b",
+      "triangles": 800,
+      "vertices": 489
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1726.obj",
+      "id": "FJ1726",
+      "source_crc32": "9bab00e1",
+      "triangles": 406,
+      "vertices": 226
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1726M.obj",
+      "id": "FJ1726M",
+      "source_crc32": "91796bdb",
+      "triangles": 406,
+      "vertices": 226
+    },
+    {
+      "archive_member": "isa_BP3D_4.0_obj_99/FJ1844.obj",
+      "id": "FJ1844",
+      "source_crc32": "c56a7c67",
+      "triangles": 244,
+      "vertices": 128
+    }
+  ],
+  "source": {
+    "archive_url": "https://dbarchive.biosciencedbc.jp/data/bodyparts3d/LATEST/isa_BP3D_4.0_obj_99.zip",
+    "attribution": "BodyParts3D, © The Database Center for Life Science licensed under CC Attribution 4.0 International",
+    "changes": "Выбраны 23 артериальные структуры по официальным таблицам FMA. OBJ триангулирован в f32, без сглаживания и деформации. Геометрия вне границ мозга скрывается только при отображении. Русские названия добавлены NeuroLab. Кровоток, капилляры и венозная сеть в исходных данных не измерены.",
+    "checked_on": "2026-10-24",
+    "id": "bodyparts3d-4.0",
+    "license": "CC BY 4.0",
+    "license_url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html",
+    "publication_doi": "10.1093/nar/gkn613",
+    "title": "BodyParts3D 4.0 · Database Center for Life Science",
+    "url": "https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html",
+    "verification": "official_dataset_and_license_verified"
+  },
+  "total_triangles": 31334,
+  "total_vertices": 21177,
+  "vessels": [
+    {
+      "hemisphere": "left",
+      "id": "FMA4062",
+      "mesh_ids": [
+        "FJ1682M"
+      ],
+      "name": "Внутренняя сонная · слева",
+      "name_en": "left internal carotid artery",
+      "supply": "ica_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA3949",
+      "mesh_ids": [
+        "FJ1682"
+      ],
+      "name": "Внутренняя сонная · справа",
+      "name_en": "right internal carotid artery",
+      "supply": "ica_right"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA4066",
+      "mesh_ids": [
+        "FJ1725M"
+      ],
+      "name": "Позвоночная · слева",
+      "name_en": "left vertebral artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA3958",
+      "mesh_ids": [
+        "FJ1725"
+      ],
+      "name": "Позвоночная · справа",
+      "name_en": "right vertebral artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "bilateral",
+      "id": "FMA50542",
+      "mesh_ids": [
+        "FJ1672",
+        "FJ1844"
+      ],
+      "name": "Базилярная артерия",
+      "name_en": "basilar artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50030",
+      "mesh_ids": [
+        "FJ1654M"
+      ],
+      "name": "Передняя мозговая · слева",
+      "name_en": "left anterior cerebral artery",
+      "supply": "aca_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50029",
+      "mesh_ids": [
+        "FJ1654"
+      ],
+      "name": "Передняя мозговая · справа",
+      "name_en": "right anterior cerebral artery",
+      "supply": "aca_right"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50367",
+      "mesh_ids": [
+        "FJ1692M"
+      ],
+      "name": "Средняя мозговая M1 · слева",
+      "name_en": "sphenoid part of left middle cerebral artery",
+      "supply": "mca_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50366",
+      "mesh_ids": [
+        "FJ1692"
+      ],
+      "name": "Средняя мозговая M1 · справа",
+      "name_en": "sphenoid part of right middle cerebral artery",
+      "supply": "mca_right"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50370",
+      "mesh_ids": [
+        "FJ1660M",
+        "FJ1694M"
+      ],
+      "name": "Средняя мозговая M2 · слева",
+      "name_en": "insular part of left middle cerebral artery",
+      "supply": "mca_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50369",
+      "mesh_ids": [
+        "FJ1660",
+        "FJ1694"
+      ],
+      "name": "Средняя мозговая M2 · справа",
+      "name_en": "insular part of right middle cerebral artery",
+      "supply": "mca_right"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50640",
+      "mesh_ids": [
+        "FJ1723M"
+      ],
+      "name": "Задняя мозговая P1 · слева",
+      "name_en": "precommunicating part of left posterior cerebral artery",
+      "supply": "pca_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50639",
+      "mesh_ids": [
+        "FJ1723"
+      ],
+      "name": "Задняя мозговая P1 · справа",
+      "name_en": "precommunicating part of right posterior cerebral artery",
+      "supply": "pca_right"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50642",
+      "mesh_ids": [
+        "FJ1714M"
+      ],
+      "name": "Задняя мозговая P2 · слева",
+      "name_en": "postcommunicating part of left posterior cerebral artery",
+      "supply": "pca_left"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50641",
+      "mesh_ids": [
+        "FJ1714"
+      ],
+      "name": "Задняя мозговая P2 · справа",
+      "name_en": "postcommunicating part of right posterior cerebral artery",
+      "supply": "pca_right"
+    },
+    {
+      "hemisphere": "bilateral",
+      "id": "FMA50169",
+      "mesh_ids": [
+        "FJ1655"
+      ],
+      "name": "Передняя соединительная",
+      "name_en": "anterior communicating artery",
+      "supply": "communicating"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50086",
+      "mesh_ids": [
+        "FJ1713M"
+      ],
+      "name": "Задняя соединительная · слева",
+      "name_en": "left posterior communicating artery",
+      "supply": "communicating"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50085",
+      "mesh_ids": [
+        "FJ1713"
+      ],
+      "name": "Задняя соединительная · справа",
+      "name_en": "right posterior communicating artery",
+      "supply": "communicating"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50575",
+      "mesh_ids": [
+        "FJ1726M"
+      ],
+      "name": "Верхняя мозжечковая · слева",
+      "name_en": "left superior cerebellar artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50574",
+      "mesh_ids": [
+        "FJ1726"
+      ],
+      "name": "Верхняя мозжечковая · справа",
+      "name_en": "right superior cerebellar artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "left",
+      "id": "FMA50520",
+      "mesh_ids": [
+        "FJ1700M",
+        "FJ1701M",
+        "FJ1702M",
+        "FJ1703M",
+        "FJ1704M",
+        "FJ1705M",
+        "FJ1706M",
+        "FJ1707M",
+        "FJ1708M",
+        "FJ1709M",
+        "FJ1710M",
+        "FJ1711M",
+        "FJ1715M"
+      ],
+      "name": "Задняя нижняя мозжечковая · слева",
+      "name_en": "left posterior inferior cerebellar artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "right",
+      "id": "FMA50519",
+      "mesh_ids": [
+        "FJ1700",
+        "FJ1701",
+        "FJ1702",
+        "FJ1703",
+        "FJ1704",
+        "FJ1705",
+        "FJ1706",
+        "FJ1707",
+        "FJ1708",
+        "FJ1709",
+        "FJ1710",
+        "FJ1711",
+        "FJ1715"
+      ],
+      "name": "Задняя нижняя мозжечковая · справа",
+      "name_en": "right posterior inferior cerebellar artery",
+      "supply": "vertebrobasilar"
+    },
+    {
+      "hemisphere": "bilateral",
+      "id": "FMA50544",
+      "mesh_ids": [
+        "FJ1656",
+        "FJ1656M"
+      ],
+      "name": "Передние нижние мозжечковые",
+      "name_en": "anterior inferior cerebellar artery",
+      "supply": "vertebrobasilar"
+    }
+  ]
+}

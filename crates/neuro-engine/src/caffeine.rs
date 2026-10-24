@@ -27,8 +27,10 @@ pub struct CaffeineTrace {
     pub solver: String,
     pub step_min: f64,
     pub sample_min: f64,
+    pub early_sample_min: Option<f64>,
     pub scenario: CaffeineScenario,
     pub samples: Vec<CaffeineSample>,
+    pub perfusion: Option<crate::PerfusionTrace>,
 }
 pub fn caffeine_pet_estimates(plasma_mg_l: f64) -> (f64, f64) {
     (
@@ -38,8 +40,18 @@ pub fn caffeine_pet_estimates(plasma_mg_l: f64) -> (f64, f64) {
 }
 impl CaffeineTrace {
     pub fn at(&self, time_min: f64) -> &CaffeineSample {
-        &self.samples
-            [((time_min / self.sample_min).round().max(0.0) as usize).min(self.samples.len() - 1)]
+        let i = self
+            .samples
+            .partition_point(|s| s.time_min < time_min)
+            .min(self.samples.len() - 1);
+        if i > 0
+            && (time_min - self.samples[i - 1].time_min).abs()
+                < (self.samples[i].time_min - time_min).abs()
+        {
+            &self.samples[i - 1]
+        } else {
+            &self.samples[i]
+        }
     }
     pub fn peak(&self) -> &CaffeineSample {
         self.samples
@@ -123,7 +135,11 @@ fn simulate_with_step(
             administered += d;
             dose_index += 1;
         }
-        if step % record_steps == 0 {
+        if step % record_steps == 0
+            || (scenario.perfusion.is_some()
+                && step as f64 * dt <= 5.0 + 1e-9
+                && step % (0.05 / dt).round() as usize == 0)
+        {
             let cp = y[1] / v;
             let (a1, a2a) = caffeine_pet_estimates(cp);
             require(
@@ -156,10 +172,13 @@ fn simulate_with_step(
             });
         }
     }
+    let perfusion = crate::simulate_perfusion(&scenario, atlas)?;
     Ok(CaffeineTrace {
+        perfusion,
         solver: "rk4_mass_balance_v1".into(),
         step_min: dt,
         sample_min: CAFFEINE_SAMPLE_MIN,
+        early_sample_min: scenario.perfusion.as_ref().map(|_| 0.05),
         scenario,
         samples,
     })
@@ -170,6 +189,7 @@ pub struct CaffeineNetworkComparison {
     pub pk_time_min: f64,
     pub driver_brain_proxy_mg_l: f64,
     pub hypothesis: String,
+    pub regional_drivers_mg_l: Vec<(String, f64)>,
     pub baseline: NetworkTrace,
     pub caffeine_hypothesis: NetworkTrace,
 }
@@ -190,10 +210,24 @@ pub fn compare_caffeine_network(
         "Включите гипотезу связи рецепторов с E/I перед расчётом",
     )?;
     let point = trace.at(time_min);
-    let (a1, a2a) = caffeine_pet_estimates(point.brain_proxy_mg_l);
+    let mut regional_drivers_mg_l = Vec::new();
     let mut network: NetworkScenario = h.network.clone();
     for p in &h.network.populations {
         let r = atlas.region(&p.region_id).expect("validated population");
+        let driver = if let (Some(config), Some(perfusion)) =
+            (&trace.scenario.perfusion, &trace.perfusion)
+        {
+            let i = config
+                .regions
+                .iter()
+                .position(|r| r.region_id == p.region_id)
+                .expect("complete perfusion beds");
+            perfusion.at(time_min).regions[i].tissue_mg_l
+        } else {
+            point.brain_proxy_mg_l
+        };
+        regional_drivers_mg_l.push((p.region_id.clone(), driver));
+        let (a1, a2a) = caffeine_pet_estimates(driver);
         let drive = if caffeine_a1_scope(r) {
             h.a1_drive_gain * a1
         } else {
@@ -210,7 +244,7 @@ pub fn compare_caffeine_network(
             amplitude: drive,
         });
     }
-    Ok(CaffeineNetworkComparison { pk_time_min:point.time_min,driver_brain_proxy_mg_l:point.brain_proxy_mg_l,hypothesis:"Непроверенная гипотеза: P_extra = g_A1*fit_A1(Ce) + g_A2A*fit_A2A(Ce) в стриатуме. PET-функции перенесены с плазмы на условный Ce. Одинаковый нейронный протокол с/без входа; это не предсказание поведения, BOLD или клинического эффекта.".into(),baseline:simulate_network(h.network.clone(),atlas)?,caffeine_hypothesis:simulate_network(network,atlas)? })
+    Ok(CaffeineNetworkComparison { regional_drivers_mg_l, pk_time_min:point.time_min,driver_brain_proxy_mg_l:point.brain_proxy_mg_l,hypothesis:"Непроверенная гипотеза: P_extra = g_A1*fit_A1(Ce) + g_A2A*fit_A2A(Ce) в стриатуме. PET-функции перенесены с плазмы на региональную Ct при включённой перфузии, иначе на условный Ce. Одинаковый нейронный протокол с/без входа; это не предсказание поведения, BOLD или клинического эффекта.".into(),baseline:simulate_network(h.network.clone(),atlas)?,caffeine_hypothesis:simulate_network(network,atlas)? })
 }
 
 #[cfg(test)]
@@ -322,6 +356,38 @@ mod tests {
         let exact = 100.0 * p.ka() / p.volume_l() / (p.ka() - p.ke())
             * ((1.0 - (-p.ke() * t).exp()) / p.ke() - (1.0 - (-p.ka() * t).exp()) / p.ka());
         assert!((coarse.at(t).auc_mg_min_l - exact).abs() < 1e-8);
+    }
+    #[test]
+    fn regional_neural_drivers_use_local_delivery_and_preserve_legacy() {
+        let (a, mut s) = reference();
+        s.duration_min = 60.0;
+        s.neural_hypothesis.enabled = true;
+        let id = s.neural_hypothesis.network.populations[0].region_id.clone();
+        let p = s.perfusion.as_mut().unwrap();
+        p.regions
+            .iter_mut()
+            .find(|r| r.region_id == id)
+            .unwrap()
+            .flow_fraction = 0.0;
+        let t = simulate_caffeine(s.clone(), &a).unwrap();
+        let c = compare_caffeine_network(&t, 2.0, &a).unwrap();
+        assert_eq!(
+            c.regional_drivers_mg_l
+                .iter()
+                .find(|(r, _)| r == &id)
+                .unwrap()
+                .1,
+            0.0
+        );
+        assert!(c.regional_drivers_mg_l.iter().any(|(_, c)| *c > 0.0));
+        s.perfusion = None;
+        let legacy = simulate_caffeine(s, &a).unwrap();
+        let c = compare_caffeine_network(&legacy, 2.0, &a).unwrap();
+        assert!(
+            c.regional_drivers_mg_l
+                .iter()
+                .all(|(_, c)| *c == legacy.at(2.0).brain_proxy_mg_l)
+        );
     }
     #[test]
     fn neural_hypothesis_is_explicit_and_zero_driver_has_no_effect() {

@@ -9,6 +9,10 @@ mod brain;
 pub use brain::*;
 mod network;
 pub use network::*;
+mod vascular;
+pub use vascular::*;
+mod perfusion;
+pub use perfusion::*;
 mod caffeine;
 pub use caffeine::*;
 

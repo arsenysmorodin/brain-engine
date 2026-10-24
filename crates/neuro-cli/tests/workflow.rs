@@ -271,13 +271,18 @@ fn caffeine_cli_roundtrip_trace_and_explicit_neural_hypothesis() {
     );
     let atlas = neuro_domain::BrainAtlas::bundled().unwrap();
     let mut scenario = neuro_domain::CaffeineScenario::load(&path, &atlas).unwrap();
+    scenario.duration_min = 60.0;
+    scenario.save(&path, &atlas).unwrap();
     let expected = neuro_engine::simulate_caffeine(scenario.clone(), &atlas).unwrap();
     let csv = temp.0.join("pk.csv");
+    let regional = temp.0.join("regional.csv");
     let result = cli()
         .arg("caffeine")
         .arg(&path)
         .arg("--csv")
         .arg(&csv)
+        .arg("--regional-csv")
+        .arg(&regional)
         .output()
         .unwrap();
     assert!(
@@ -286,6 +291,32 @@ fn caffeine_cli_roundtrip_trace_and_explicit_neural_hypothesis() {
         String::from_utf8_lossy(&result.stderr)
     );
     assert_eq!(fs::read_to_string(csv).unwrap(), expected.csv());
+    assert_eq!(
+        fs::read_to_string(&regional).unwrap(),
+        expected
+            .perfusion
+            .as_ref()
+            .unwrap()
+            .regional_csv(&expected.scenario)
+    );
+    let rejected = cli()
+        .arg("caffeine")
+        .arg(&path)
+        .arg("--regional-csv")
+        .arg(&path)
+        .output()
+        .unwrap();
+    assert!(!rejected.status.success());
+    let collision = cli()
+        .arg("caffeine")
+        .arg(&path)
+        .arg("--regional-csv")
+        .arg(&regional)
+        .arg("--csv")
+        .arg(&regional)
+        .output()
+        .unwrap();
+    assert!(!collision.status.success());
     let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
     assert_eq!(
         report["trace"]["scenario"]["provenance_id"],

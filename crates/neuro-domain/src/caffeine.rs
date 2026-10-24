@@ -108,6 +108,8 @@ pub struct CaffeineScenario {
     pub doses: Vec<CaffeineDose>,
     pub duration_min: f64,
     pub neural_hypothesis: CaffeineNeuralHypothesis,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub perfusion: Option<crate::CaffeinePerfusion>,
 }
 impl CaffeineScenario {
     pub fn reference(atlas: &BrainAtlas) -> Result<Self, Error> {
@@ -124,6 +126,7 @@ impl CaffeineScenario {
                 amount_mg: 100.0,
             }],
             duration_min: 1440.0,
+            perfusion: Some(crate::CaffeinePerfusion::reference(atlas)),
             neural_hypothesis: CaffeineNeuralHypothesis {
                 enabled: false,
                 a1_drive_gain: 2.0,
@@ -146,6 +149,9 @@ impl CaffeineScenario {
             "Название: 1–512 байт",
         )?;
         self.parameters.validate()?;
+        if let Some(p) = &self.perfusion {
+            p.validate(atlas)?;
+        }
         require(
             (60.0..=2880.0).contains(&self.duration_min)
                 && on_time_grid(self.duration_min, CAFFEINE_SAMPLE_MIN),

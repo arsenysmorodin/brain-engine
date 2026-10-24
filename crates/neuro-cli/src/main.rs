@@ -80,10 +80,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             let mut csv = None;
             let mut json = None;
             let mut network_time = None;
+            let mut regional_csv = None;
             while let Some(flag) = args.next() {
                 match flag.as_str() {
                     "--csv" if csv.is_none() => csv = Some(next_path(&mut args, &flag)?),
                     "--json" if json.is_none() => json = Some(next_path(&mut args, &flag)?),
+                    "--regional-csv" if command == "caffeine" && regional_csv.is_none() => {
+                        regional_csv = Some(next_path(&mut args, &flag)?)
+                    }
                     "--network-at-min" if command == "caffeine" && network_time.is_none() => {
                         network_time = Some(
                             args.next()
@@ -94,15 +98,18 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     _ => return Err(format!("Неизвестный или повторный аргумент: {flag}").into()),
                 }
             }
-            for output in [&csv, &json].into_iter().flatten() {
+            for output in [&csv, &json, &regional_csv].into_iter().flatten() {
                 if same_path(&path, output) {
                     return Err("Экспорт не должен перезаписывать входной сценарий".into());
                 }
             }
-            if let (Some(csv), Some(json)) = (&csv, &json)
-                && same_path(csv, json)
-            {
-                return Err("CSV и JSON должны иметь разные пути".into());
+            let outputs: Vec<_> = [&csv, &json, &regional_csv].into_iter().flatten().collect();
+            for (i, a) in outputs.iter().enumerate() {
+                for b in &outputs[i + 1..] {
+                    if same_path(a, b) {
+                        return Err("Все файлы экспорта должны иметь разные пути".into());
+                    }
+                }
             }
             let text = if command == "caffeine" {
                 let atlas = neuro_domain::BrainAtlas::bundled()?;
@@ -111,6 +118,13 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                 let comparison = network_time
                     .map(|time| neuro_engine::compare_caffeine_network(&trace, time, &atlas))
                     .transpose()?;
+                if let Some(path) = regional_csv {
+                    let regional = trace
+                        .perfusion
+                        .as_ref()
+                        .ok_or("В сценарии не включена региональная перфузия")?;
+                    atomic_write(&path, regional.regional_csv(&trace.scenario).as_bytes())?;
+                }
                 if let Some(csv) = csv {
                     trace.export_csv(csv)?;
                 }
@@ -159,6 +173,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
+        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--regional-csv regions.csv] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );
 }

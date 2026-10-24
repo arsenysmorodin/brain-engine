@@ -271,6 +271,9 @@ impl BrainGeometry {
         )
     }
     pub fn decode(bytes: &[u8], atlas: &BrainAtlas) -> Result<Self, Error> {
+        Self::decode_meshes(bytes, &atlas.meshes)
+    }
+    pub fn decode_meshes(bytes: &[u8], manifest: &[BrainMeshInfo]) -> Result<Self, Error> {
         fn take<'a>(bytes: &mut &'a [u8], n: usize) -> Result<&'a [u8], Error> {
             require(bytes.len() >= n, "Повреждённая геометрия: файл обрезан")?;
             let (head, tail) = bytes.split_at(n);
@@ -288,10 +291,7 @@ impl BrainGeometry {
             "Неизвестный формат геометрии",
         )?;
         let count = integer(&mut bytes)? as usize;
-        require(
-            count == atlas.meshes.len(),
-            "Геометрия не соответствует атласу",
-        )?;
+        require(count == manifest.len(), "Геометрия не соответствует атласу")?;
         let mut meshes = Vec::with_capacity(count);
         let mut ids = HashSet::new();
         for _ in 0..count {
@@ -301,8 +301,7 @@ impl BrainGeometry {
                 .map_err(|_| Error::Validation("Некорректный ID геометрии".into()))?
                 .to_string();
             require(ids.insert(id.clone()), "Повторный ID геометрии")?;
-            let info = atlas
-                .meshes
+            let info = manifest
                 .iter()
                 .find(|m| m.id == id)
                 .ok_or_else(|| Error::Validation("Неизвестный ID геометрии".into()))?;
