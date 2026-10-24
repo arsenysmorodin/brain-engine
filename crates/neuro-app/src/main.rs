@@ -4,7 +4,10 @@ mod inspector;
 mod map;
 mod smoke;
 mod theme;
-use bevy::{prelude::*, winit::WinitSettings};
+use bevy::{
+    prelude::*,
+    winit::{UpdateMode, WinitSettings},
+};
 use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, egui};
 use neuro_domain::{Catalog, Parameters, Scenario};
 use neuro_engine::{Evaluation, evaluate};
@@ -118,7 +121,17 @@ impl Lab {
         }
     }
     fn open_dialog(&mut self, action: FileAction) {
-        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        let mut cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        if !cwd.join("scenarios/competition.json").exists()
+            && let Some(home) = std::env::var_os("HOME")
+        {
+            let home = PathBuf::from(home);
+            cwd = if home.join("Documents").is_dir() {
+                home.join("Documents")
+            } else {
+                home
+            };
+        }
         self.file_path = match action {
             FileAction::Csv => cwd.join("neuro-results.csv"),
             FileAction::Open => self
@@ -217,7 +230,12 @@ fn main() {
     let mut app = App::new();
     app.insert_resource(lab)
         .insert_resource(ClearColor(Color::srgb_u8(17, 21, 28)))
-        .insert_resource(WinitSettings::desktop_app())
+        // A short fallback avoids stale rendered frames with Bevy's render pipeline.
+        // Numerical results are cached; no continuous simulation is running.
+        .insert_resource(WinitSettings {
+            focused_mode: UpdateMode::reactive(std::time::Duration::from_millis(50)),
+            unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs(1)),
+        })
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "NeuroLab — исследовательская лаборатория".into(),
@@ -336,6 +354,7 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
             View::Experiment => {
                 egui::ScrollArea::vertical()
                     .id_salt("experiment-scroll")
+                    .auto_shrink([false, false])
                     .show(ui, |ui| {
                         ui.heading("Конкурентное связывание");
                         ui.add_space(10.0);

@@ -11,6 +11,8 @@ task_bundle="$task_root/output/NeuroLab.app/Contents"
 mkdir -p "$task_bundle/MacOS" "$task_bundle/Resources/licenses"
 cp target/debug/neuro-app "$task_bundle/MacOS/NeuroLab"
 cp assets/fonts/OFL.txt "$task_bundle/Resources/licenses/NotoSans-OFL.txt"
+cp assets/fonts/NotoSansMath-OFL.txt "$task_bundle/Resources/licenses/NotoSansMath-OFL.txt"
+cp assets/fonts/NotoSansSymbols2-OFL.txt "$task_bundle/Resources/licenses/NotoSansSymbols2-OFL.txt"
 cp LICENSE "$task_bundle/Resources/licenses/NeuroLab-MIT.txt"
 cat > "$task_bundle/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

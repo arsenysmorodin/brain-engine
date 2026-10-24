@@ -12,17 +12,32 @@ pub const ERROR: Color32 = Color32::from_rgb(255, 156, 147);
 pub fn configure(ctx: &egui::Context) {
     let mut fonts = egui::FontDefinitions::default();
     fonts.font_data.insert(
+        "Noto Math".into(),
+        std::sync::Arc::new(egui::FontData::from_static(include_bytes!(
+            "../../../assets/fonts/NotoSansMath.ttf"
+        ))),
+    );
+    fonts.font_data.insert(
+        "Noto Symbols".into(),
+        std::sync::Arc::new(egui::FontData::from_static(include_bytes!(
+            "../../../assets/fonts/NotoSansSymbols2.ttf"
+        ))),
+    );
+    fonts.font_data.insert(
         "Noto Sans".into(),
         std::sync::Arc::new(egui::FontData::from_static(include_bytes!(
             "../../../assets/fonts/NotoSans.ttf"
         ))),
     );
     for family in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
-        fonts
-            .families
-            .entry(family)
-            .or_default()
-            .insert(0, "Noto Sans".into());
+        fonts.families.insert(
+            family,
+            vec![
+                "Noto Sans".into(),
+                "Noto Math".into(),
+                "Noto Symbols".into(),
+            ],
+        );
     }
     ctx.set_fonts(fonts);
     let mut style = (*ctx.style()).clone();
@@ -76,4 +91,22 @@ pub fn card() -> egui::Frame {
         .stroke(Stroke::new(1.0_f32, BORDER))
         .corner_radius(10)
         .inner_margin(18)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn bundled_fonts_cover_russian_and_scientific_notation() {
+        let ctx = egui::Context::default();
+        configure(&ctx);
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            ctx.fonts_mut(|fonts| {
+                let font = FontId::proportional(16.0);
+                for symbol in "Кофеин Аденозин Ёё ⇌ → ⊣ ● −".chars() {
+                    assert!(fonts.has_glyph(&font, symbol), "Missing glyph: {symbol}");
+                }
+            });
+        });
+    }
 }

@@ -3,17 +3,17 @@ use bevy_egui::egui::{self, Align2, FontId, Pos2, Rect, RichText, Sense, Stroke}
 use neuro_engine::Evaluation;
 
 pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
+    ui.spacing_mut().item_spacing.y = 5.0;
     tag(ui, "Иллюстративная модель · illustrative", PURPLE);
-    ui.add_space(12.0);
+    ui.add_space(4.0);
     muted(
         ui,
         "Два абстрактных лиганда, один сайт. Это не параметры кофеина.",
     );
-    ui.add_space(10.0);
-    card().show(ui, |ui| {
+    ui.add_space(4.0);
+    card().inner_margin(12).show(ui, |ui| {
         ui.set_width(ui.available_width());
-        ui.heading("Параметры равновесия");
-        ui.add_space(8.0);
+        ui.spacing_mut().interact_size.y = 22.0;
         let before = lab.scenario.clone();
         ui.columns(2, |columns| {
             parameter(
@@ -42,7 +42,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
             muted(ui, "Исправьте ввод для расчёта, сохранения и экспорта.");
         }
     });
-    ui.add_space(14.0);
+    ui.add_space(5.0);
     if lab.parameter_error.is_some() {
         return;
     }
@@ -56,7 +56,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
             .into_iter()
             .enumerate()
             {
-                card().show(&mut columns[index], |ui| {
+                card().inner_margin(10).show(&mut columns[index], |ui| {
                     ui.set_min_width(ui.available_width());
                     ui.label(
                         RichText::new(format!("{:.2}%", value * 100.0))
@@ -72,11 +72,11 @@ pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
                 });
             }
         });
-        ui.add_space(10.0);
+        ui.add_space(4.0);
         ui.label(RichText::new("Занятость рецептора не равна активации. Эффекты на мозг и поведение не вычисляются.").color(MUTED).size(12.0));
-        ui.add_space(16.0);
+        ui.add_space(5.0);
     }
-    card().show(ui, |ui| {
+    card().inner_margin(12).show(ui, |ui| {
         ui.set_width(ui.available_width());
         ui.horizontal_wrapped(|ui| {
             ui.label(RichText::new("Связывание лиганда A").size(18.0));
@@ -85,6 +85,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
                 .add(
                     egui::DragValue::new(&mut lab.scenario.plot.max_a)
                         .speed(1.0)
+                        .custom_formatter(|value, _| number(value))
                         .range(0.001..=f64::MAX),
                 )
                 .changed()
@@ -133,23 +134,18 @@ fn parameter(
     {
         *draft = slider_value.to_string();
     }
-    ui.label(
-        RichText::new("Ползунок: 0–100; ввод: весь диапазон f64")
-            .size(10.0)
-            .color(MUTED),
-    );
 }
 fn plot(ui: &mut egui::Ui, result: &Evaluation) {
     ui.horizontal_wrapped(|ui| {
         ui.colored_label(
             TEAL,
-            format!("━━  При b = {}", result.scenario.parameters.b),
+            format!("При b = {}", number(result.scenario.parameters.b)),
         );
-        ui.colored_label(PURPLE, "┄┄  Сравнение: b = 0");
+        ui.colored_label(PURPLE, "Пунктир: b = 0");
         ui.label("●  Текущая точка");
     });
     let (outer, response) =
-        ui.allocate_exact_size(egui::vec2(ui.available_width(), 275.0), Sense::hover());
+        ui.allocate_exact_size(egui::vec2(ui.available_width(), 220.0), Sense::hover());
     let rect = Rect::from_min_max(
         outer.min + egui::vec2(44.0, 24.0),
         outer.max - egui::vec2(16.0, 45.0),

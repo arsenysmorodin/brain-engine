@@ -67,7 +67,23 @@ fn run(
                 .spawn(Screenshot::primary_window())
                 .observe(save_to_disk(smoke.directory.join("experiment.png")));
         }
+        90 => {
+            let corrupt = smoke.directory.join("corrupt.json");
+            std::fs::write(&corrupt, "{broken").expect("write corrupt fixture");
+            let before = lab.scenario.clone();
+            assert!(!lab.perform(FileAction::Open, &corrupt));
+            assert_eq!(lab.scenario, before);
+            assert!(lab.status.contains("Повреждённый JSON"));
+            lab.dialog = Some(FileAction::Open);
+            lab.file_path = corrupt.display().to_string();
+        }
+        95 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("corrupt-file.png")));
+        }
         100 => {
+            lab.dialog = None;
             lab.draft_a = "NaN".into();
             lab.apply_drafts();
             assert!(lab.parameter_error.is_some());
@@ -80,7 +96,7 @@ fn run(
         130 => {
             lab.draft_a = "3".into();
             lab.apply_drafts();
-            std::fs::write(smoke.directory.join("passed.txt"), "GUI startup; claim selection; a=3,b=6; save; mutate; reload; CSV; NaN rejection: passed\n").expect("smoke report");
+            std::fs::write(smoke.directory.join("passed.txt"), "GUI startup; claim selection; a=3,b=6; save; mutate; reload; CSV; corrupt file preserves scenario; NaN rejection: passed\n").expect("smoke report");
             exit.write(AppExit::Success);
         }
         _ => {}
