@@ -2,4 +2,7 @@
 /.local/
 /output/
 .DS_Store
+.idea/
+/neuro-scenario.json
+/neuro-results.csv
 *.tmp
