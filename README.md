@@ -42,9 +42,14 @@ cargo run -p neuro-app --locked
 cargo run -p neuro-cli --locked -- new /tmp/my-neuro.json
 cargo run -p neuro-cli --locked -- run /tmp/my-neuro.json \
   --csv /tmp/neuro.csv --json /tmp/neuro.json
+cargo run -p neuro-cli --locked -- new-response /tmp/response-scenario.json
+cargo run -p neuro-cli --locked -- run scenarios/response.json --csv /tmp/response.csv
+cargo run -p neuro-cli --locked -- benchmark-response
 ```
 
 `run` выводит полный JSON-результат в stdout; ошибки — в stderr с exit code 1. CSV имеет `row_type=current` и `row_type=curve`, версии модели, отметку illustrative, входы, три доли и сравнение `p_a_without_b`. Десятичный разделитель — точка. Формат f64 обеспечивает round trip; сумма отображённых округлённых процентов может отличаться от 100%.
+
+`run` выбирает модель по `model_id`. Для `operational_agonism_n1_v1` CSV содержит x, τ, занятость, E/E_m, асимптоту и EC50/K_A; при τ = 0 последнее поле пустое (JSON: null). Формулы, источник, численная устойчивость и границы эталона: [docs/response-model.md](docs/response-model.md). Проверка теоретических кривых не является независимой экспериментальной валидацией.
 
 ## Проверки
 

@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, fs, io::Write, path::Path};
 use thiserror::Error;
 
+mod response;
+pub use response::*;
+
 pub const FORMAT_VERSION: u32 = 1;
 pub const MODEL_ID: &str = "competitive_binding_equilibrium_v1";
 pub const MODEL_REVISION: u32 = 1;

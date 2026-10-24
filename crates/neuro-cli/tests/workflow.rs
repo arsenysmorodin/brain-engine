@@ -120,3 +120,62 @@ fn creation_is_usable_and_refuses_accidental_overwrite() {
             .success()
     );
 }
+
+#[test]
+fn response_cli_roundtrip_export_and_benchmark() {
+    use neuro_domain::{Experiment, ResponseScenario};
+    use neuro_engine::evaluate_response;
+    let temp = Temp::new();
+    let input = temp.0.join("response.json");
+    let csv = temp.0.join("response.csv");
+    assert!(
+        cli()
+            .arg("new-response")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    let Experiment::Response(scenario) = Experiment::load(&input).unwrap() else {
+        panic!("wrong model");
+    };
+    assert_eq!(scenario, ResponseScenario::default());
+    let shared = evaluate_response(&scenario).unwrap();
+    let output = cli()
+        .arg("run")
+        .arg(&input)
+        .arg("--csv")
+        .arg(&csv)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(fs::read_to_string(&csv).unwrap(), shared.csv());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(
+        value["current"]["fractional_response"].as_f64().unwrap(),
+        shared.current.fractional_response
+    );
+    let before = fs::read(&input).unwrap();
+    assert!(
+        !cli()
+            .arg("run")
+            .arg(&input)
+            .arg("--csv")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(fs::read(&input).unwrap(), before);
+    let report = cli().arg("benchmark-response").output().unwrap();
+    assert!(report.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&report.stdout).unwrap();
+    assert_eq!(value["passed"], true);
+    assert_eq!(value["independent_experimental_validation"], false);
+}

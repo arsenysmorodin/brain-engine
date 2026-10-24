@@ -1,7 +1,35 @@
-//! CPU/f64 equilibrium model. No graphics, time axis, or biological effect model.
+//! CPU/f64 equilibrium binding and operational response. No graphics or kinetics.
 use neuro_domain::{Error, Parameters, Scenario, atomic_write};
 use serde::Serialize;
 use std::path::Path;
+
+mod response;
+pub use response::*;
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(untagged)]
+pub enum ExperimentEvaluation {
+    Binding(Evaluation),
+    Response(ResponseEvaluation),
+}
+pub fn evaluate_experiment(
+    scenario: &neuro_domain::Experiment,
+) -> Result<ExperimentEvaluation, Error> {
+    match scenario {
+        neuro_domain::Experiment::Binding(s) => evaluate(s).map(ExperimentEvaluation::Binding),
+        neuro_domain::Experiment::Response(s) => {
+            evaluate_response(s).map(ExperimentEvaluation::Response)
+        }
+    }
+}
+impl ExperimentEvaluation {
+    pub fn export_csv(&self, path: impl AsRef<Path>) -> Result<(), Error> {
+        match self {
+            Self::Binding(result) => result.export_csv(path),
+            Self::Response(result) => result.export_csv(path),
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub struct Occupancy {

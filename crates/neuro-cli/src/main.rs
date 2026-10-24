@@ -1,5 +1,5 @@
-use neuro_domain::{Scenario, atomic_write};
-use neuro_engine::evaluate;
+use neuro_domain::{Experiment, ResponseScenario, Scenario, atomic_write};
+use neuro_engine::{evaluate_experiment, response_benchmark};
 use std::{
     env,
     path::{Path, PathBuf},
@@ -26,16 +26,31 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         help();
         return Ok(());
     }
+    if command == "benchmark-response" {
+        if args.next().is_some() {
+            return Err("benchmark-response не принимает аргументов".into());
+        }
+        let report = response_benchmark()?;
+        println!("{}", serde_json::to_string_pretty(&report)?);
+        if !report.passed {
+            return Err("Ошибка превышает допуск эталона".into());
+        }
+        return Ok(());
+    }
     let path = next_path(&mut args, &command)?;
     match command.as_str() {
-        "new" => {
+        "new" | "new-response" => {
             if args.next().is_some() {
                 return Err("Лишний аргумент команды new".into());
             }
             if path.exists() {
                 return Err("Файл уже существует; укажите новый путь".into());
             }
-            Scenario::default().save(&path)?;
+            if command == "new-response" {
+                ResponseScenario::default().save(&path)?;
+            } else {
+                Scenario::default().save(&path)?;
+            }
             println!("Создан illustrative-сценарий: {}", path.display());
         }
         "run" => {
@@ -58,7 +73,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             {
                 return Err("CSV и JSON должны иметь разные пути".into());
             }
-            let evaluation = evaluate(&Scenario::load(&path)?)?;
+            let evaluation = evaluate_experiment(&Experiment::load(&path)?)?;
             if let Some(csv) = csv {
                 evaluation.export_csv(csv)?;
             }
@@ -90,6 +105,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — равновесное связывание абстрактных лигандов (illustrative)\n\n  neuro-cli new scenario.json\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n\nРезультат JSON выводится в stdout. Ошибки: stderr и код 1. Дозировок и прогнозов эффектов нет."
+        "NeuroLab — связывание и операционный ответ (illustrative)\n\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. JSON — stdout, ошибки — stderr и код 1. Дозировок и прогнозов эффектов нет."
     );
 }

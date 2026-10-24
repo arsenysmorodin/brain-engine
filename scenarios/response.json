@@ -1,0 +1,9 @@
+{
+  "format_version": 1,
+  "model_id": "operational_agonism_n1_v1",
+  "model_revision": 1,
+  "data_kind": "illustrative",
+  "name": "Функциональный ответ · Black–Leff, n = 1",
+  "parameters": { "x": 1.0, "tau": 10.0 },
+  "plot": { "max_x": 100.0, "samples": 257 }
+}
