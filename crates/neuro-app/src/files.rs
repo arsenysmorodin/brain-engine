@@ -12,7 +12,7 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
         ui.label("Полный путь к файлу");
         ui.add(egui::TextEdit::singleline(&mut lab.file_path).desired_width(f32::INFINITY));
         if matches!(action, FileAction::Open) {
-            if lab.dirty { ui.colored_label(PURPLE, "Открытие заменит текущие несохранённые параметры."); }
+            if lab.dirty || lab.response.dirty { ui.colored_label(PURPLE, "Открытие заменит параметры модели из файла; другая модель сохранится в памяти."); }
             if let Some(parent) = Path::new(&lab.file_path).parent() && let Ok(entries) = std::fs::read_dir(parent) {
                 let mut files: Vec<_> = entries.filter_map(Result::ok).map(|e| e.path()).filter(|p| p.extension().is_some_and(|e| e == "json")).take(128).collect(); files.sort();
                 egui::ScrollArea::vertical().max_height(160.0).show(ui, |ui| {

@@ -2,6 +2,8 @@ mod experiment;
 mod files;
 mod inspector;
 mod map;
+mod plot;
+mod response;
 mod smoke;
 mod theme;
 use bevy::{
@@ -9,7 +11,7 @@ use bevy::{
     winit::{UpdateMode, WinitSettings},
 };
 use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, egui};
-use neuro_domain::{Catalog, Parameters, Scenario};
+use neuro_domain::{Catalog, Experiment, Parameters, Scenario};
 use neuro_engine::{Evaluation, evaluate};
 use std::path::{Path, PathBuf};
 use theme::*;
@@ -18,6 +20,7 @@ use theme::*;
 enum View {
     Map,
     Experiment,
+    Response,
 }
 #[derive(Clone)]
 enum Selection {
@@ -44,6 +47,7 @@ struct Lab {
     catalog: Catalog,
     scenario: Scenario,
     evaluation: Option<Evaluation>,
+    response: response::ResponseLab,
     view: View,
     selection: Selection,
     map: map::MapState,
@@ -65,6 +69,7 @@ impl Lab {
             catalog: Catalog::bundled()?,
             evaluation: Some(evaluate(&scenario)?),
             scenario,
+            response: response::ResponseLab::new()?,
             view: View::Map,
             selection: Selection::Entity("caffeine".into()),
             map: map::MapState::default(),
@@ -132,16 +137,32 @@ impl Lab {
                 home
             };
         }
+        let response = self.view == View::Response;
+        let last_path = if response {
+            &self.response.last_scenario_path
+        } else {
+            &self.last_scenario_path
+        };
         self.file_path = match action {
-            FileAction::Csv => cwd.join("neuro-results.csv"),
-            FileAction::Open => self
-                .last_scenario_path
-                .clone()
-                .unwrap_or_else(|| cwd.join("scenarios/competition.json")),
-            FileAction::Save => self
-                .last_scenario_path
-                .clone()
-                .unwrap_or_else(|| cwd.join("neuro-scenario.json")),
+            FileAction::Csv => cwd.join(if response {
+                "neuro-response-results.csv"
+            } else {
+                "neuro-results.csv"
+            }),
+            FileAction::Open => last_path.clone().unwrap_or_else(|| {
+                cwd.join(if response {
+                    "scenarios/response.json"
+                } else {
+                    "scenarios/competition.json"
+                })
+            }),
+            FileAction::Save => last_path.clone().unwrap_or_else(|| {
+                cwd.join(if response {
+                    "neuro-response-scenario.json"
+                } else {
+                    "neuro-scenario.json"
+                })
+            }),
         }
         .display()
         .to_string();
@@ -154,30 +175,55 @@ impl Lab {
     ) -> Result<(), neuro_domain::Error> {
         if !matches!(action, FileAction::Open) {
             neuro_domain::require(
-                self.parameter_error.is_none(),
+                if self.view == View::Response {
+                    self.response.parameter_error.is_none()
+                } else {
+                    self.parameter_error.is_none()
+                },
                 "Исправьте параметры перед сохранением или экспортом",
             )?;
         }
         match action {
             FileAction::Save => {
-                self.scenario.save(path)?;
-                self.last_scenario_path = Some(path.into());
-                self.dirty = false;
+                if self.view == View::Response {
+                    self.response.scenario.save(path)?;
+                    self.response.last_scenario_path = Some(path.into());
+                    self.response.dirty = false;
+                } else {
+                    self.scenario.save(path)?;
+                    self.last_scenario_path = Some(path.into());
+                    self.dirty = false;
+                }
             }
-            FileAction::Open => {
-                let scenario = Scenario::load(path)?;
-                let result = evaluate(&scenario)?;
-                self.draft_a = scenario.parameters.a.to_string();
-                self.draft_b = scenario.parameters.b.to_string();
-                self.scenario = scenario;
-                self.evaluation = Some(result);
-                self.parameter_error = None;
-                self.last_scenario_path = Some(path.into());
-                self.dirty = false;
-                self.view = View::Experiment;
-            }
+            FileAction::Open => match Experiment::load(path)? {
+                Experiment::Binding(scenario) => {
+                    let result = evaluate(&scenario)?;
+                    self.draft_a = scenario.parameters.a.to_string();
+                    self.draft_b = scenario.parameters.b.to_string();
+                    self.scenario = scenario;
+                    self.evaluation = Some(result);
+                    self.parameter_error = None;
+                    self.last_scenario_path = Some(path.into());
+                    self.dirty = false;
+                    self.view = View::Experiment;
+                }
+                Experiment::Response(scenario) => {
+                    let result = neuro_engine::evaluate_response(&scenario)?;
+                    self.response.draft_x = scenario.parameters.x.to_string();
+                    self.response.draft_tau = scenario.parameters.tau.to_string();
+                    self.response.scenario = scenario;
+                    self.response.evaluation = Some(result);
+                    self.response.parameter_error = None;
+                    self.response.last_scenario_path = Some(path.into());
+                    self.response.dirty = false;
+                    self.view = View::Response;
+                }
+            },
             FileAction::Csv => {
-                if let Some(scenario_path) = &self.last_scenario_path {
+                for scenario_path in [&self.last_scenario_path, &self.response.last_scenario_path]
+                    .into_iter()
+                    .flatten()
+                {
                     neuro_domain::require(
                         path.canonicalize()
                             .ok()
@@ -186,12 +232,22 @@ impl Lab {
                         "CSV не должен перезаписывать сценарий",
                     )?;
                 }
-                self.evaluation
-                    .as_ref()
-                    .ok_or_else(|| {
-                        neuro_domain::Error::Validation("Нет результата для экспорта".into())
-                    })?
-                    .export_csv(path)?;
+                if self.view == View::Response {
+                    self.response
+                        .evaluation
+                        .as_ref()
+                        .ok_or_else(|| {
+                            neuro_domain::Error::Validation("Нет результата для экспорта".into())
+                        })?
+                        .export_csv(path)?;
+                } else {
+                    self.evaluation
+                        .as_ref()
+                        .ok_or_else(|| {
+                            neuro_domain::Error::Validation("Нет результата для экспорта".into())
+                        })?
+                        .export_csv(path)?;
+                }
             }
         }
         Ok(())
@@ -306,8 +362,13 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
                         .size(12.0)
                         .color(if lab.status_error { ERROR } else { MUTED }),
                 );
-                if lab.dirty {
-                    ui.colored_label(PURPLE, "Есть несохранённые изменения");
+                if lab.dirty || lab.response.dirty {
+                    let models = match (lab.dirty, lab.response.dirty) {
+                        (true, true) => "A/B и ответ",
+                        (true, false) => "A/B",
+                        _ => "ответ",
+                    };
+                    ui.colored_label(PURPLE, format!("Не сохранено: {models}"));
                 }
             });
         });
@@ -323,8 +384,9 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
         ui.add_space(24.0); ui.separator(); ui.add_space(16.0); muted(ui, "Представление");
         if ui.add_sized([ui.available_width(), 40.0], egui::Button::new("Карта механизма").selected(lab.view == View::Map)).clicked() { lab.view = View::Map; }
         if ui.add_sized([ui.available_width(), 40.0], egui::Button::new("Эксперимент A / B").selected(lab.view == View::Experiment)).clicked() { lab.view = View::Experiment; }
-        ui.add_space(24.0); tag(ui, "Первая итерация", TEAL); ui.add_space(8.0);
-        ui.label(egui::RichText::new("Карта — опубликованные сведения.\n\nЭксперимент — отдельная математическая демонстрация.").size(12.0).color(MUTED));
+        if ui.add_sized([ui.available_width(), 40.0], egui::Button::new("Ответ рецептора").selected(lab.view == View::Response)).clicked() { lab.view = View::Response; }
+        ui.add_space(24.0); tag(ui, "Исследовательская версия", TEAL); ui.add_space(8.0);
+        ui.label(egui::RichText::new("Карта — опубликованные сведения.\n\nЭксперименты — отдельные математические демонстрации.").size(12.0).color(MUTED));
         ui.add_space(18.0); ui.separator(); ui.add_space(10.0); muted(ui, "Без облака и API-ключей");
     });
     egui::SidePanel::right("inspector")
@@ -361,6 +423,16 @@ fn ui(mut contexts: EguiContexts, mut lab: ResMut<Lab>) -> Result {
                         experiment::show(ui, &mut lab);
                     });
             }
+            View::Response => {
+                egui::ScrollArea::vertical()
+                    .id_salt("response-scroll")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| {
+                        ui.heading("Функциональный ответ");
+                        ui.add_space(10.0);
+                        response::show(ui, &mut lab.response);
+                    });
+            }
         });
     files::show(ctx, &mut lab);
     Ok(())
@@ -384,5 +456,72 @@ mod tests {
         lab.draft_a = "1,5".into();
         lab.apply_drafts();
         assert_eq!(lab.scenario.parameters.a, 1.5);
+    }
+
+    #[test]
+    fn two_models_roundtrip_independently_and_protect_scenario_files() {
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let directory =
+            std::env::temp_dir().join(format!("neurolab-app-{}-{stamp}", std::process::id()));
+        std::fs::create_dir(&directory).unwrap();
+        let binding = directory.join("binding.json");
+        let response = directory.join("response.json");
+        let csv = directory.join("response.csv");
+        let mut lab = Lab::new().unwrap();
+        lab.scenario.parameters = Parameters { a: 3.0, b: 6.0 };
+        lab.refresh();
+        lab.file_operation(FileAction::Save, &binding).unwrap();
+        lab.dirty = true;
+        lab.view = View::Response;
+        lab.response.draft_x = "1,5".into();
+        lab.response.draft_tau = "10".into();
+        lab.response.apply_drafts();
+        let expected = lab.response.scenario.clone();
+        lab.file_operation(FileAction::Save, &response).unwrap();
+        assert!(lab.dirty && !lab.response.dirty);
+        lab.response.draft_tau = "0".into();
+        lab.response.apply_drafts();
+        assert_eq!(
+            lab.response
+                .evaluation
+                .as_ref()
+                .unwrap()
+                .current
+                .ec50_over_ka,
+            None
+        );
+        lab.view = View::Experiment;
+        lab.file_operation(FileAction::Open, &response).unwrap();
+        assert!(lab.view == View::Response);
+        assert_eq!(lab.response.scenario, expected);
+        assert_eq!(lab.scenario.parameters, Parameters { a: 3.0, b: 6.0 });
+        lab.file_operation(FileAction::Csv, &csv).unwrap();
+        assert_eq!(
+            std::fs::read_to_string(&csv).unwrap(),
+            neuro_engine::evaluate_response(&expected).unwrap().csv()
+        );
+        for path in [&binding, &response] {
+            let before = std::fs::read(path).unwrap();
+            assert!(lab.file_operation(FileAction::Csv, path).is_err());
+            assert_eq!(std::fs::read(path).unwrap(), before);
+        }
+        lab.response.draft_tau = "NaN".into();
+        lab.response.apply_drafts();
+        assert!(lab.response.evaluation.is_none());
+        assert!(lab.file_operation(FileAction::Save, &response).is_err());
+        assert!(lab.file_operation(FileAction::Csv, &csv).is_err());
+        lab.view = View::Experiment;
+        lab.file_operation(FileAction::Csv, &csv).unwrap();
+        lab.file_operation(FileAction::Open, &binding).unwrap();
+        assert!(lab.view == View::Experiment);
+        let bad = directory.join("bad.json");
+        std::fs::write(&bad, "{bad").unwrap();
+        assert!(lab.file_operation(FileAction::Open, &bad).is_err());
+        assert!(lab.view == View::Experiment);
+        assert_eq!(lab.response.scenario, expected);
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }

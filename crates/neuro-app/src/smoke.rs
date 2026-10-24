@@ -96,7 +96,61 @@ fn run(
         130 => {
             lab.draft_a = "3".into();
             lab.apply_drafts();
-            std::fs::write(smoke.directory.join("passed.txt"), "GUI startup; claim selection; a=3,b=6; save; mutate; reload; CSV; corrupt file preserves scenario; NaN rejection: passed\n").expect("smoke report");
+            lab.view = View::Response;
+            lab.response.draft_x = "1".into();
+            lab.response.draft_tau = "10".into();
+            lab.response.apply_drafts();
+            let path = smoke.directory.join("response.json");
+            assert!(lab.perform(FileAction::Save, &path));
+            lab.response.draft_tau = "0.1".into();
+            lab.response.apply_drafts();
+            assert!(lab.perform(FileAction::Open, &path));
+            assert_eq!(
+                lab.response.scenario.parameters,
+                neuro_domain::ResponseParameters { x: 1.0, tau: 10.0 }
+            );
+            assert_eq!(lab.scenario.parameters, Parameters { a: 3.0, b: 6.0 });
+            assert!(lab.perform(FileAction::Csv, &smoke.directory.join("response-gui.csv")));
+        }
+        145 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("response.png")));
+        }
+        155 => {
+            lab.response.draft_tau = "0".into();
+            lab.response.apply_drafts();
+            assert_eq!(
+                lab.response
+                    .evaluation
+                    .as_ref()
+                    .unwrap()
+                    .current
+                    .ec50_over_ka,
+                None
+            );
+        }
+        165 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("response-zero.png")));
+        }
+        175 => {
+            lab.response.draft_tau = "NaN".into();
+            lab.response.apply_drafts();
+            assert!(lab.response.evaluation.is_none());
+            assert!(!lab.perform(
+                FileAction::Save,
+                &smoke.directory.join("invalid-response.json")
+            ));
+        }
+        185 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("response-invalid.png")));
+        }
+        200 => {
+            std::fs::write(smoke.directory.join("passed.txt"), "GUI startup; claim selection; binding save/mutate/reload/CSV; corrupt file and NaN rejection; response save/mutate/reload/CSV; independent states; tau=0 undefined EC50; invalid response blocks saving: passed\n").expect("smoke report");
             exit.write(AppExit::Success);
         }
         _ => {}

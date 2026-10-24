@@ -5,4 +5,6 @@
 .idea/
 /neuro-scenario.json
 /neuro-results.csv
+/neuro-response-scenario.json
+/neuro-response-results.csv
 *.tmp

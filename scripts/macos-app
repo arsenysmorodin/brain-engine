@@ -14,6 +14,7 @@ cp assets/fonts/OFL.txt "$task_bundle/Resources/licenses/NotoSans-OFL.txt"
 cp assets/fonts/NotoSansMath-OFL.txt "$task_bundle/Resources/licenses/NotoSansMath-OFL.txt"
 cp assets/fonts/NotoSansSymbols2-OFL.txt "$task_bundle/Resources/licenses/NotoSansSymbols2-OFL.txt"
 cp LICENSE "$task_bundle/Resources/licenses/NeuroLab-MIT.txt"
+cp data/operational-model.json "$task_bundle/Resources/licenses/Operational-model-provenance.json"
 cat > "$task_bundle/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">

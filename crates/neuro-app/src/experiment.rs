@@ -104,7 +104,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
         }
     });
 }
-fn parameter(
+pub(crate) fn parameter(
     ui: &mut egui::Ui,
     name: &str,
     label: &str,
@@ -260,7 +260,7 @@ fn plot(ui: &mut egui::Ui, result: &Evaluation) {
         }
     }
 }
-fn number(value: f64) -> String {
+pub(crate) fn number(value: f64) -> String {
     if value == 0.0 {
         "0".into()
     } else if !(0.01..10000.0).contains(&value) {

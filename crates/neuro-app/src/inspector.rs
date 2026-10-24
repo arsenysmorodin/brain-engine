@@ -2,6 +2,10 @@ use crate::{Lab, Selection, View, theme::*};
 use bevy_egui::egui;
 
 pub fn show(ui: &mut egui::Ui, lab: &mut Lab) {
+    if lab.view == View::Response {
+        crate::response::inspector(ui, &lab.response);
+        return;
+    }
     if lab.view == View::Experiment {
         tag(ui, "Результат модели", PURPLE);
         ui.add_space(14.0);

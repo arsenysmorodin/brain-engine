@@ -103,7 +103,8 @@ mod tests {
         let _ = ctx.run(egui::RawInput::default(), |ctx| {
             ctx.fonts_mut(|fonts| {
                 let font = FontId::proportional(16.0);
-                for symbol in "Кофеин Аденозин Ёё ⇌ → ⊣ ● −".chars() {
+                for symbol in "Кофеин Аденозин Ёё ⇌ → ⊣ ● − τ θ ∞".chars()
+                {
                     assert!(fonts.has_glyph(&font, symbol), "Missing glyph: {symbol}");
                 }
             });
