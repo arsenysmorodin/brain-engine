@@ -5,12 +5,16 @@ use std::{fs, path::PathBuf, process::Command};
 struct Temp(PathBuf);
 impl Temp {
     fn new() -> Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let sequence = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         let stamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_nanos();
-        let path =
-            std::env::temp_dir().join(format!("neurolab-test-{}-{stamp}", std::process::id()));
+        let path = std::env::temp_dir().join(format!(
+            "neurolab-test-{}-{stamp}-{sequence}",
+            std::process::id()
+        ));
         fs::create_dir(&path).unwrap();
         Self(path)
     }

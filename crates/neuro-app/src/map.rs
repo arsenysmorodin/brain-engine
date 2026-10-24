@@ -217,3 +217,49 @@ fn segment_distance(point: Pos2, start: Pos2, end: Pos2) -> f32 {
     let t = ((point - start).dot(v) / v.length_sq()).clamp(0.0, 1.0);
     point.distance(start + v * t)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn canvas_drag_changes_pan_across_input_frames() {
+        let ctx = egui::Context::default();
+        crate::theme::configure(&ctx);
+        let catalog = Catalog::bundled().unwrap();
+        let mut state = MapState::default();
+        let mut selection = Selection::Entity("caffeine".into());
+        let start = egui::pos2(450.0, 400.0);
+        let end = start + egui::vec2(50.0, 50.0);
+        let pressed = |pos, pressed| egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::NONE,
+        };
+        for (frame, events) in [
+            vec![],
+            vec![egui::Event::PointerMoved(start), pressed(start, true)],
+            vec![egui::Event::PointerMoved(end)],
+            vec![pressed(end, false)],
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let input = egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, egui::vec2(900.0, 700.0))),
+                time: Some(frame as f64 / 30.0),
+                events,
+                ..Default::default()
+            };
+            let _ = ctx.run(input, |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    show(ui, &catalog, &mut state, &mut selection);
+                });
+            });
+        }
+        assert_eq!(state.pan, egui::vec2(50.0, 50.0));
+        state.reset();
+        assert_eq!(state.pan, Vec2::ZERO);
+        assert_eq!(state.zoom, 1.0);
+    }
+}
