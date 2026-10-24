@@ -3,6 +3,7 @@ mod experiment;
 mod files;
 mod glossary;
 mod inspector;
+mod launcher;
 mod map;
 mod plot;
 mod response;
@@ -51,6 +52,7 @@ impl FileAction {
 struct Lab {
     brain: brain::BrainLab,
     glossary: glossary::Glossary,
+    launcher: Option<launcher::SimulationLauncher>,
     catalog: Catalog,
     scenario: Scenario,
     evaluation: Option<Evaluation>,
@@ -93,6 +95,7 @@ impl Lab {
         Ok(Self {
             brain,
             glossary,
+            launcher: None,
             catalog: Catalog::bundled()?,
             evaluation: Some(evaluate(&scenario)?),
             scenario,
@@ -676,6 +679,17 @@ fn ui(
                 ui.add_space(16.0);
                 muted(ui, "Среда моделирования мозга");
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui
+                        .add(
+                            egui::Button::new(
+                                egui::RichText::new("Запустить симуляцию").color(BACKGROUND),
+                            )
+                            .fill(TEAL),
+                        )
+                        .clicked()
+                    {
+                        lab.open_launcher();
+                    }
                     if lab.view == View::Brain && lab.brain.circulation.mode {
                         ui.menu_button("Экспорт CSV", |ui| {
                             if ui.button("Общая PK трёх веществ").clicked() {
@@ -856,6 +870,7 @@ fn ui(
         .into();
     }
     files::show(ctx, &mut lab);
+    launcher::show(ctx, &mut lab);
     lab.glossary.show(ctx);
     Ok(())
 }
