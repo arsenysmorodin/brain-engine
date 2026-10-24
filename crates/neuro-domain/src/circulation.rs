@@ -4,6 +4,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+pub const CIRCULATION_MODEL_REVISION: u32 = 2;
 pub const CIRCULATION_MODEL_ID: &str = "purine_closed_circulation_v1";
 pub const CIRCULATION_PROVENANCE_ID: &str = "purine_sources_2026_10_24_v1";
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -88,6 +89,8 @@ pub struct CirculationScenario {
     pub beds: CaffeinePerfusion,
     pub capillary_volume_fraction: f64,
     pub venous_volume_fraction: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub neural_hypothesis: Option<crate::PurineNeuralHypothesis>,
 }
 impl CirculationScenario {
     pub fn reference(atlas: &BrainAtlas, mask: u8) -> Self {
@@ -95,7 +98,7 @@ impl CirculationScenario {
             format_version: 1,
             document_kind: "circulation_scenario".into(),
             model_id: CIRCULATION_MODEL_ID.into(),
-            model_revision: 1,
+            model_revision: CIRCULATION_MODEL_REVISION,
             provenance_id: CIRCULATION_PROVENANCE_ID.into(),
             name: "Пурины: замкнутый кровеносный контур".into(),
             parameters: Purine::ALL.map(PurineParameters::reference),
@@ -105,6 +108,7 @@ impl CirculationScenario {
             beds: CaffeinePerfusion::reference(atlas),
             capillary_volume_fraction: 0.03,
             venous_volume_fraction: 0.04,
+            neural_hypothesis: None,
         };
         for p in Purine::ALL {
             if mask & (1 << p.index()) != 0 {
@@ -127,22 +131,20 @@ impl CirculationScenario {
         }
         s
     }
-    /// Only simultaneous, single oral doses can use these study-inspired profiles.
-    /// Changes in dose remain an explicitly labelled extrapolation.
+    /// Revision 1 retains t=0-only semantics; revision 2 accepts a shared oral dose time.
     pub fn interaction_profile_active(&self) -> bool {
+        let positive: Vec<_> = self.doses.iter().filter(|d| d.amount_mg > 0.0).collect();
         self.interactions
-            && Purine::ALL.iter().all(|p| {
-                self.doses
-                    .iter()
-                    .filter(|d| d.substance == *p && d.amount_mg > 0.0)
-                    .count()
-                    <= 1
-            })
-            && self
-                .doses
+            && Purine::ALL
                 .iter()
-                .filter(|d| d.amount_mg > 0.0)
-                .all(|d| d.time_min == 0.0)
+                .all(|p| positive.iter().filter(|d| d.substance == *p).count() <= 1)
+            && if self.model_revision == 1 {
+                positive.iter().all(|d| d.time_min == 0.0)
+            } else {
+                positive
+                    .first()
+                    .is_some_and(|first| positive.iter().all(|d| d.time_min == first.time_min))
+            }
     }
     pub fn effective_parameters(&self) -> [PurineParameters; 3] {
         let mut p = self.parameters.clone();
@@ -169,7 +171,7 @@ impl CirculationScenario {
             self.format_version == 1
                 && self.document_kind == "circulation_scenario"
                 && self.model_id == CIRCULATION_MODEL_ID
-                && self.model_revision == 1
+                && (1..=CIRCULATION_MODEL_REVISION).contains(&self.model_revision)
                 && self.provenance_id == CIRCULATION_PROVENANCE_ID,
             "Неизвестная версия замкнутой циркуляции",
         )?;
@@ -178,6 +180,9 @@ impl CirculationScenario {
             "Название: 1…512 байт",
         )?;
         self.beds.validate(atlas)?;
+        if let Some(h) = &self.neural_hypothesis {
+            h.validate(atlas)?;
+        }
         require(
             self.duration_min.is_finite()
                 && (5.0..=2880.0).contains(&self.duration_min)
@@ -347,7 +352,7 @@ mod tests {
         s.parameters[2].exchange_min_inv = f64::NAN;
         assert!(s.validate(&a).is_err());
         s = CirculationScenario::reference(&a, 7);
-        s.model_revision = 2;
+        s.model_revision = 99;
         assert!(s.validate(&a).is_err());
     }
 }

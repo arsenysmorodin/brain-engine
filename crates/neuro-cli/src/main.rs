@@ -94,7 +94,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     {
                         regional_csv = Some(next_path(&mut args, &flag)?)
                     }
-                    "--network-at-min" if command == "caffeine" && network_time.is_none() => {
+                    "--network-at-min"
+                        if (command == "caffeine" || command == "circulation")
+                            && network_time.is_none() =>
+                    {
                         network_time = Some(
                             args.next()
                                 .ok_or("После --network-at-min нужно время")?
@@ -123,13 +126,22 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
                     neuro_domain::CirculationScenario::load(&path, &atlas)?,
                     &atlas,
                 )?;
+                let comparison = network_time
+                    .map(|t| neuro_engine::compare_purine_network(&trace, t, &atlas))
+                    .transpose()?;
                 if let Some(path) = csv {
                     atomic_write(&path, trace.csv().as_bytes())?;
                 }
                 if let Some(path) = regional_csv {
                     atomic_write(&path, trace.regional_csv().as_bytes())?;
                 }
-                serde_json::to_string_pretty(&trace)?
+                if let Some(comparison) = comparison {
+                    serde_json::to_string_pretty(
+                        &serde_json::json!({"trace":trace,"network_comparison":comparison}),
+                    )?
+                } else {
+                    serde_json::to_string_pretty(&trace)?
+                }
             } else if command == "caffeine" {
                 let atlas = neuro_domain::BrainAtlas::bundled()?;
                 let scenario = neuro_domain::CaffeineScenario::load(&path, &atlas)?;
@@ -192,6 +204,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-circulation circulation.json\n  neuro-cli circulation circulation-or-project.json [--csv pk.csv] [--regional-csv regions.csv] [--json trace.json]\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--regional-csv regions.csv] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
+        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-circulation circulation.json\n  neuro-cli circulation circulation-or-project.json [--csv pk.csv] [--regional-csv regions.csv] [--json trace.json] [--network-at-min 60]\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--regional-csv regions.csv] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );
 }

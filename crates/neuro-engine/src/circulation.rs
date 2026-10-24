@@ -305,8 +305,9 @@ impl CirculationTrace {
             for p in Purine::ALL {
                 let r = f.systemic[p.index()];
                 out.push_str(&format!(
-                    "{},1,{},{},{},{},{},{},{},{},{},{},{}\n",
+                    "{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
                     self.model_id,
+                    self.scenario.model_revision,
                     f.time_min,
                     p.key(),
                     r.administered_mg,
@@ -332,8 +333,9 @@ impl CirculationTrace {
                 for p in Purine::ALL {
                     let r = f.regions[i][p.index()];
                     out.push_str(&format!(
-                        "{},1,{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+                        "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
                         self.model_id,
+                        self.scenario.model_revision,
                         f.time_min,
                         region.region_id,
                         p.key(),
