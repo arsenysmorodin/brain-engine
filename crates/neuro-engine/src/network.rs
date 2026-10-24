@@ -336,6 +336,17 @@ mod tests {
                 .zip(&cut.samples)
                 .any(|(x, y)| x.states[1].e - y.states[1].e > 0.1)
         );
+        s.connections[0].enabled = true;
+        s.connections[0].weight = -8.0;
+        let suppressed = simulate_network(s.clone(), &a).unwrap();
+        assert!(
+            suppressed
+                .samples
+                .iter()
+                .zip(&cut.samples)
+                .any(|(x, y)| x.time_ms > 44.0 && x.states[1].e < y.states[1].e - 0.005)
+        );
+        s.connections[0].enabled = false;
         s.stimuli[0].region_id = s.populations[1].region_id.clone();
         let reversed = simulate_network(s, &a).unwrap();
         assert!(reversed.samples.iter().all(|x| x.states[0].e < 0.03));
@@ -367,5 +378,25 @@ mod tests {
             "pulse must reach the far branch"
         );
         assert!(full.csv().contains("illustrative"));
+    }
+    #[test]
+    fn delayed_network_agrees_with_a_refined_time_grid() {
+        let atlas = BrainAtlas::bundled().unwrap();
+        let mut scenario = NetworkScenario::bundled(&atlas).unwrap();
+        let coarse = simulate_network(scenario.clone(), &atlas).unwrap();
+        scenario.dt_ms = 0.125;
+        let fine = simulate_network(scenario, &atlas).unwrap();
+        let max = coarse
+            .samples
+            .iter()
+            .zip(&fine.samples)
+            .flat_map(|(a, b)| a.states.iter().zip(&b.states))
+            .flat_map(|(a, b)| [(a.e - b.e).abs(), (a.i - b.i).abs()])
+            .fold(0.0_f64, f64::max);
+        assert!(
+            max < 0.002,
+            "maximum discrepancy on common 2 ms samples: {max}"
+        );
+        eprintln!("network dt 0.25 vs 0.125 ms, maximum E/I discrepancy: {max}");
     }
 }

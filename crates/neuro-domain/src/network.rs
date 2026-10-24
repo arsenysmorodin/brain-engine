@@ -105,8 +105,11 @@ impl NetworkScenario {
             "Неизвестная версия сети, модели или атласа",
         )?;
         require(
-            !self.name.trim().is_empty() && !self.assumptions.trim().is_empty(),
-            "Укажите название и допущения сети",
+            !self.name.trim().is_empty()
+                && self.name.len() <= 512
+                && !self.assumptions.trim().is_empty()
+                && self.assumptions.len() <= 8192,
+            "Укажите название (до 512 байт) и допущения сети (до 8192 байт)",
         )?;
         require(
             self.dt_ms.is_finite() && (0.1..=1.0).contains(&self.dt_ms),

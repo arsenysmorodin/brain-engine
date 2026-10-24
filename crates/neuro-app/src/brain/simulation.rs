@@ -497,13 +497,13 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         });
     }
     ui.collapsing("Стимул и протокол", |ui| {
-        for s in &mut sim.scenario.stimuli {
+        for (n, s) in sim.scenario.stimuli.iter_mut().enumerate() {
             ui.label(
                 lab.atlas
                     .region(&s.region_id)
                     .map_or(s.region_id.as_str(), |r| r.name.as_str()),
             );
-            egui::Grid::new("stimulus-grid")
+            egui::Grid::new(("stimulus-grid", n))
                 .num_columns(2)
                 .show(ui, |ui| {
                     for (label, v, min, max) in [
