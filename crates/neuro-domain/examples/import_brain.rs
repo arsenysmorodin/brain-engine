@@ -141,7 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     };
     for (english, russian, group, kind) in pairs {
-        for (side, suffix) in [("left", "левая"), ("right", "правая")] {
+        for (side, suffix) in [("left", "слева"), ("right", "справа")] {
             add(
                 format!("{side} {english}"),
                 format!("{russian} · {suffix}"),
@@ -151,7 +151,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             )?;
         }
     }
-    for (side, suffix) in [("left", "левая"), ("right", "правая")] {
+    for (side, suffix) in [("left", "слева"), ("right", "справа")] {
         for (part, ru) in [
             ("anterior", "передняя часть"),
             ("posterior", "задняя часть"),

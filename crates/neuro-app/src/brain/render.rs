@@ -94,8 +94,8 @@ pub fn setup(
             DirectionalLight {
                 color,
                 illuminance,
-                // Detailed, adjoining atlas surfaces produce shadow-map acne.
-                // Soft directional shading keeps anatomical boundaries readable.
+                // Keep the offscreen anatomical view lightweight: directional
+                // shading is sufficient without additional shadow-map passes.
                 shadows_enabled: false,
                 ..default()
             },

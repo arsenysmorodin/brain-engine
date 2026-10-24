@@ -456,7 +456,7 @@
       "mesh_ids": [
         "FJ1833"
       ],
-      "name": "Верхняя лобная извилина · левая",
+      "name": "Верхняя лобная извилина · слева",
       "name_en": "left superior frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -468,7 +468,7 @@
       "mesh_ids": [
         "FJ1834"
       ],
-      "name": "Верхняя лобная извилина · правая",
+      "name": "Верхняя лобная извилина · справа",
       "name_en": "right superior frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -480,7 +480,7 @@
       "mesh_ids": [
         "FJ1787"
       ],
-      "name": "Средняя лобная извилина · левая",
+      "name": "Средняя лобная извилина · слева",
       "name_en": "left middle frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -492,7 +492,7 @@
       "mesh_ids": [
         "FJ1788"
       ],
-      "name": "Средняя лобная извилина · правая",
+      "name": "Средняя лобная извилина · справа",
       "name_en": "right middle frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -504,7 +504,7 @@
       "mesh_ids": [
         "FJ1744"
       ],
-      "name": "Нижняя лобная извилина · левая",
+      "name": "Нижняя лобная извилина · слева",
       "name_en": "left inferior frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -516,7 +516,7 @@
       "mesh_ids": [
         "FJ1745"
       ],
-      "name": "Нижняя лобная извилина · правая",
+      "name": "Нижняя лобная извилина · справа",
       "name_en": "right inferior frontal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -528,7 +528,7 @@
       "mesh_ids": [
         "FJ1800"
       ],
-      "name": "Предцентральная извилина · левая",
+      "name": "Предцентральная извилина · слева",
       "name_en": "left precentral gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -540,7 +540,7 @@
       "mesh_ids": [
         "FJ1801"
       ],
-      "name": "Предцентральная извилина · правая",
+      "name": "Предцентральная извилина · справа",
       "name_en": "right precentral gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -552,7 +552,7 @@
       "mesh_ids": [
         "FJ1797"
       ],
-      "name": "Постцентральная извилина · левая",
+      "name": "Постцентральная извилина · слева",
       "name_en": "left postcentral gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -564,7 +564,7 @@
       "mesh_ids": [
         "FJ1798"
       ],
-      "name": "Постцентральная извилина · правая",
+      "name": "Постцентральная извилина · справа",
       "name_en": "right postcentral gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -576,7 +576,7 @@
       "mesh_ids": [
         "FJ1835"
       ],
-      "name": "Верхняя теменная долька · левая",
+      "name": "Верхняя теменная долька · слева",
       "name_en": "left superior parietal lobule",
       "source_id": "bodyparts3d-4.0"
     },
@@ -588,7 +588,7 @@
       "mesh_ids": [
         "FJ1836"
       ],
-      "name": "Верхняя теменная долька · правая",
+      "name": "Верхняя теменная долька · справа",
       "name_en": "right superior parietal lobule",
       "source_id": "bodyparts3d-4.0"
     },
@@ -600,7 +600,7 @@
       "mesh_ids": [
         "FJ1841"
       ],
-      "name": "Надкраевая извилина · левая",
+      "name": "Надкраевая извилина · слева",
       "name_en": "left supramarginal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -612,7 +612,7 @@
       "mesh_ids": [
         "FJ1842"
       ],
-      "name": "Надкраевая извилина · правая",
+      "name": "Надкраевая извилина · справа",
       "name_en": "right supramarginal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -624,7 +624,7 @@
       "mesh_ids": [
         "FJ1732"
       ],
-      "name": "Угловая извилина · левая",
+      "name": "Угловая извилина · слева",
       "name_en": "left angular gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -636,7 +636,7 @@
       "mesh_ids": [
         "FJ1733"
       ],
-      "name": "Угловая извилина · правая",
+      "name": "Угловая извилина · справа",
       "name_en": "right angular gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -648,7 +648,7 @@
       "mesh_ids": [
         "FJ1789"
       ],
-      "name": "Средняя височная извилина · левая",
+      "name": "Средняя височная извилина · слева",
       "name_en": "left middle temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -660,7 +660,7 @@
       "mesh_ids": [
         "FJ1790"
       ],
-      "name": "Средняя височная извилина · правая",
+      "name": "Средняя височная извилина · справа",
       "name_en": "right middle temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -672,7 +672,7 @@
       "mesh_ids": [
         "FJ1746"
       ],
-      "name": "Нижняя височная извилина · левая",
+      "name": "Нижняя височная извилина · слева",
       "name_en": "left inferior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -684,7 +684,7 @@
       "mesh_ids": [
         "FJ1747"
       ],
-      "name": "Нижняя височная извилина · правая",
+      "name": "Нижняя височная извилина · справа",
       "name_en": "right inferior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -696,7 +696,7 @@
       "mesh_ids": [
         "FJ1783"
       ],
-      "name": "Веретенообразная извилина · левая",
+      "name": "Веретенообразная извилина · слева",
       "name_en": "left fusiform gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -708,7 +708,7 @@
       "mesh_ids": [
         "FJ1784"
       ],
-      "name": "Веретенообразная извилина · правая",
+      "name": "Веретенообразная извилина · справа",
       "name_en": "right fusiform gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -720,7 +720,7 @@
       "mesh_ids": [
         "FJ1791"
       ],
-      "name": "Затылочная доля · левая",
+      "name": "Затылочная доля · слева",
       "name_en": "left occipital lobe",
       "source_id": "bodyparts3d-4.0"
     },
@@ -732,7 +732,7 @@
       "mesh_ids": [
         "FJ1792"
       ],
-      "name": "Затылочная доля · правая",
+      "name": "Затылочная доля · справа",
       "name_en": "right occipital lobe",
       "source_id": "bodyparts3d-4.0"
     },
@@ -744,7 +744,7 @@
       "mesh_ids": [
         "FJ1748"
       ],
-      "name": "Островок · левая",
+      "name": "Островок · слева",
       "name_en": "left insula",
       "source_id": "bodyparts3d-4.0"
     },
@@ -756,7 +756,7 @@
       "mesh_ids": [
         "FJ1749"
       ],
-      "name": "Островок · правая",
+      "name": "Островок · справа",
       "name_en": "right insula",
       "source_id": "bodyparts3d-4.0"
     },
@@ -768,7 +768,7 @@
       "mesh_ids": [
         "FJ1739"
       ],
-      "name": "Поясная извилина · левая",
+      "name": "Поясная извилина · слева",
       "name_en": "left cingulate gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -780,7 +780,7 @@
       "mesh_ids": [
         "FJ1740"
       ],
-      "name": "Поясная извилина · правая",
+      "name": "Поясная извилина · справа",
       "name_en": "right cingulate gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -792,7 +792,7 @@
       "mesh_ids": [
         "FJ1785"
       ],
-      "name": "Парагиппокампальная извилина · левая",
+      "name": "Парагиппокампальная извилина · слева",
       "name_en": "left parahippocampal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -804,7 +804,7 @@
       "mesh_ids": [
         "FJ1786"
       ],
-      "name": "Парагиппокампальная извилина · правая",
+      "name": "Парагиппокампальная извилина · справа",
       "name_en": "right parahippocampal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -816,7 +816,7 @@
       "mesh_ids": [
         "FJ1759"
       ],
-      "name": "Гиппокамп · левая",
+      "name": "Гиппокамп · слева",
       "name_en": "left hippocampus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -828,7 +828,7 @@
       "mesh_ids": [
         "FJ1807"
       ],
-      "name": "Гиппокамп · правая",
+      "name": "Гиппокамп · справа",
       "name_en": "right hippocampus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -840,7 +840,7 @@
       "mesh_ids": [
         "FJ1753"
       ],
-      "name": "Миндалина · левая",
+      "name": "Миндалина · слева",
       "name_en": "left amygdala",
       "source_id": "bodyparts3d-4.0"
     },
@@ -852,7 +852,7 @@
       "mesh_ids": [
         "FJ1829"
       ],
-      "name": "Миндалина · правая",
+      "name": "Миндалина · справа",
       "name_en": "right amygdala",
       "source_id": "bodyparts3d-4.0"
     },
@@ -864,7 +864,7 @@
       "mesh_ids": [
         "FJ1782"
       ],
-      "name": "Таламус · левая",
+      "name": "Таламус · слева",
       "name_en": "left thalamus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -876,7 +876,7 @@
       "mesh_ids": [
         "FJ1827"
       ],
-      "name": "Таламус · правая",
+      "name": "Таламус · справа",
       "name_en": "right thalamus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -888,7 +888,7 @@
       "mesh_ids": [
         "FJ1754"
       ],
-      "name": "Хвостатое ядро · левая",
+      "name": "Хвостатое ядро · слева",
       "name_en": "left caudate nucleus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -900,7 +900,7 @@
       "mesh_ids": [
         "FJ1802"
       ],
-      "name": "Хвостатое ядро · правая",
+      "name": "Хвостатое ядро · справа",
       "name_en": "right caudate nucleus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -912,7 +912,7 @@
       "mesh_ids": [
         "FJ1776"
       ],
-      "name": "Скорлупа · левая",
+      "name": "Скорлупа · слева",
       "name_en": "left putamen",
       "source_id": "bodyparts3d-4.0"
     },
@@ -924,7 +924,7 @@
       "mesh_ids": [
         "FJ1823"
       ],
-      "name": "Скорлупа · правая",
+      "name": "Скорлупа · справа",
       "name_en": "right putamen",
       "source_id": "bodyparts3d-4.0"
     },
@@ -936,7 +936,7 @@
       "mesh_ids": [
         "FJ1757"
       ],
-      "name": "Бледный шар · левая",
+      "name": "Бледный шар · слева",
       "name_en": "left globus pallidus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -948,7 +948,7 @@
       "mesh_ids": [
         "FJ1805"
       ],
-      "name": "Бледный шар · правая",
+      "name": "Бледный шар · справа",
       "name_en": "right globus pallidus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -960,7 +960,7 @@
       "mesh_ids": [
         "FJ1767"
       ],
-      "name": "Боковой желудочек · левая",
+      "name": "Боковой желудочек · слева",
       "name_en": "left lateral ventricle",
       "source_id": "bodyparts3d-4.0"
     },
@@ -972,7 +972,7 @@
       "mesh_ids": [
         "FJ1814"
       ],
-      "name": "Боковой желудочек · правая",
+      "name": "Боковой желудочек · справа",
       "name_en": "right lateral ventricle",
       "source_id": "bodyparts3d-4.0"
     },
@@ -984,7 +984,7 @@
       "mesh_ids": [
         "FJ1837"
       ],
-      "name": "Верхняя височная извилина · левая, передняя часть",
+      "name": "Верхняя височная извилина · слева, передняя часть",
       "name_en": "anterior part of left superior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -996,7 +996,7 @@
       "mesh_ids": [
         "FJ1839"
       ],
-      "name": "Верхняя височная извилина · левая, задняя часть",
+      "name": "Верхняя височная извилина · слева, задняя часть",
       "name_en": "posterior part of left superior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -1020,7 +1020,7 @@
       "mesh_ids": [
         "FJ1838"
       ],
-      "name": "Верхняя височная извилина · правая, передняя часть",
+      "name": "Верхняя височная извилина · справа, передняя часть",
       "name_en": "anterior part of right superior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },
@@ -1032,7 +1032,7 @@
       "mesh_ids": [
         "FJ1840"
       ],
-      "name": "Верхняя височная извилина · правая, задняя часть",
+      "name": "Верхняя височная извилина · справа, задняя часть",
       "name_en": "posterior part of right superior temporal gyrus",
       "source_id": "bodyparts3d-4.0"
     },

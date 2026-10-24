@@ -60,7 +60,7 @@ impl BrainGroup {
             Self::Occipital => "Затылочная кора",
             Self::Insula => "Островок",
             Self::Medial => "Медиальные структуры",
-            Self::Deep => "Глубокие ядра",
+            Self::Deep => "Глубокие структуры",
             Self::Cerebellum => "Мозжечок",
             Self::Brainstem => "Ствол мозга",
             Self::WhiteMatter => "Белое вещество",

@@ -185,6 +185,31 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
             .corner_radius(12),
     );
     let response = response.on_hover_cursor(egui::CursorIcon::Grab);
+    interact(ui, &response, lab);
+    let visible = lab
+        .atlas
+        .regions
+        .iter()
+        .filter(|r| lab.scene.visible(r))
+        .count();
+    ui.horizontal_wrapped(|ui| {
+        muted(
+            ui,
+            format!("{visible} из {} структур включены", lab.atlas.regions.len()),
+        );
+        if let Some(r) = lab.selected() {
+            ui.colored_label(TEAL, &r.name);
+        }
+    });
+    ui.label(RichText::new("Вращение — перетаскивание · Масштаб — прокрутка · Выбор — щелчок · Панорама — правая кнопка").size(11.0).color(MUTED));
+    ui.label(
+        RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Параметры динамики ещё не подключены")
+            .size(11.0)
+            .color(MUTED),
+    );
+    lab.dirty |= lab.scene != before;
+}
+fn interact(ui: &egui::Ui, response: &egui::Response, lab: &mut BrainLab) {
     if response.dragged_by(egui::PointerButton::Primary) {
         let delta = ui.input(|i| i.pointer.delta());
         orbit(&mut lab.scene, Vec2::new(delta.x, delta.y));
@@ -210,7 +235,7 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         let local = (pointer - response.rect.min) / response.rect.size();
         lab.scene.selected_region = lab.pick(
             Vec2::new(local.x * 2.0 - 1.0, 1.0 - local.y * 2.0),
-            size.x / size.y,
+            response.rect.width() / response.rect.height(),
         );
         if lab.scene.selected_region.is_none() {
             lab.scene.isolate = false;
@@ -219,28 +244,6 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     if response.double_clicked() {
         lab.focus_selected();
     }
-    let visible = lab
-        .atlas
-        .regions
-        .iter()
-        .filter(|r| lab.scene.visible(r))
-        .count();
-    ui.horizontal_wrapped(|ui| {
-        muted(
-            ui,
-            format!("{visible} из {} структур видимы", lab.atlas.regions.len()),
-        );
-        if let Some(r) = lab.selected() {
-            ui.colored_label(TEAL, &r.name);
-        }
-    });
-    ui.label(RichText::new("Вращение — перетаскивание · Масштаб — прокрутка · Выбор — щелчок · Панорама — правая кнопка").size(11.0).color(MUTED));
-    ui.label(
-        RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Параметры динамики ещё не подключены")
-            .size(11.0)
-            .color(MUTED),
-    );
-    lab.dirty |= lab.scene != before;
 }
 pub(super) fn orbit(scene: &mut BrainScene, delta: Vec2) {
     scene.camera.yaw = (scene.camera.yaw - delta.x * 0.007 + std::f32::consts::PI)
@@ -363,4 +366,70 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         );
     });
     lab.dirty |= lab.scene != before;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn pointer_frames_rotate_pan_and_zoom_the_brain() {
+        let ctx = egui::Context::default();
+        let mut lab = BrainLab::new().unwrap();
+        let original = lab.scene.camera;
+        let start = egui::pos2(200.0, 180.0);
+        let end = start + egui::vec2(50.0, 30.0);
+        let button = |pos, button, pressed| egui::Event::PointerButton {
+            pos,
+            button,
+            pressed,
+            modifiers: egui::Modifiers::NONE,
+        };
+        use egui::PointerButton::{Primary, Secondary};
+        for (frame, events) in [
+            vec![],
+            vec![
+                egui::Event::PointerMoved(start),
+                button(start, Primary, true),
+            ],
+            vec![egui::Event::PointerMoved(end)],
+            vec![button(end, Primary, false)],
+            vec![button(end, Secondary, true)],
+            vec![egui::Event::PointerMoved(start)],
+            vec![button(start, Secondary, false)],
+            vec![egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: egui::vec2(0.0, 100.0),
+                modifiers: egui::Modifiers::NONE,
+            }],
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(700.0, 600.0),
+                    )),
+                    time: Some(frame as f64 / 30.0),
+                    events,
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        let (_, response) = ui.allocate_exact_size(
+                            egui::vec2(600.0, 500.0),
+                            egui::Sense::click_and_drag(),
+                        );
+                        interact(ui, &response, &mut lab);
+                    });
+                },
+            );
+        }
+        assert!((lab.scene.camera.yaw - original.yaw + 0.35).abs() < 1e-5);
+        assert!((lab.scene.camera.pitch - original.pitch - 0.21).abs() < 1e-5);
+        assert_ne!(lab.scene.camera.target, original.target);
+        assert!(lab.scene.camera.distance < original.distance);
+        lab.scene.validate(&lab.atlas).unwrap();
+    }
 }
