@@ -512,14 +512,24 @@ impl BrainScene {
 #[derive(Clone, Debug, PartialEq)]
 pub enum WorkspaceDocument {
     Brain(BrainScene),
+    Project(crate::BrainProject),
+    Network(crate::NetworkScenario),
     Experiment(crate::Experiment),
 }
 impl WorkspaceDocument {
     pub fn load(path: impl AsRef<Path>, atlas: &BrainAtlas) -> Result<Self, Error> {
         let text = read_small_file(path.as_ref())?;
         let value: serde_json::Value = serde_json::from_str(&text)?;
-        if value.get("document_kind").is_some() {
-            BrainScene::from_json(&text, atlas).map(Self::Brain)
+        if let Some(kind) = value.get("document_kind") {
+            match kind.as_str() {
+                Some("brain_project") => {
+                    crate::BrainProject::from_json(&text, atlas).map(Self::Project)
+                }
+                Some("brain_network") => {
+                    crate::NetworkScenario::from_json(&text, atlas).map(Self::Network)
+                }
+                _ => BrainScene::from_json(&text, atlas).map(Self::Brain),
+            }
         } else {
             crate::Experiment::from_json(&text).map(Self::Experiment)
         }

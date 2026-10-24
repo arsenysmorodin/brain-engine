@@ -231,6 +231,97 @@ fn run(
                 .observe(save_to_disk(smoke.directory.join("brain-cerebellum.png")));
         }
         350 => {
+            lab.activate(View::Brain);
+            lab.brain.scene = neuro_domain::BrainScene::default();
+            lab.brain.scene.camera.yaw = -std::f32::consts::FRAC_PI_2;
+            lab.brain.scene.camera.pitch = 0.0;
+            let mut simulation = crate::brain::SimulationLab::new(&lab.brain.atlas).unwrap();
+            simulation.mode = true;
+            simulation.revision = lab.brain.simulation.revision + 1;
+            lab.brain.simulation = simulation;
+        }
+        360 => {
+            lab.brain.simulation.advance(320);
+        }
+        370 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("simulation-80ms.png")));
+        }
+        380 => {
+            lab.brain.simulation.advance(400);
+        }
+        390 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("simulation-180ms.png")));
+        }
+        400 => {
+            lab.brain.simulation.advance(240);
+            lab.brain.scene.layers.cortex = false;
+        }
+        410 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("simulation-deep-240ms.png"),
+                ));
+        }
+        420 => {
+            lab.brain.simulation.advance(3040);
+            assert!(lab.brain.simulation.engine.as_ref().unwrap().finished());
+            let scenario = lab.brain.simulation.scenario.clone();
+            let csv = smoke.directory.join("network-gui.csv");
+            let project = smoke.directory.join("brain-project.json");
+            assert!(lab.perform(FileAction::Save, &project));
+            assert!(lab.perform(FileAction::Csv, &csv));
+            assert!(!lab.perform(FileAction::Csv, &project));
+            lab.brain.simulation.scenario.connections[0].enabled = false;
+            let atlas = lab.brain.atlas.clone();
+            lab.brain.simulation.reset(&atlas);
+            assert!(lab.perform(FileAction::Open, &project));
+            assert_eq!(lab.brain.simulation.scenario, scenario);
+            assert_eq!(lab.brain.simulation.display_time(), 0.0);
+            assert!(!lab.brain.simulation.playing);
+            lab.brain.simulation.advance(4000);
+            let again = smoke.directory.join("network-reopened.csv");
+            assert!(lab.perform(FileAction::Csv, &again));
+            assert_eq!(std::fs::read(&csv).unwrap(), std::fs::read(&again).unwrap());
+            lab.brain.simulation.cursor = Some(120);
+            lab.brain.simulation.revision += 1;
+            assert_eq!(lab.brain.simulation.display_time(), 240.0);
+        }
+        430 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("simulation-history.png")));
+        }
+        440 => {
+            let before = lab.brain.simulation.scenario.clone();
+            let mut bad = before.clone();
+            bad.connections[0].delay_ms = 0.0;
+            let path = smoke.directory.join("network-invalid.json");
+            std::fs::write(&path, serde_json::to_vec(&bad).unwrap()).unwrap();
+            assert!(!lab.perform(FileAction::Open, &path));
+            assert_eq!(lab.brain.simulation.scenario, before);
+            assert_eq!(lab.brain.simulation.display_time(), 240.0);
+            lab.brain.simulation.scenario.populations[0].tau_e_ms = f64::NAN;
+            let atlas = lab.brain.atlas.clone();
+            lab.brain.simulation.reset(&atlas);
+            assert!(!lab.perform(
+                FileAction::Save,
+                &smoke.directory.join("invalid-project.json")
+            ));
+            assert!(!lab.perform(
+                FileAction::Csv,
+                &smoke.directory.join("invalid-network.csv")
+            ));
+            assert!(lab.brain.simulation.state("FMA72976").is_none());
+            lab.brain.simulation.scenario = before;
+            lab.brain.simulation.reset(&atlas);
+        }
+        450 => {
+            std::fs::write(smoke.directory.join("network-passed.txt"),"E/I activity at 80/180/240 ms; project roundtrip resets to paused t=0; deterministic replay CSV identical; history frame 240 ms; invalid topology leaves previous state intact; invalid parameters block output and clear activity; legacy smoke also passed\n").unwrap();
             std::fs::write(smoke.directory.join("passed.txt"), "Native brain startup; overview/deep/isolated scenes; ray picks selected thalamus; brain save/mutate/reload/CSV; unknown atlas rejected without mutation; binding and response save/mutate/reload/CSV; invalid numerical inputs rejected: passed\n").expect("smoke report");
             exit.write(AppExit::Success);
         }

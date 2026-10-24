@@ -20,6 +20,7 @@ pub struct BrainViewport {
     size: UVec2,
     last_scene: Option<BrainScene>,
     active: bool,
+    last_simulation: Option<(bool, u64)>,
 }
 #[derive(Component)]
 pub struct BrainCameraEntity;
@@ -72,6 +73,7 @@ pub fn setup(
         size,
         last_scene: None,
         active: true,
+        last_simulation: None,
     });
     commands.insert_resource(GlobalAmbientLight {
         color: Color::srgb(0.78, 0.86, 1.0),
@@ -179,7 +181,11 @@ pub fn sync(
             });
         }
     }
-    if viewport.last_scene.as_ref() == Some(&lab.brain.scene) {
+    let simulation = &lab.brain.simulation;
+    let simulation_revision = (simulation.mode, simulation.revision);
+    if viewport.last_scene.as_ref() == Some(&lab.brain.scene)
+        && viewport.last_simulation == Some(simulation_revision)
+    {
         return;
     }
     *transform = camera_transform(lab.brain.scene.camera);
@@ -193,7 +199,10 @@ pub fn sync(
         transform.translation = lab.brain.offset(region);
         if let Some(material) = materials.get_mut(&handle.0) {
             let selected = lab.brain.scene.selected_region.as_ref() == Some(&region.id);
-            let rgb = if selected {
+            let activity = simulation.state(&region.id);
+            let rgb = if simulation.mode {
+                activity.map_or([65, 69, 77], |s| super::simulation::heat_rgb(s.e))
+            } else if selected {
                 [112, 234, 214]
             } else if lab.brain.scene.color_mode == BrainColorMode::Groups {
                 group_rgb(region.group)
@@ -201,7 +210,14 @@ pub fn sync(
                 [184, 194, 207]
             };
             material.base_color = Color::srgb_u8(rgb[0], rgb[1], rgb[2]);
-            material.emissive = if selected {
+            material.emissive = if simulation.mode {
+                let glow = activity.map_or(0.0, |s| s.e as f32 * 0.3);
+                LinearRgba::rgb(
+                    glow * rgb[0] as f32 / 255.0,
+                    glow * rgb[1] as f32 / 255.0,
+                    glow * rgb[2] as f32 / 255.0,
+                )
+            } else if selected {
                 LinearRgba::rgb(0.045, 0.15, 0.12)
             } else {
                 LinearRgba::BLACK
@@ -209,6 +225,7 @@ pub fn sync(
         }
     }
     viewport.last_scene = Some(lab.brain.scene.clone());
+    viewport.last_simulation = Some(simulation_revision);
 }
 pub fn group_rgb(group: BrainGroup) -> [u8; 3] {
     match group {

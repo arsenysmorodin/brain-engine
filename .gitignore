@@ -9,4 +9,6 @@
 /neuro-response-results.csv
 /neuro-brain-scene.json
 /neuro-brain-regions.csv
+/neuro-brain-project.json
+/neuro-brain-trace.csv
 *.tmp

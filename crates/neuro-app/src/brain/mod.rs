@@ -1,7 +1,9 @@
 mod controls;
 mod render;
+mod simulation;
 pub use controls::{inspector, sidebar, viewport};
 pub use render::{BrainViewport, setup, sync};
+pub use simulation::SimulationLab;
 
 use bevy::prelude::*;
 use neuro_domain::{
@@ -22,11 +24,13 @@ pub struct BrainLab {
     pub atlas: BrainAtlas,
     pub scene: BrainScene,
     pub meshes: Vec<DisplayMesh>,
+    pub centers: Vec<Vec3>,
     pub search: String,
     pub group: Option<neuro_domain::BrainGroup>,
     pub dirty: bool,
     pub last_scene_path: Option<PathBuf>,
     pub target_size: UVec2,
+    pub simulation: SimulationLab,
 }
 impl BrainLab {
     pub fn new() -> Result<Self, Error> {
@@ -41,7 +45,7 @@ impl BrainLab {
         }
         let center = (min + max) * 0.5;
         let scale = 2.8 / (max - min).max_element();
-        let meshes = geometry
+        let meshes: Vec<DisplayMesh> = geometry
             .meshes
             .into_iter()
             .map(|m| {
@@ -73,15 +77,31 @@ impl BrainLab {
                 }
             })
             .collect();
+        let centers = (0..atlas.regions.len())
+            .map(|n| {
+                let mut sum = Vec3::ZERO;
+                let mut count = 0;
+                for m in meshes.iter().filter(|m| m.region == n) {
+                    for p in &m.positions {
+                        sum += *p;
+                        count += 1;
+                    }
+                }
+                sum / count as f32
+            })
+            .collect();
+        let simulation = SimulationLab::new(&atlas)?;
         Ok(Self {
             atlas,
             scene: BrainScene::default(),
             meshes,
+            centers,
             search: String::new(),
             group: None,
             dirty: false,
             last_scene_path: None,
             target_size: UVec2::new(1000, 800),
+            simulation,
         })
     }
     pub fn offset(&self, r: &BrainRegion) -> Vec3 {
@@ -190,6 +210,15 @@ impl BrainLab {
             }
         }
         selected
+    }
+}
+pub fn advance_network(
+    time: Res<Time<Real>>,
+    mut lab: ResMut<crate::Lab>,
+    windows: Query<&Window>,
+) {
+    if lab.view == crate::View::Brain && windows.iter().any(|w| w.focused) {
+        lab.brain.simulation.tick(time.delta_secs_f64());
     }
 }
 pub fn camera_transform(camera: BrainCamera) -> Transform {

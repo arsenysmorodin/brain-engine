@@ -67,6 +67,9 @@ struct Lab {
 }
 impl Lab {
     fn activate(&mut self, view: View) {
+        if view != View::Brain {
+            self.brain.simulation.playing = false;
+        }
         self.view = view;
         self.status_error = false;
         self.status = match view {
@@ -154,7 +157,10 @@ impl Lab {
         }
         let response = self.view == View::Response;
         let brain = self.view == View::Brain;
-        let last_path = if brain {
+        let network = brain && self.brain.simulation.mode;
+        let last_path = if network {
+            &self.brain.simulation.last_path
+        } else if brain {
             &self.brain.last_scene_path
         } else if response {
             &self.response.last_scenario_path
@@ -162,7 +168,9 @@ impl Lab {
             &self.last_scenario_path
         };
         self.file_path = match action {
-            FileAction::Csv => cwd.join(if brain {
+            FileAction::Csv => cwd.join(if network {
+                "neuro-brain-trace.csv"
+            } else if brain {
                 "neuro-brain-regions.csv"
             } else if response {
                 "neuro-response-results.csv"
@@ -170,7 +178,9 @@ impl Lab {
                 "neuro-results.csv"
             }),
             FileAction::Open => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if brain {
+                cwd.join(if network {
+                    "scenarios/brain-network.json"
+                } else if brain {
                     "scenes/brain.json"
                 } else if response {
                     "scenarios/response.json"
@@ -179,7 +189,9 @@ impl Lab {
                 })
             }),
             FileAction::Save => last_path.clone().unwrap_or_else(|| {
-                cwd.join(if brain {
+                cwd.join(if network {
+                    "neuro-brain-project.json"
+                } else if brain {
                     "neuro-brain-scene.json"
                 } else if response {
                     "neuro-response-scenario.json"
@@ -209,7 +221,20 @@ impl Lab {
         }
         match action {
             FileAction::Save => {
-                if self.view == View::Brain {
+                if self.view == View::Brain && self.brain.simulation.mode {
+                    neuro_domain::require(
+                        self.brain.simulation.error.is_none(),
+                        "Исправьте параметры сети перед сохранением",
+                    )?;
+                    neuro_domain::BrainProject::new(
+                        self.brain.scene.clone(),
+                        self.brain.simulation.scenario.clone(),
+                    )
+                    .save(path, &self.brain.atlas)?;
+                    self.brain.simulation.last_path = Some(path.into());
+                    self.brain.simulation.dirty = false;
+                    self.brain.dirty = false;
+                } else if self.view == View::Brain {
                     self.brain.scene.save(path, &self.brain.atlas)?;
                     self.brain.last_scene_path = Some(path.into());
                     self.brain.dirty = false;
@@ -225,14 +250,37 @@ impl Lab {
             }
             FileAction::Open => match WorkspaceDocument::load(path, &self.brain.atlas)? {
                 WorkspaceDocument::Brain(scene) => {
+                    self.brain.simulation.playing = false;
+                    self.brain.simulation.mode = false;
                     self.brain.scene = scene;
                     self.brain.last_scene_path = Some(path.into());
                     self.brain.dirty = false;
                     self.view = View::Brain;
                 }
+                WorkspaceDocument::Project(project) => {
+                    let mut simulation =
+                        brain::SimulationLab::from_scenario(project.network, &self.brain.atlas)?;
+                    simulation.mode = true;
+                    simulation.last_path = Some(path.into());
+                    simulation.revision = self.brain.simulation.revision.wrapping_add(1);
+                    self.brain.scene = project.scene;
+                    self.brain.simulation = simulation;
+                    self.brain.dirty = false;
+                    self.view = View::Brain;
+                }
+                WorkspaceDocument::Network(network) => {
+                    let mut simulation =
+                        brain::SimulationLab::from_scenario(network, &self.brain.atlas)?;
+                    simulation.mode = true;
+                    simulation.revision = self.brain.simulation.revision.wrapping_add(1);
+                    simulation.source_path = Some(path.into());
+                    self.brain.simulation = simulation;
+                    self.view = View::Brain;
+                }
                 WorkspaceDocument::Experiment(experiment) => match experiment {
                     Experiment::Binding(scenario) => {
                         let result = evaluate(&scenario)?;
+                        self.brain.simulation.playing = false;
                         self.draft_a = scenario.parameters.a.to_string();
                         self.draft_b = scenario.parameters.b.to_string();
                         self.scenario = scenario;
@@ -244,6 +292,7 @@ impl Lab {
                     }
                     Experiment::Response(scenario) => {
                         let result = neuro_engine::evaluate_response(&scenario)?;
+                        self.brain.simulation.playing = false;
                         self.response.draft_x = scenario.parameters.x.to_string();
                         self.response.draft_tau = scenario.parameters.tau.to_string();
                         self.response.scenario = scenario;
@@ -260,6 +309,8 @@ impl Lab {
                     &self.last_scenario_path,
                     &self.response.last_scenario_path,
                     &self.brain.last_scene_path,
+                    &self.brain.simulation.last_path,
+                    &self.brain.simulation.source_path,
                 ]
                 .into_iter()
                 .flatten()
@@ -272,7 +323,21 @@ impl Lab {
                         "CSV не должен перезаписывать сценарий",
                     )?;
                 }
-                if self.view == View::Brain {
+                if self.view == View::Brain && self.brain.simulation.mode {
+                    neuro_domain::require(
+                        self.brain.simulation.error.is_none(),
+                        "Нет корректной трассы сети для экспорта",
+                    )?;
+                    self.brain
+                        .simulation
+                        .engine
+                        .as_ref()
+                        .ok_or_else(|| {
+                            neuro_domain::Error::Validation("Расчёт сети отсутствует".into())
+                        })?
+                        .trace()
+                        .export_csv(path)?;
+                } else if self.view == View::Brain {
                     neuro_domain::atomic_write(path, self.brain.atlas.csv().as_bytes())?;
                 } else if self.view == View::Response {
                     self.response
@@ -300,6 +365,15 @@ impl Lab {
                 self.status = format!(
                     "{}: {}",
                     match action {
+                        FileAction::Save
+                            if self.view == View::Brain && self.brain.simulation.mode =>
+                            "Проект мозга сохранён (при открытии время = 0)",
+                        FileAction::Open
+                            if self.view == View::Brain && self.brain.simulation.mode =>
+                            "Сеть открыта на паузе, время = 0",
+                        FileAction::Csv
+                            if self.view == View::Brain && self.brain.simulation.mode =>
+                            "Вычисленная трасса E/I экспортирована",
                         FileAction::Save if self.view == View::Brain => "Сцена мозга сохранена",
                         FileAction::Open if self.view == View::Brain => "Сцена мозга открыта",
                         FileAction::Csv if self.view == View::Brain =>
@@ -333,7 +407,7 @@ fn main() {
     app.insert_resource(lab)
         .insert_resource(ClearColor(Color::srgb_u8(17, 21, 28)))
         // A short fallback avoids stale rendered frames with Bevy's render pipeline.
-        // Numerical results are cached; no continuous simulation is running.
+        // Network simulation advances only while explicitly playing in the brain view.
         .insert_resource(WinitSettings {
             focused_mode: UpdateMode::reactive(std::time::Duration::from_millis(50)),
             unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs(1)),
@@ -353,6 +427,7 @@ fn main() {
         }))
         .add_plugins(EguiPlugin::default())
         .add_systems(Startup, brain::setup)
+        .add_systems(Update, brain::advance_network)
         .add_systems(EguiPrimaryContextPass, (ui, brain::sync).chain());
     smoke::configure(&mut app);
     app.run();
@@ -412,6 +487,9 @@ fn ui(
                 );
                 if lab.brain.dirty {
                     ui.colored_label(PURPLE, "Сцена мозга не сохранена");
+                }
+                if lab.brain.simulation.dirty {
+                    ui.colored_label(PURPLE, "Сеть не сохранена");
                 }
                 if lab.dirty || lab.response.dirty {
                     let models = match (lab.dirty, lab.response.dirty) {

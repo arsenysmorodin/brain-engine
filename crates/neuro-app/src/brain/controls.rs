@@ -111,11 +111,16 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
     let before = lab.scene.clone();
+    let mode_before = lab.simulation.mode;
     ui.horizontal_wrapped(|ui| {
         ui.heading("Мозг человека");
         ui.add_space(10.0);
-        tag(ui, "Анатомическая основа", TEAL);
+        ui.selectable_value(&mut lab.simulation.mode, false, "Анатомия");
+        ui.selectable_value(&mut lab.simulation.mode, true, "Симуляция");
     });
+    if mode_before && !lab.simulation.mode {
+        lab.simulation.playing = false;
+    }
     ui.horizontal_wrapped(|ui| {
         for (label, yaw, pitch) in [
             ("Слева", -std::f32::consts::FRAC_PI_2, 0.0),
@@ -137,23 +142,27 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
             zoom(&mut lab.scene, 120.0);
         }
         ui.separator();
-        egui::ComboBox::from_id_salt("brain-colors")
-            .selected_text(match lab.scene.color_mode {
-                BrainColorMode::Groups => "Цвета областей",
-                BrainColorMode::Anatomy => "Нейтральная анатомия",
-            })
-            .show_ui(ui, |ui| {
-                ui.selectable_value(
-                    &mut lab.scene.color_mode,
-                    BrainColorMode::Groups,
-                    "Цвета областей",
-                );
-                ui.selectable_value(
-                    &mut lab.scene.color_mode,
-                    BrainColorMode::Anatomy,
-                    "Нейтральная анатомия",
-                );
-            });
+        if lab.simulation.mode {
+            tag(ui, "Активность E", TEAL);
+        } else {
+            egui::ComboBox::from_id_salt("brain-colors")
+                .selected_text(match lab.scene.color_mode {
+                    BrainColorMode::Groups => "Цвета областей",
+                    BrainColorMode::Anatomy => "Нейтральная анатомия",
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut lab.scene.color_mode,
+                        BrainColorMode::Groups,
+                        "Цвета областей",
+                    );
+                    ui.selectable_value(
+                        &mut lab.scene.color_mode,
+                        BrainColorMode::Anatomy,
+                        "Нейтральная анатомия",
+                    );
+                });
+        }
     });
     ui.horizontal_wrapped(|ui| {
         ui.label("Раздвижение полушарий");
@@ -167,10 +176,23 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
             lab.scene.isolate = false;
         }
     });
+    if lab.simulation.mode {
+        super::simulation::transport(ui, lab);
+    }
     ui.add_space(4.0);
     let size = egui::vec2(
         ui.available_width(),
-        (ui.available_height() - 80.0).max(180.0),
+        (ui.available_height()
+            - if lab.simulation.mode {
+                if lab.simulation.cursor.is_some() {
+                    240.0
+                } else {
+                    210.0
+                }
+            } else {
+                80.0
+            })
+        .max(160.0),
     );
     // Bound the offscreen target, including Retina, without allocating it every frame.
     let ppp = ui.ctx().pixels_per_point();
@@ -185,6 +207,9 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
             .corner_radius(12),
     );
     let response = response.on_hover_cursor(egui::CursorIcon::Grab);
+    if lab.simulation.mode {
+        super::simulation::overlay(ui, response.rect, lab);
+    }
     interact(ui, &response, lab);
     let visible = lab
         .atlas
@@ -192,20 +217,30 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
         .iter()
         .filter(|r| lab.scene.visible(r))
         .count();
-    ui.horizontal_wrapped(|ui| {
-        muted(
-            ui,
-            format!("{visible} из {} структур включены", lab.atlas.regions.len()),
-        );
-        if let Some(r) = lab.selected() {
-            ui.colored_label(TEAL, &r.name);
-        }
-    });
-    ui.label(RichText::new("Вращение — перетаскивание · Масштаб — прокрутка · Выбор — щелчок · Панорама — правая кнопка").size(11.0).color(MUTED));
+    if !lab.simulation.mode {
+        ui.horizontal_wrapped(|ui| {
+            muted(
+                ui,
+                format!("{visible} из {} структур включены", lab.atlas.regions.len()),
+            );
+            if let Some(r) = lab.selected() {
+                ui.colored_label(TEAL, &r.name);
+            }
+        });
+        ui.label(RichText::new("Вращение — перетаскивание · Масштаб — прокрутка · Выбор — щелчок · Панорама — правая кнопка").size(11.0).color(MUTED));
+    }
+    if lab.simulation.mode {
+        super::simulation::legend(ui);
+        super::simulation::timeline(ui, lab);
+    }
     ui.label(
-        RichText::new("BodyParts3D © DBCLS · CC BY 4.0 · Параметры динамики ещё не подключены")
-            .size(11.0)
-            .color(MUTED),
+        RichText::new(if lab.simulation.mode {
+            "BodyParts3D © DBCLS · CC BY 4.0 · Связи — схема, параметры — допущения"
+        } else {
+            "BodyParts3D © DBCLS · CC BY 4.0 · Геометрия не задаёт динамику"
+        })
+        .size(11.0)
+        .color(MUTED),
     );
     lab.dirty |= lab.scene != before;
 }
@@ -256,6 +291,11 @@ pub(super) fn zoom(scene: &mut BrainScene, scroll: f32) {
 }
 pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
     let before = lab.scene.clone();
+    if lab.simulation.mode {
+        super::simulation::inspector(ui, lab);
+        ui.add_space(10.0);
+        ui.separator();
+    }
     if let Some(r) = lab.selected().cloned() {
         tag(ui, r.kind.label(), egui_color(r.group));
         ui.add_space(12.0);
@@ -311,20 +351,20 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         ui.add_space(10.0);
         ui.strong("Данные области");
         muted(ui, format!("Объектов геометрии: {}", r.mesh_ids.len()));
-        ui.label(
-            "Модель популяции: не задана\nАктивность: неизвестна\nМежрегиональные связи: не заданы",
-        );
+        if !lab.simulation.mode {
+            ui.label("Динамика доступна на вкладке «Симуляция». Области без настроенной популяции остаются неизвестными.");
+        }
         ui.add_space(10.0);
         muted(
             ui,
-            "FMA ID связывает эту структуру с будущими параметрами и результатами симуляции. Форма меша не задаёт динамику.",
+            "FMA ID связывает анатомическую область с параметрами и результатами сети. Форма меша не задаёт динамику.",
         );
         ui.collapsing("Исходные объекты", |ui| {
             for id in &r.mesh_ids {
                 muted(ui, id);
             }
         });
-    } else {
+    } else if !lab.simulation.mode {
         tag(ui, "Анатомия человека", TEAL);
         ui.add_space(12.0);
         ui.heading("Основа симуляции");
@@ -345,6 +385,12 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         for group in BrainGroup::ALL {
             ui.colored_label(egui_color(group), group.label());
         }
+    } else {
+        ui.add_space(12.0);
+        muted(
+            ui,
+            "Выберите область на мозге или в списке: здесь появятся её E/I-популяции и направленные связи.",
+        );
     }
     ui.add_space(16.0);
     ui.separator();

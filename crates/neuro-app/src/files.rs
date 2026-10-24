@@ -8,7 +8,13 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
     let mut open = true;
     let mut submitted = false;
     let mut cancel = false;
-    let title = if lab.view == View::Brain {
+    let title = if lab.view == View::Brain && lab.brain.simulation.mode {
+        match action {
+            FileAction::Save => "Сохранить проект мозга",
+            FileAction::Open => "Открыть проект, сеть или сцену",
+            FileAction::Csv => "Экспорт вычисленной трассы E/I",
+        }
+    } else if lab.view == View::Brain {
         match action {
             FileAction::Save => "Сохранить сцену мозга",
             FileAction::Open => "Открыть сцену или сценарий",
@@ -36,7 +42,7 @@ pub fn show(ctx: &egui::Context, lab: &mut Lab) {
             let label = if exists { "Заменить файл" } else { match action { FileAction::Save => "Сохранить JSON", FileAction::Open => "Открыть файл", FileAction::Csv => "Экспортировать CSV" } };
             submitted = ui.button(label).clicked(); cancel = ui.button("Отмена").clicked();
         });
-        muted(ui, "JSON сохраняет сцену мозга или сценарий эксперимента. CSV — каталог областей мозга либо численные результаты выбранного эксперимента.");
+        muted(ui, "JSON проекта хранит сцену, сеть и протокол; открытие запускает их с t = 0 на паузе. CSV сети — вся вычисленная трасса, включая состояния после выбранного кадра истории.");
     });
     if submitted {
         let path = PathBuf::from(lab.file_path.trim());

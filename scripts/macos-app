@@ -15,6 +15,7 @@ cp assets/fonts/NotoSansMath-OFL.txt "$task_bundle/Resources/licenses/NotoSansMa
 cp assets/fonts/NotoSansSymbols2-OFL.txt "$task_bundle/Resources/licenses/NotoSansSymbols2-OFL.txt"
 cp LICENSE "$task_bundle/Resources/licenses/NeuroLab-MIT.txt"
 cp data/operational-model.json "$task_bundle/Resources/licenses/Operational-model-provenance.json"
+cp data/population-model.json "$task_bundle/Resources/licenses/Population-model-provenance.json"
 cp assets/brain/LICENSE-BodyParts3D.txt "$task_bundle/Resources/licenses/BodyParts3D-CC-BY-4.0.txt"
 cat > "$task_bundle/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
