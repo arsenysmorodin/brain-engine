@@ -443,3 +443,33 @@ mod tests {
         assert!((tr.at(5.0).systemic[0].rest_mg - expected).abs() < 2e-6);
     }
 }
+
+#[cfg(test)]
+mod long_horizon_tests {
+    use super::*;
+    #[test]
+    fn triple_24h_preserves_mass_and_concentration_dependent_flow_refines() {
+        let a = BrainAtlas::bundled().unwrap();
+        let s = CirculationScenario::reference(&a, 7);
+        let tr = simulate_circulation(s.clone(), &a).unwrap();
+        assert_eq!(tr.frames.last().unwrap().time_min, 1440.0);
+        for f in &tr.frames {
+            for x in &f.systemic {
+                assert!(x.balance_error_mg.abs() < 1e-7);
+            }
+        }
+        let last = tr.frames.last().unwrap();
+        assert!(last.systemic[1].eliminated_mg > 99.0);
+        assert!(last.systemic[2].brain_mg > last.systemic[1].brain_mg);
+        let mut short = s;
+        short.duration_min = 10.0;
+        let normal = simulate_circulation(short.clone(), &a).unwrap();
+        let fine = simulate_with_step(short, &a, 0.0025).unwrap();
+        for (x, y) in normal.frames.iter().zip(&fine.frames) {
+            assert!((x.systemic[0].central_mg_l - y.systemic[0].central_mg_l).abs() < 0.0001);
+            for (x, y) in x.regions.iter().zip(&y.regions) {
+                assert!((x[0].tissue_mg_l - y[0].tissue_mg_l).abs() < 0.002);
+            }
+        }
+    }
+}

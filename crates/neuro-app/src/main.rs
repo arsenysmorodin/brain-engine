@@ -1,6 +1,7 @@
 mod brain;
 mod experiment;
 mod files;
+mod glossary;
 mod inspector;
 mod map;
 mod plot;
@@ -49,6 +50,7 @@ impl FileAction {
 #[derive(Resource)]
 struct Lab {
     brain: brain::BrainLab,
+    glossary: glossary::Glossary,
     catalog: Catalog,
     scenario: Scenario,
     evaluation: Option<Evaluation>,
@@ -86,8 +88,11 @@ impl Lab {
     }
     fn new() -> Result<Self, neuro_domain::Error> {
         let scenario = Scenario::default();
+        let brain = brain::BrainLab::new()?;
+        let glossary = glossary::Glossary::new(&brain.atlas, &brain.vascular_atlas)?;
         Ok(Self {
-            brain: brain::BrainLab::new()?,
+            brain,
+            glossary,
             catalog: Catalog::bundled()?,
             evaluation: Some(evaluate(&scenario)?),
             scenario,
@@ -543,6 +548,18 @@ impl Lab {
                     "{}: {}",
                     match action {
                         FileAction::Save
+                            if self.view == View::Brain && self.brain.circulation.mode =>
+                            "Проект циркуляции сохранён (пересчёт при открытии с t=0)",
+                        FileAction::Open
+                            if self.view == View::Brain && self.brain.circulation.mode =>
+                            "Циркуляция пересчитана, t=0, пауза",
+                        FileAction::Csv
+                            if self.view == View::Brain && self.brain.circulation.mode =>
+                            "Общая PK трёх веществ экспортирована",
+                        FileAction::RegionalCsv
+                            if self.view == View::Brain && self.brain.circulation.mode =>
+                            "Капиллярный обмен и венозный возврат экспортированы",
+                        FileAction::Save
                             if self.view == View::Brain && self.brain.caffeine.mode =>
                             "Проект кофеина сохранён (PK при открытии с t=0)",
                         FileAction::Open
@@ -691,6 +708,9 @@ fn ui(
                     } else if ui.button("Экспорт CSV").clicked() {
                         lab.open_dialog(FileAction::Csv);
                     }
+                    if ui.button("Учебник").clicked() {
+                        lab.glossary.open = !lab.glossary.open;
+                    }
                     if ui.button("Открыть").clicked() {
                         lab.open_dialog(FileAction::Open);
                     }
@@ -836,6 +856,7 @@ fn ui(
         .into();
     }
     files::show(ctx, &mut lab);
+    lab.glossary.show(ctx);
     Ok(())
 }
 #[cfg(test)]

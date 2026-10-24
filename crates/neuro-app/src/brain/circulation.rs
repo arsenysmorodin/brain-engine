@@ -610,6 +610,21 @@ mod tests {
     fn schematic_paths_are_finite_and_can_be_picked_on_actual_triangles() {
         let mut lab = BrainLab::new().unwrap();
         lab.circulation.mode = true;
+        let mesh = lab.flow_geometry.meshes.last().unwrap();
+        let tri = &mesh.indices[..3];
+        let point = (mesh.positions[tri[0] as usize]
+            + mesh.positions[tri[1] as usize]
+            + mesh.positions[tri[2] as usize])
+            / 3.0;
+        let cam = super::super::camera_transform(lab.scene.camera);
+        let local = cam.rotation.inverse() * (point - cam.translation);
+        let tan = (super::super::FIELD_OF_VIEW * 0.5).tan();
+        let ndc = bevy::prelude::Vec2::new(local.x / (-local.z * tan), local.y / (-local.z * tan));
+        assert!(lab.flow_geometry.pick(&lab, ndc, 1.0).is_some());
+        lab.circulation.arteries = false;
+        lab.circulation.capillaries = false;
+        lab.circulation.veins = false;
+        assert!(lab.flow_geometry.pick(&lab, ndc, 1.0).is_none());
         assert_eq!(
             lab.flow_geometry
                 .paths

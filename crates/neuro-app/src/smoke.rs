@@ -36,6 +36,7 @@ fn run(
     mut lab: ResMut<Lab>,
     mut commands: Commands,
     mut exit: MessageWriter<AppExit>,
+    mut egui_inputs: Query<&mut bevy_egui::EguiInput>,
 ) {
     use bevy::render::view::screenshot::{Screenshot, save_to_disk};
     smoke.frame += 1;
@@ -763,6 +764,54 @@ fn run(
         }
         780 => {
             std::fs::write(smoke.directory.join("circulation-passed.txt"),"Closed three-substance circulation; capillary and venous views; replay from t=0; invalid/stale/input overwrite export guards; GUI and replay CSV identical.\n").unwrap();
+        }
+
+        790 => {
+            lab.brain.circulation.selected = neuro_domain::Purine::Caffeine;
+            lab.brain.circulation.set_time(60.0);
+            lab.brain.circulation.early = false;
+        }
+        800 => {
+            for mut input in &mut egui_inputs {
+                input
+                    .events
+                    .push(bevy_egui::egui::Event::PointerMoved(bevy_egui::egui::pos2(
+                        1080.0, 170.0,
+                    )));
+            }
+        }
+        860 => {
+            assert!(
+                lab.glossary.visible_tooltip.is_some(),
+                "Scientific tooltip should open over Cp in native UI"
+            );
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("learning-hover.png")));
+        }
+        870 => {
+            lab.glossary.open = true;
+            lab.glossary.search = "ГЭБ".into();
+            lab.glossary.selected = lab.glossary.terms.iter().position(|t| t.term == "ГЭБ");
+            for mut input in &mut egui_inputs {
+                input
+                    .events
+                    .push(bevy_egui::egui::Event::PointerMoved(bevy_egui::egui::pos2(
+                        1000.0, 80.0,
+                    )));
+            }
+        }
+        890 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("learning-glossary.png")));
+        }
+        900 => {
+            std::fs::write(
+                smoke.directory.join("learning-passed.txt"),
+                "Native hover tooltip over Cp; searchable learning glossary; screenshot review.\n",
+            )
+            .unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}
