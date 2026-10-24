@@ -904,13 +904,20 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         }
         if let Some(t) = &c.trace {
             let peak = t.peak();
-            muted(
-                ui,
-                format!(
-                    "Пик на сетке: {:.3} мг/л в {:.1} мин",
-                    peak.plasma_mg_l, peak.time_min
-                ),
-            );
+            if peak.plasma_mg_l > 0.0 {
+                muted(
+                    ui,
+                    format!(
+                        "Пик на сетке: {:.3} мг/л в {:.1} мин",
+                        peak.plasma_mg_l, peak.time_min
+                    ),
+                );
+            } else {
+                muted(
+                    ui,
+                    "Плазма равна 0 на всём горизонте; время пика не определено.",
+                );
+            }
         }
     }
     ui.add_space(7.0);
