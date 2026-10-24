@@ -5,6 +5,8 @@ use std::path::Path;
 
 mod response;
 pub use response::*;
+mod caffeine;
+pub use caffeine::*;
 mod network;
 pub use network::*;
 

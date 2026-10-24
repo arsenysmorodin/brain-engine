@@ -246,3 +246,93 @@ fn neural_network_cli_reproduces_shared_trace_and_guards_input() {
     );
     assert_eq!(fs::read(&input).unwrap(), before);
 }
+
+#[test]
+fn caffeine_cli_roundtrip_trace_and_explicit_neural_hypothesis() {
+    let temp = Temp::new();
+    let path = temp.0.join("caffeine.json");
+    assert!(
+        cli()
+            .arg("new-caffeine")
+            .arg(&path)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert!(
+        !cli()
+            .arg("new-caffeine")
+            .arg(&path)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    let atlas = neuro_domain::BrainAtlas::bundled().unwrap();
+    let mut scenario = neuro_domain::CaffeineScenario::load(&path, &atlas).unwrap();
+    let expected = neuro_engine::simulate_caffeine(scenario.clone(), &atlas).unwrap();
+    let csv = temp.0.join("pk.csv");
+    let result = cli()
+        .arg("caffeine")
+        .arg(&path)
+        .arg("--csv")
+        .arg(&csv)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    assert_eq!(fs::read_to_string(csv).unwrap(), expected.csv());
+    let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(
+        report["trace"]["scenario"]["provenance_id"],
+        neuro_domain::CAFFEINE_PROVENANCE_ID
+    );
+    assert!(report["network_comparison"].is_null());
+    assert!(
+        !cli()
+            .arg("caffeine")
+            .arg(&path)
+            .arg("--network-at-min")
+            .arg("60")
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    scenario.neural_hypothesis.enabled = true;
+    let project = neuro_domain::CaffeineProject::new(neuro_domain::BrainScene::default(), scenario);
+    project.save(&path, &atlas).unwrap();
+    let bytes = fs::read(&path).unwrap();
+    assert!(
+        !cli()
+            .arg("caffeine")
+            .arg(&path)
+            .arg("--csv")
+            .arg(&path)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(fs::read(&path).unwrap(), bytes);
+    let result = cli()
+        .arg("caffeine")
+        .arg(&path)
+        .arg("--network-at-min")
+        .arg("60")
+        .output()
+        .unwrap();
+    assert!(result.status.success());
+    let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(report["network_comparison"]["pk_time_min"], 60.0);
+    assert!(
+        report["network_comparison"]["hypothesis"]
+            .as_str()
+            .unwrap()
+            .contains("Непроверенная")
+    );
+}

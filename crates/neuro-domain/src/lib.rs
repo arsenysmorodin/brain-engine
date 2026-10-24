@@ -9,6 +9,8 @@ mod brain;
 pub use brain::*;
 mod network;
 pub use network::*;
+mod caffeine;
+pub use caffeine::*;
 
 pub const FORMAT_VERSION: u32 = 1;
 pub const MODEL_ID: &str = "competitive_binding_equilibrium_v1";

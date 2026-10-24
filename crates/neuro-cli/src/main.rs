@@ -56,14 +56,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     let path = next_path(&mut args, &command)?;
     match command.as_str() {
-        "new" | "new-response" | "new-network" => {
+        "new" | "new-response" | "new-network" | "new-caffeine" => {
             if args.next().is_some() {
                 return Err("Лишний аргумент команды new".into());
             }
             if path.exists() {
                 return Err("Файл уже существует; укажите новый путь".into());
             }
-            if command == "new-network" {
+            if command == "new-caffeine" {
+                let atlas = neuro_domain::BrainAtlas::bundled()?;
+                neuro_domain::CaffeineScenario::reference(&atlas)?.save(&path, &atlas)?;
+            } else if command == "new-network" {
                 let atlas = neuro_domain::BrainAtlas::bundled()?;
                 neuro_domain::NetworkScenario::bundled(&atlas)?.save(&path, &atlas)?;
             } else if command == "new-response" {
@@ -73,13 +76,21 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             }
             println!("Создан illustrative-сценарий: {}", path.display());
         }
-        "run" | "simulate" => {
+        "run" | "simulate" | "caffeine" => {
             let mut csv = None;
             let mut json = None;
+            let mut network_time = None;
             while let Some(flag) = args.next() {
                 match flag.as_str() {
                     "--csv" if csv.is_none() => csv = Some(next_path(&mut args, &flag)?),
                     "--json" if json.is_none() => json = Some(next_path(&mut args, &flag)?),
+                    "--network-at-min" if command == "caffeine" && network_time.is_none() => {
+                        network_time = Some(
+                            args.next()
+                                .ok_or("После --network-at-min нужно время")?
+                                .parse::<f64>()?,
+                        );
+                    }
                     _ => return Err(format!("Неизвестный или повторный аргумент: {flag}").into()),
                 }
             }
@@ -93,7 +104,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
             {
                 return Err("CSV и JSON должны иметь разные пути".into());
             }
-            let text = if command == "simulate" {
+            let text = if command == "caffeine" {
+                let atlas = neuro_domain::BrainAtlas::bundled()?;
+                let scenario = neuro_domain::CaffeineScenario::load(&path, &atlas)?;
+                let trace = neuro_engine::simulate_caffeine(scenario, &atlas)?;
+                let comparison = network_time
+                    .map(|time| neuro_engine::compare_caffeine_network(&trace, time, &atlas))
+                    .transpose()?;
+                if let Some(csv) = csv {
+                    trace.export_csv(csv)?;
+                }
+                serde_json::to_string_pretty(
+                    &serde_json::json!({"trace":trace,"network_comparison":comparison}),
+                )?
+            } else if command == "simulate" {
                 let atlas = neuro_domain::BrainAtlas::bundled()?;
                 let scenario = neuro_domain::NetworkScenario::load(&path, &atlas)?;
                 let trace = neuro_engine::simulate_network(scenario, &atlas)?;
@@ -135,6 +159,6 @@ fn same_path(a: &Path, b: &Path) -> bool {
 }
 fn help() {
     println!(
-        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
+        "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );
 }
