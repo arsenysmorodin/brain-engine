@@ -13,6 +13,8 @@ mod circulation;
 pub use circulation::*;
 mod pk_reference;
 pub use pk_reference::*;
+mod pk_fit;
+pub use pk_fit::*;
 mod caffeine;
 pub use caffeine::*;
 mod network;

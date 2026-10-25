@@ -32,7 +32,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
         let atlas = neuro_domain::BrainAtlas::bundled()?;
         let mut report = Vec::new();
-        for revision in [2, neuro_domain::CIRCULATION_MODEL_REVISION] {
+        for revision in [2, 3] {
             for mask in [1, 2, 3, 4, 5] {
                 let mut s = neuro_domain::CirculationScenario::reference(&atlas, mask);
                 s.model_revision = revision;
@@ -76,6 +76,68 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
     let path = next_path(&mut args, &command)?;
     match command.as_str() {
+        "fit-purine-curves" => {
+            let mut json = None;
+            let mut csv = None;
+            let mut scenarios = None;
+            while let Some(flag) = args.next() {
+                match flag.as_str() {
+                    "--json" if json.is_none() => json = Some(next_path(&mut args, &flag)?),
+                    "--csv" if csv.is_none() => csv = Some(next_path(&mut args, &flag)?),
+                    "--scenarios-dir" if scenarios.is_none() => {
+                        scenarios = Some(next_path(&mut args, &flag)?)
+                    }
+                    _ => return Err(format!("Неизвестный или повторный аргумент: {flag}").into()),
+                }
+            }
+            for out in [&json, &csv].into_iter().flatten() {
+                if same_path(&path, out) {
+                    return Err("Экспорт не должен перезаписывать входные данные".into());
+                }
+            }
+            if let (Some(a), Some(b)) = (&json, &csv)
+                && same_path(a, b)
+            {
+                return Err("Файлы отчёта должны различаться".into());
+            }
+            let data = neuro_domain::PkCurveDataset::load(&path)?;
+            if let Some(dir) = &scenarios
+                && (dir.exists()
+                    || [&json, &csv]
+                        .into_iter()
+                        .flatten()
+                        .any(|p| p.starts_with(dir)))
+            {
+                return Err("Для протоколов укажите новый отдельный каталог".into());
+            }
+            let report = neuro_engine::fit_pk_curves(&data)?;
+            if let Some(dir) = scenarios {
+                let atlas = neuro_domain::BrainAtlas::bundled()?;
+                let protocols = neuro_engine::fitted_pk_protocols(&report, &atlas)?;
+                std::fs::create_dir_all(&dir)?;
+                let mut checks = Vec::new();
+                for (i, scenario) in protocols.into_iter().enumerate() {
+                    let file = format!("protocol-{}.json", i + 1);
+                    scenario.save(dir.join(&file), &atlas)?;
+                    let trace = neuro_engine::simulate_circulation(scenario, &atlas)?;
+                    for (fit, time) in neuro_engine::matching_fitted_curves(&trace, &report) {
+                        checks.push(serde_json::json!({"file": file, "curve_id": fit.curve.id, "actual_circulation": neuro_engine::coupled_curve_metrics(&trace, fit, time)}));
+                    }
+                }
+                atomic_write(
+                    &dir.join("comparison.json"),
+                    serde_json::to_string_pretty(&checks)?.as_bytes(),
+                )?;
+            }
+            if let Some(p) = csv {
+                atomic_write(&p, report.csv().as_bytes())?;
+            }
+            let text = serde_json::to_string_pretty(&report)?;
+            if let Some(p) = json {
+                atomic_write(&p, format!("{text}\n").as_bytes())?;
+            }
+            println!("{text}");
+        }
         "new" | "new-response" | "new-network" | "new-caffeine" | "new-circulation" => {
             if args.next().is_some() {
                 return Err("Лишний аргумент команды new".into());
@@ -223,9 +285,10 @@ fn same_path(a: &Path, b: &Path) -> bool {
     normalized(a) == normalized(b)
 }
 fn help() {
-    println!(
+    println!(concat!(
+        "  neuro-cli fit-purine-curves <data.json> [--json report.json] [--csv predictions.csv] [--scenarios-dir new-dir] — подбор опубликованных кривых с исключением временных точек\n",
         "  neuro-cli benchmark-purine-pk — сравнение сводных плазменных ориентиров с ревизиями 2/3 (JSON, без объявления биологической валидации)\n"
-    );
+    ));
     println!(
         "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-circulation circulation.json\n  neuro-cli circulation circulation-or-project.json [--csv pk.csv] [--regional-csv regions.csv] [--json trace.json] [--network-at-min 60]\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--regional-csv regions.csv] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );

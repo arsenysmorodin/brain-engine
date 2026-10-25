@@ -1,0 +1,77 @@
+{
+  "format_version": 1,
+  "id": "published_plasma_curves_2026_10_25_v1",
+  "species": "Homo sapiens",
+  "matrix": "plasma",
+  "limitations": "Оцифрованные маркеры опубликованных графиков, не исходные индивидуальные записи. Погрешность координат не является SD/SEM участников. Преддозовые точки исключены из подбора дозового ответа. Wang: проверены аннотация и оригиналы рисунков издателя; полный текст, тип агрегации/усов и все условия протокола не проверены. Различие масштаба между исследованиями не интерпретируется как причинный эффект смеси.",
+  "curves": [
+    {
+      "id": "mondal2022-m100-mean", "study": "Mondal 2022, Figure 1A, cohort II", "substance": "methylliberine", "doses_mg": [0, 100, 0], "n": 12,
+      "source_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "figure_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "sha256": "35d7aa708a9b4317898bf2b4d7e7ac3f7c917c0645c789ea2f7cf026f0d272f3",
+      "verification": "Полный PDF проверен; оцифровано встроенное Image63.png, 1138×378. Арифметическое среднее; усы SD. Ранние наложенные маркеры имеют увеличенную погрешность. Последняя точка ниже указанного LLOQ 0.67 ng/mL — верхняя граница.",
+      "axes": {"x0_px":109,"x1_px":440,"t0_min":0,"t1_min":1800,"y0_px":89,"y1_px":233,"c0_ng_ml":1000,"c1_ng_ml":1},
+      "points": [
+        {"pixel":[112,139],"time_min":15,"error_px":6}, {"pixel":[115,123],"time_min":30,"error_px":6},
+        {"pixel":[120,117],"time_min":60,"error_px":5}, {"pixel":[126,123],"time_min":90,"error_px":5},
+        {"pixel":[131,129],"time_min":120,"error_px":3}, {"pixel":[153,146],"time_min":240,"error_px":2},
+        {"pixel":[175,164.5],"time_min":360,"error_px":2}, {"pixel":[197,176.5],"time_min":480,"error_px":2},
+        {"pixel":[374,277.5],"time_min":1440,"error_px":2,"upper_limit_ng_ml":0.67}
+      ]
+    },
+    {
+      "id": "mondal2022-c150-mean", "study": "Mondal 2022, Figure 1B, cohort III", "substance": "caffeine", "doses_mg": [150, 0, 0], "n": 12,
+      "source_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "figure_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "sha256": "35d7aa708a9b4317898bf2b4d7e7ac3f7c917c0645c789ea2f7cf026f0d272f3",
+      "verification": "Полный PDF проверен; Image63.png, пурпурные маркеры. Арифметическое среднее; усы SD. Масштаб ng/mL сохраняется как напечатан, не умножается на 10 ради согласования с He 2017.",
+      "axes": {"x0_px":686,"x1_px":1029,"t0_min":0,"t1_min":1800,"y0_px":73,"y1_px":301,"c0_ng_ml":1000,"c1_ng_ml":1},
+      "points": [
+        {"pixel":[689,151],"time_min":15,"error_px":5}, {"pixel":[692,112],"time_min":30,"error_px":5},
+        {"pixel":[697,105],"time_min":60,"error_px":4}, {"pixel":[703,108],"time_min":90,"error_px":4},
+        {"pixel":[709,110],"time_min":120,"error_px":3}, {"pixel":[732,114],"time_min":240,"error_px":2},
+        {"pixel":[754,122],"time_min":360,"error_px":2}, {"pixel":[778,129],"time_min":480,"error_px":2},
+        {"pixel":[960,165],"time_min":1440,"error_px":2}
+      ]
+    },
+    {
+      "id": "wang2020-triple-m", "study": "Wang 2020, Figure 3", "substance": "methylliberine", "doses_mg": [150, 100, 50], "n": 12,
+      "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278", "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr3_lrg.jpg", "sha256": "1c2f3f349f7c82fe0cae417888da3078513367ee40a67de54c36ba05beb3e1d8",
+      "verification": "Оригинал издателя 1376×1060. Полный текст закрыт; состав и n — из аннотации. Агрегация и тип усов не проверены. Время восстановлено по оси; первый маркер исключён как исходный фон, который дозовая модель с нулевым началом не описывает.",
+      "axes": {"x0_px":228,"x1_px":1346,"t0_min":0,"t1_min":1800,"y0_px":107,"y1_px":594,"c0_ng_ml":1000,"c1_ng_ml":1},
+      "points": [
+        {"pixel":[228,417],"error_px":4,"exclude":"Исходный фон: начальное состояние неизвестно"},
+        {"pixel":[237,278],"error_px":5}, {"pixel":[247,195],"error_px":6}, {"pixel":[265,190],"error_px":6},
+        {"pixel":[284,204],"error_px":5}, {"pixel":[303,230],"error_px":4}, {"pixel":[377,285],"error_px":3},
+        {"pixel":[452,330],"error_px":3}, {"pixel":[526,375],"error_px":3}, {"pixel":[1122,595],"error_px":3}
+      ]
+    },
+    {
+      "id": "wang2020-triple-c", "study": "Wang 2020, Figure 4", "substance": "caffeine", "doses_mg": [150, 100, 50], "n": 12,
+      "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278", "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr4_lrg.jpg", "sha256": "3c1bc993d5bc2642ab6e6e4484a1218228e2216d8ca40719a42e7c69e2960183",
+      "verification": "Оригинал издателя 1378×922; аннотация и график, не полный текст. Сохранены напечатанные ng/mL. Первый маркер исходного фона исключён. Нельзя сравнивать масштабы разных исследований как причинный эффект смеси.",
+      "axes": {"x0_px":230,"x1_px":1350,"t0_min":0,"t1_min":1800,"y0_px":28,"y1_px":772,"c0_ng_ml":1000,"c1_ng_ml":1},
+      "points": [
+        {"pixel":[230,407],"error_px":4,"exclude":"Исходный фон: начальное состояние неизвестно"},
+        {"pixel":[239,250],"error_px":5}, {"pixel":[248,129],"error_px":6}, {"pixel":[267,121],"error_px":6},
+        {"pixel":[286,125],"error_px":5}, {"pixel":[305,123],"error_px":5}, {"pixel":[379,130],"error_px":3},
+        {"pixel":[454,137],"error_px":3}, {"pixel":[528,147],"error_px":3}, {"pixel":[1126,224],"error_px":3}
+      ]
+    },
+    {
+      "id": "wang2020-triple-t", "study": "Wang 2020, Figure 5", "substance": "theacrine", "doses_mg": [150, 100, 50], "n": 12,
+      "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278", "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr5_lrg.jpg", "sha256": "fc2ea775fd872a1863e96da4e4a356a4a4b5badfc69424bbc4d5d1d708685b9b",
+      "verification": "Оригинал издателя 1378×999. Ось рисунка содержит 48 ч, аннотация описывает 24 ч; полный текст нужен для уточнения. Агрегация/усы не проверены. Состав и n из аннотации. Фон исключён.",
+      "axes": {"x0_px":235,"x1_px":1350,"t0_min":0,"t1_min":3600,"y0_px":50,"y1_px":790,"c0_ng_ml":1000,"c1_ng_ml":1},
+      "points": [
+        {"pixel":[235,627],"error_px":4,"exclude":"Исходный фон: начальное состояние неизвестно"},
+        {"pixel":[240,419],"error_px":5}, {"pixel":[244,273],"error_px":7}, {"pixel":[254,262],"error_px":7},
+        {"pixel":[263,260],"error_px":7}, {"pixel":[272,259],"error_px":6}, {"pixel":[309,266],"error_px":4},
+        {"pixel":[346,270],"error_px":4}, {"pixel":[383,278],"error_px":3}, {"pixel":[681,327],"error_px":3},
+        {"pixel":[1127,416],"error_px":3}
+      ]
+    }
+  ],
+  "gaps": [
+    "He 2017: одиночный T125. Индивидуальные ранние маркеры перекрыты; числовые записи не получены. Полная одиночная кривая T не считается откалиброванной.",
+    "Wang 2020: полный текст и индивидуальные записи не получены; подгонка рисунков имеет исследовательский статус.",
+    "Межисследовательская шкала концентраций и разведение должны быть уточнены у авторов."
+  ]
+}

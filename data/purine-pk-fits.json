@@ -1,0 +1,3451 @@
+{
+  "model_id": "oral_plasma_curve_fit_v1",
+  "model_revision": 1,
+  "dataset_id": "published_plasma_curves_2026_10_25_v1",
+  "data_kind": "digitized_published_graphs_not_original_records",
+  "method": "Deterministic bounded multistart Nelder-Mead; log interval residuals; pixel uncertainty and a 0.10 log modelling floor; minimum leave-one-time-out log RMSE among 1/2 compartments and 1..4 absorption stages; complexity breaks exact ties",
+  "limitations": "Оцифрованные маркеры опубликованных графиков, не исходные индивидуальные записи. Погрешность координат не является SD/SEM участников. Преддозовые точки исключены из подбора дозового ответа. Wang: проверены аннотация и оригиналы рисунков издателя; полный текст, тип агрегации/усов и все условия протокола не проверены. Различие масштаба между исследованиями не интерпретируется как причинный эффект смеси.",
+  "scope_gaps": [
+    "He 2017: одиночный T125. Индивидуальные ранние маркеры перекрыты; числовые записи не получены. Полная одиночная кривая T не считается откалиброванной.",
+    "Wang 2020: полный текст и индивидуальные записи не получены; подгонка рисунков имеет исследовательский статус.",
+    "Межисследовательская шкала концентраций и разведение должны быть уточнены у авторов."
+  ],
+  "fits": [
+    {
+      "curve": {
+        "id": "mondal2022-m100-mean",
+        "study": "Mondal 2022, Figure 1A, cohort II",
+        "substance": "methylliberine",
+        "doses_mg": [
+          0.0,
+          100.0,
+          0.0
+        ],
+        "n": 12,
+        "source_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342",
+        "figure_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342",
+        "sha256": "35d7aa708a9b4317898bf2b4d7e7ac3f7c917c0645c789ea2f7cf026f0d272f3",
+        "verification": "Полный PDF проверен; оцифровано встроенное Image63.png, 1138×378. Арифметическое среднее; усы SD. Ранние наложенные маркеры имеют увеличенную погрешность. Последняя точка ниже указанного LLOQ 0.67 ng/mL — верхняя граница.",
+        "axes": {
+          "x0_px": 109.0,
+          "x1_px": 440.0,
+          "t0_min": 0.0,
+          "t1_min": 1800.0,
+          "y0_px": 89.0,
+          "y1_px": 233.0,
+          "c0_ng_ml": 1000.0,
+          "c1_ng_ml": 1.0
+        },
+        "points": [
+          {
+            "pixel": [
+              112.0,
+              139.0
+            ],
+            "error_px": 6.0,
+            "time_min": 15.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              115.0,
+              123.0
+            ],
+            "error_px": 6.0,
+            "time_min": 30.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              120.0,
+              117.0
+            ],
+            "error_px": 5.0,
+            "time_min": 60.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              126.0,
+              123.0
+            ],
+            "error_px": 5.0,
+            "time_min": 90.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              131.0,
+              129.0
+            ],
+            "error_px": 3.0,
+            "time_min": 120.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              153.0,
+              146.0
+            ],
+            "error_px": 2.0,
+            "time_min": 240.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              175.0,
+              164.5
+            ],
+            "error_px": 2.0,
+            "time_min": 360.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              197.0,
+              176.5
+            ],
+            "error_px": 2.0,
+            "time_min": 480.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              374.0,
+              277.5
+            ],
+            "error_px": 2.0,
+            "time_min": 1440.0,
+            "exclude": null,
+            "upper_limit_ng_ml": 0.67
+          }
+        ]
+      },
+      "selected": {
+        "compartments": 2,
+        "parameters": {
+          "volume_l": 297.18886997955303,
+          "clearance_l_h": 131.63786853501853,
+          "absorption_rate_h": 7.240056623514763,
+          "peripheral_volume_l": 94.1084350057532,
+          "distribution_clearance_l_h": 19.881540513447387,
+          "absorption_stages": 3
+        },
+        "training": {
+          "observations": 8,
+          "log_rmse": 0.05058457501640502,
+          "mean_absolute_relative_error_pct": 4.481472752919695,
+          "max_absolute_relative_error_pct": 8.426736268916969
+        },
+        "leave_one_time_out": {
+          "observations": 8,
+          "log_rmse": 0.14748137358539304,
+          "mean_absolute_relative_error_pct": 12.380316118348098,
+          "max_absolute_relative_error_pct": 24.02707915307307
+        },
+        "held_out_predictions_mg_l": [
+          0.07815699389276305,
+          0.21814132870669456,
+          0.23639255626063221,
+          0.19647683099704055,
+          0.16013591011782308,
+          0.055755369584844616,
+          0.031157591684403636,
+          0.01142200002813653
+        ],
+        "jackknife_min": [
+          12.61046166844586,
+          128.4302589550316,
+          3.130969754360109,
+          63.84139385964666,
+          18.779994266526977
+        ],
+        "jackknife_max": [
+          308.32004972038277,
+          139.56370938330943,
+          7.386614509561287,
+          251.82732074851788,
+          306.7159125572926
+        ],
+        "warnings": [
+          "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+        ]
+      },
+      "candidates": [
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 363.2010921024891,
+            "clearance_l_h": 144.20534822994628,
+            "absorption_rate_h": 2.497535503796587,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.16850901832701018,
+            "mean_absolute_relative_error_pct": 13.467258351247413,
+            "max_absolute_relative_error_pct": 33.294573454966624
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.2990479819436738,
+            "mean_absolute_relative_error_pct": 24.855890616805898,
+            "max_absolute_relative_error_pct": 86.6452309316829
+          },
+          "held_out_predictions_mg_l": [
+            0.16957047271300182,
+            0.16791849454064592,
+            0.18305233936222784,
+            0.16967247773231445,
+            0.14522157004809821,
+            0.06807788144293823,
+            0.03191651459430517,
+            0.010594660644819518
+          ],
+          "jackknife_min": [
+            315.9873825452947,
+            136.8584748398296,
+            1.9839452589655093
+          ],
+          "jackknife_max": [
+            382.13489240495727,
+            149.0156149418775,
+            3.9134090351460036
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 360.55407246295545,
+            "clearance_l_h": 142.83645188418555,
+            "absorption_rate_h": 5.19744539776674,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.10934756101610711,
+            "mean_absolute_relative_error_pct": 8.628796332213666,
+            "max_absolute_relative_error_pct": 20.207837666704588
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.19753306348959498,
+            "mean_absolute_relative_error_pct": 15.901756397970587,
+            "max_absolute_relative_error_pct": 36.02033407114751
+          },
+          "held_out_predictions_mg_l": [
+            0.12357686414965151,
+            0.1809318127061174,
+            0.20046301915921222,
+            0.17543938927025968,
+            0.14721175652659765,
+            0.06747418648971942,
+            0.03181175375219096,
+            0.010993681842052364
+          ],
+          "jackknife_min": [
+            321.07152867233134,
+            138.98368504091823,
+            4.657377582973331
+          ],
+          "jackknife_max": [
+            376.5831548727198,
+            146.33670820565226,
+            6.183083286294173
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 359.135289237145,
+            "clearance_l_h": 141.86533592819356,
+            "absorption_rate_h": 8.252613080640197,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.095151932459789,
+            "mean_absolute_relative_error_pct": 6.727704541404944,
+            "max_absolute_relative_error_pct": 18.021372256353587
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.1549725234108584,
+            "mean_absolute_relative_error_pct": 10.866840062018241,
+            "max_absolute_relative_error_pct": 25.942768291888207
+          },
+          "held_out_predictions_mg_l": [
+            0.09517156496730156,
+            0.19971520432676088,
+            0.2059152877590568,
+            0.1753220099388651,
+            0.1461937749069002,
+            0.06714177660455999,
+            0.0317806611910379,
+            0.011133989495521442
+          ],
+          "jackknife_min": [
+            321.27745985620385,
+            138.061525132633,
+            7.617166832098703
+          ],
+          "jackknife_max": [
+            374.5286305034462,
+            145.1175073626752,
+            8.443491258942066
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 358.8370479566931,
+            "clearance_l_h": 141.32177913016318,
+            "absorption_rate_h": 11.546476328140317,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.09859949007609954,
+            "mean_absolute_relative_error_pct": 7.775586418994747,
+            "max_absolute_relative_error_pct": 17.62857276002203
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.1687567956417756,
+            "mean_absolute_relative_error_pct": 13.39251734770553,
+            "max_absolute_relative_error_pct": 25.235351434943876
+          },
+          "held_out_predictions_mg_l": [
+            0.07533619266069069,
+            0.21548455559006663,
+            0.206519228981788,
+            0.17432076675463676,
+            0.14507937476485802,
+            0.06685706937295212,
+            0.03176255117464551,
+            0.011240344697741487
+          ],
+          "jackknife_min": [
+            321.96910199464594,
+            137.5494594948214,
+            10.683618872053286
+          ],
+          "jackknife_max": [
+            374.4907869687655,
+            144.62002969266496,
+            11.83272564496801
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 245.42742117548607,
+            "clearance_l_h": 133.3633365966515,
+            "absorption_rate_h": 1.4197143523233806,
+            "peripheral_volume_l": 127.14822305533592,
+            "distribution_clearance_l_h": 32.1182570600134,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.12151141402633851,
+            "mean_absolute_relative_error_pct": 9.001723156441082,
+            "max_absolute_relative_error_pct": 22.74351168747517
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.2485700158516332,
+            "mean_absolute_relative_error_pct": 21.26039017339982,
+            "max_absolute_relative_error_pct": 61.34059542697186
+          },
+          "held_out_predictions_mg_l": [
+            0.14658076661151215,
+            0.16321269890391224,
+            0.1830522974817279,
+            0.1931281816281847,
+            0.1741512968821703,
+            0.057801767653978924,
+            0.029587537210461878,
+            0.011934160607028142
+          ],
+          "jackknife_min": [
+            174.2670461732576,
+            127.66357597772469,
+            1.0117188385707825,
+            1.0000001074607872,
+            22.304936115414492
+          ],
+          "jackknife_max": [
+            381.13483328866334,
+            149.0156197968459,
+            2.3881108686698282,
+            143.02785283423873,
+            5000.000000000004
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 292.20485500309115,
+            "clearance_l_h": 132.5521848340446,
+            "absorption_rate_h": 4.305515701824706,
+            "peripheral_volume_l": 99.7953252594376,
+            "distribution_clearance_l_h": 21.928129917150994,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.0543930865535598,
+            "mean_absolute_relative_error_pct": 4.529309233821397,
+            "max_absolute_relative_error_pct": 10.254562288297908
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.16192017316505208,
+            "mean_absolute_relative_error_pct": 13.5929154449065,
+            "max_absolute_relative_error_pct": 22.78801233258466
+          },
+          "held_out_predictions_mg_l": [
+            0.10476387297698209,
+            0.19094453793230265,
+            0.22672203307227898,
+            0.1994991243937711,
+            0.16930545814773978,
+            0.050977189784743394,
+            0.031089801230923995,
+            0.011608285103143675
+          ],
+          "jackknife_min": [
+            148.62964655515216,
+            127.26530673896245,
+            2.921585875947726,
+            96.71810083633272,
+            20.64182707577152
+          ],
+          "jackknife_max": [
+            306.19145504174196,
+            141.3011537028141,
+            4.638994749745802,
+            155.45140413264002,
+            198.6580643748871
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 297.18886997955303,
+            "clearance_l_h": 131.63786853501853,
+            "absorption_rate_h": 7.240056623514763,
+            "peripheral_volume_l": 94.1084350057532,
+            "distribution_clearance_l_h": 19.881540513447387,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.05058457501640502,
+            "mean_absolute_relative_error_pct": 4.481472752919695,
+            "max_absolute_relative_error_pct": 8.426736268916969
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.14748137358539304,
+            "mean_absolute_relative_error_pct": 12.380316118348098,
+            "max_absolute_relative_error_pct": 24.02707915307307
+          },
+          "held_out_predictions_mg_l": [
+            0.07815699389276305,
+            0.21814132870669456,
+            0.23639255626063221,
+            0.19647683099704055,
+            0.16013591011782308,
+            0.055755369584844616,
+            0.031157591684403636,
+            0.01142200002813653
+          ],
+          "jackknife_min": [
+            12.61046166844586,
+            128.4302589550316,
+            3.130969754360109,
+            63.84139385964666,
+            18.779994266526977
+          ],
+          "jackknife_max": [
+            308.32004972038277,
+            139.56370938330943,
+            7.386614509561287,
+            251.82732074851788,
+            306.7159125572926
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 300.9456728166146,
+            "clearance_l_h": 131.26979801504285,
+            "absorption_rate_h": 10.417165172418592,
+            "peripheral_volume_l": 90.55365776338228,
+            "distribution_clearance_l_h": 18.55745136197839,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 8,
+            "log_rmse": 0.07269091288818294,
+            "mean_absolute_relative_error_pct": 6.000975608478935,
+            "max_absolute_relative_error_pct": 17.44516996288783
+          },
+          "leave_one_time_out": {
+            "observations": 8,
+            "log_rmse": 0.20968627313071156,
+            "mean_absolute_relative_error_pct": 15.798607247821089,
+            "max_absolute_relative_error_pct": 33.88442268214366
+          },
+          "held_out_predictions_mg_l": [
+            0.060067164017630514,
+            0.2409733521041417,
+            0.2361234014836158,
+            0.19248092096590247,
+            0.15593731047479525,
+            0.05720409083970943,
+            0.030521989061430388,
+            0.011143389412177698
+          ],
+          "jackknife_min": [
+            10.000000112044848,
+            129.03860683107672,
+            8.160178876546878,
+            41.320232885440184,
+            17.386950828238707
+          ],
+          "jackknife_max": [
+            312.7588588755211,
+            140.83287970559326,
+            10.635698702794636,
+            297.46046054635525,
+            2926.4607186038393
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        }
+      ],
+      "predictions": [
+        {
+          "observation": {
+            "time_min": 15.0,
+            "concentration_mg_l": 0.09085175756516871,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.2878231366242557,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.0878381795993253,
+          "relative_error_pct": -3.317027701617925
+        },
+        {
+          "observation": {
+            "time_min": 30.0,
+            "concentration_mg_l": 0.19573417814876606,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.2878231366242557,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.21222818112949468,
+          "relative_error_pct": 8.426736268916969
+        },
+        {
+          "observation": {
+            "time_min": 60.0,
+            "concentration_mg_l": 0.2610157215682537,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.23985261385354642,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.2431664884459608,
+          "relative_error_pct": -6.8383747212810935
+        },
+        {
+          "observation": {
+            "time_min": 90.0,
+            "concentration_mg_l": 0.19573417814876606,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.23985261385354642,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.19630346869429757,
+          "relative_error_pct": 0.2908488190032976
+        },
+        {
+          "observation": {
+            "time_min": 120.0,
+            "concentration_mg_l": 0.14677992676220697,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.14391156831212784,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.1542260610319331,
+          "relative_error_pct": 5.0729922231051106
+        },
+        {
+          "observation": {
+            "time_min": 240.0,
+            "concentration_mg_l": 0.06493816315762115,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.09594104554141857,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.06185338092429265,
+          "relative_error_pct": -4.750337988219588
+        },
+        {
+          "observation": {
+            "time_min": 360.0,
+            "concentration_mg_l": 0.026735193599339912,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.09594104554141857,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.02811762671087784,
+          "relative_error_pct": 5.170836359950881
+        },
+        {
+          "observation": {
+            "time_min": 480.0,
+            "concentration_mg_l": 0.015034304197873346,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.09594104554141857,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.014735929195987922,
+          "relative_error_pct": -1.9846279412626955
+        },
+        {
+          "observation": {
+            "time_min": 1440.0,
+            "concentration_mg_l": 0.00011828145730152709,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.09594104554141857,
+            "exclude": null,
+            "upper_limit_mg_l": 0.00067
+          },
+          "predicted_mg_l": 0.0006703476803339139,
+          "relative_error_pct": 466.7394498066091
+        }
+      ],
+      "sampled_cmax_mg_l": 0.2610157215682537,
+      "fitted_cmax_mg_l": 0.2522850682280292,
+      "fitted_tmax_min": 48.0
+    },
+    {
+      "curve": {
+        "id": "mondal2022-c150-mean",
+        "study": "Mondal 2022, Figure 1B, cohort III",
+        "substance": "caffeine",
+        "doses_mg": [
+          150.0,
+          0.0,
+          0.0
+        ],
+        "n": 12,
+        "source_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342",
+        "figure_url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342",
+        "sha256": "35d7aa708a9b4317898bf2b4d7e7ac3f7c917c0645c789ea2f7cf026f0d272f3",
+        "verification": "Полный PDF проверен; Image63.png, пурпурные маркеры. Арифметическое среднее; усы SD. Масштаб ng/mL сохраняется как напечатан, не умножается на 10 ради согласования с He 2017.",
+        "axes": {
+          "x0_px": 686.0,
+          "x1_px": 1029.0,
+          "t0_min": 0.0,
+          "t1_min": 1800.0,
+          "y0_px": 73.0,
+          "y1_px": 301.0,
+          "c0_ng_ml": 1000.0,
+          "c1_ng_ml": 1.0
+        },
+        "points": [
+          {
+            "pixel": [
+              689.0,
+              151.0
+            ],
+            "error_px": 5.0,
+            "time_min": 15.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              692.0,
+              112.0
+            ],
+            "error_px": 5.0,
+            "time_min": 30.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              697.0,
+              105.0
+            ],
+            "error_px": 4.0,
+            "time_min": 60.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              703.0,
+              108.0
+            ],
+            "error_px": 4.0,
+            "time_min": 90.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              709.0,
+              110.0
+            ],
+            "error_px": 3.0,
+            "time_min": 120.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              732.0,
+              114.0
+            ],
+            "error_px": 2.0,
+            "time_min": 240.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              754.0,
+              122.0
+            ],
+            "error_px": 2.0,
+            "time_min": 360.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              778.0,
+              129.0
+            ],
+            "error_px": 2.0,
+            "time_min": 480.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              960.0,
+              165.0
+            ],
+            "error_px": 2.0,
+            "time_min": 1440.0,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          }
+        ]
+      },
+      "selected": {
+        "compartments": 2,
+        "parameters": {
+          "volume_l": 373.54923683242305,
+          "clearance_l_h": 0.17443004536492687,
+          "absorption_rate_h": 10.003268323412954,
+          "peripheral_volume_l": 3383.4205941171736,
+          "distribution_clearance_l_h": 39.81919845789113,
+          "absorption_stages": 4
+        },
+        "training": {
+          "observations": 9,
+          "log_rmse": 0.03248079112037399,
+          "mean_absolute_relative_error_pct": 2.6734216977340597,
+          "max_absolute_relative_error_pct": 5.754651761466678
+        },
+        "leave_one_time_out": {
+          "observations": 9,
+          "log_rmse": 0.1902628210325971,
+          "mean_absolute_relative_error_pct": 10.643115567309684,
+          "max_absolute_relative_error_pct": 40.25385175692239
+        },
+        "held_out_predictions_mg_l": [
+          0.11357161656941195,
+          0.2846398448695788,
+          0.3697774446530011,
+          0.36093598869133375,
+          0.34467464918081814,
+          0.25817649857786235,
+          0.22536249051200927,
+          0.19071246804312328,
+          0.03679455851358498
+        ],
+        "jackknife_min": [
+          337.7803606272419,
+          0.10000006474730558,
+          9.553750390496706,
+          98.78605900280091,
+          0.05082747567115176
+        ],
+        "jackknife_max": [
+          377.08381432283113,
+          37.933748115265246,
+          10.823943889015084,
+          3932.4542905016924,
+          57.551681618684135
+        ],
+        "warnings": [
+          "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+        ]
+      },
+      "candidates": [
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 398.4673631373203,
+            "clearance_l_h": 31.589524045124183,
+            "absorption_rate_h": 1.9122682124812924,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.19271965029397273,
+            "mean_absolute_relative_error_pct": 14.373105613063197,
+            "max_absolute_relative_error_pct": 50.37710653291458
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.4715387867639227,
+            "mean_absolute_relative_error_pct": 34.0475899551125,
+            "max_absolute_relative_error_pct": 154.40483374057567
+          },
+          "held_out_predictions_mg_l": [
+            0.23944709321363652,
+            0.20401053494541863,
+            0.2912698364569893,
+            0.32336394250111095,
+            0.3267422674016613,
+            0.2849183062952691,
+            0.2487154514335897,
+            0.21452212643631005,
+            0.02443141695897215
+          ],
+          "jackknife_min": [
+            337.3238361515539,
+            30.764793051198897,
+            1.4807143793603694
+          ],
+          "jackknife_max": [
+            409.2098350059547,
+            42.01573615807275,
+            4.233572593142005
+          ],
+          "warnings": [
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 402.1695978828359,
+            "clearance_l_h": 31.552931506442064,
+            "absorption_rate_h": 4.479040707109671,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.12251839996730726,
+            "mean_absolute_relative_error_pct": 9.31990215988639,
+            "max_absolute_relative_error_pct": 21.828291286116432
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.3433293895601858,
+            "mean_absolute_relative_error_pct": 24.518676719243764,
+            "max_absolute_relative_error_pct": 101.70370153290725
+          },
+          "held_out_predictions_mg_l": [
+            0.1898445257991279,
+            0.22003037102109918,
+            0.3265263387277846,
+            0.3387569144820007,
+            0.3310130356750164,
+            0.2807728728239331,
+            0.24443732514570887,
+            0.21113325865268842,
+            0.03250257038193253
+          ],
+          "jackknife_min": [
+            364.5691780381347,
+            30.81438118085538,
+            4.097465944142071
+          ],
+          "jackknife_max": [
+            411.1270662688628,
+            39.369099870076674,
+            6.944954075061503
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 404.061423574013,
+            "clearance_l_h": 31.515577222689508,
+            "absorption_rate_h": 7.366743211777396,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.08446266795568394,
+            "mean_absolute_relative_error_pct": 6.8147004363811385,
+            "max_absolute_relative_error_pct": 15.28854979693497
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.2686481222224406,
+            "mean_absolute_relative_error_pct": 18.408134351615153,
+            "max_absolute_relative_error_pct": 65.68637766350238
+          },
+          "held_out_predictions_mg_l": [
+            0.15594484166554132,
+            0.2483431026724433,
+            0.3404544588993481,
+            0.3393987667514201,
+            0.32848079895249893,
+            0.2787316537829059,
+            0.24270349097856236,
+            0.2098312397298708,
+            0.035178891020040855
+          ],
+          "jackknife_min": [
+            372.02575953679263,
+            30.80975656134173,
+            6.975208589137923
+          ],
+          "jackknife_max": [
+            411.3026894836754,
+            38.501976140596156,
+            9.527751662114104
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 405.4345230760267,
+            "clearance_l_h": 31.48946482726959,
+            "absorption_rate_h": 10.456109130712544,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.06312300536350733,
+            "mean_absolute_relative_error_pct": 5.3283424675959274,
+            "max_absolute_relative_error_pct": 11.716379796289434
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.21498027669775516,
+            "mean_absolute_relative_error_pct": 13.964800102541256,
+            "max_absolute_relative_error_pct": 40.253632873362676
+          },
+          "held_out_predictions_mg_l": [
+            0.13003610567852902,
+            0.2733411894452702,
+            0.3445368482531027,
+            0.3378570010714415,
+            0.3264408545091042,
+            0.27736723187293805,
+            0.24162249048393658,
+            0.2090443502359282,
+            0.03679469331263366
+          ],
+          "jackknife_min": [
+            376.1735547315588,
+            30.80312243011088,
+            10.038789987553503
+          ],
+          "jackknife_max": [
+            412.1373668786278,
+            37.984506786566996,
+            12.038743743454312
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 201.2677065148,
+            "clearance_l_h": 31.254434162580182,
+            "absorption_rate_h": 0.8438823881582574,
+            "peripheral_volume_l": 209.95980066878084,
+            "distribution_clearance_l_h": 77.76433949889707,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.1672991287418058,
+            "mean_absolute_relative_error_pct": 11.307194058510408,
+            "max_absolute_relative_error_pct": 40.736924640322925
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.3367189008211531,
+            "mean_absolute_relative_error_pct": 26.324843044161987,
+            "max_absolute_relative_error_pct": 133.67211215247013
+          },
+          "held_out_predictions_mg_l": [
+            0.21993335266992567,
+            0.1978895334276652,
+            0.3077518262945245,
+            0.3619119412111634,
+            0.381121488193474,
+            0.2776506673674408,
+            0.21987031610366395,
+            0.19034222693517677,
+            0.051231228284185415
+          ],
+          "jackknife_min": [
+            180.04613859014555,
+            1.981999017135519,
+            0.7000000001043852,
+            142.86151853148877,
+            37.75637038119713
+          ],
+          "jackknife_max": [
+            368.98723050688864,
+            33.99243523872392,
+            3.187778163024461,
+            3044.315387201896,
+            81.9823782122566
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 354.3550619826319,
+            "clearance_l_h": 30.297272309714902,
+            "absorption_rate_h": 4.012797936716449,
+            "peripheral_volume_l": 122.9616843759985,
+            "distribution_clearance_l_h": 16.390576458762776,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.10047274052666426,
+            "mean_absolute_relative_error_pct": 6.94971741650739,
+            "max_absolute_relative_error_pct": 20.208429016749786
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.2683568915246696,
+            "mean_absolute_relative_error_pct": 21.398662576610494,
+            "max_absolute_relative_error_pct": 82.28692797713684
+          },
+          "held_out_predictions_mg_l": [
+            0.17156936208011753,
+            0.22325689759692938,
+            0.3483386402717404,
+            0.3756149279752445,
+            0.36346813588458515,
+            0.2513398575933829,
+            0.22290820027387176,
+            0.2013403944106096,
+            0.04278966692460038
+          ],
+          "jackknife_min": [
+            159.4012704772321,
+            1.1596389031874583,
+            2.534275769461071,
+            102.63979785591408,
+            18.069916843303346
+          ],
+          "jackknife_max": [
+            373.60915536578506,
+            36.370972908187454,
+            5.880286700204817,
+            3280.81880284348,
+            260.6698149152017
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 368.88910457200956,
+            "clearance_l_h": 0.44379386239687363,
+            "absorption_rate_h": 6.939985825064567,
+            "peripheral_volume_l": 3176.010688062972,
+            "distribution_clearance_l_h": 40.30468818770407,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.058851864455310314,
+            "mean_absolute_relative_error_pct": 4.263701121577816,
+            "max_absolute_relative_error_pct": 12.729692379279223
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.20344204099957652,
+            "mean_absolute_relative_error_pct": 15.188035883078063,
+            "max_absolute_relative_error_pct": 47.248321401556524
+          },
+          "held_out_predictions_mg_l": [
+            0.13859085152502978,
+            0.25624499838135983,
+            0.3657359360368008,
+            0.366479016771555,
+            0.3508974832607619,
+            0.2549879019273918,
+            0.22521180839548358,
+            0.2038127006975929,
+            0.04161436622115654
+          ],
+          "jackknife_min": [
+            152.24444888077224,
+            0.10000000110395531,
+            4.829482504528301,
+            165.6879384017232,
+            38.56003242029151
+          ],
+          "jackknife_max": [
+            375.4592334363309,
+            36.607193420189724,
+            8.394887086404294,
+            3389.7542585624346,
+            459.83866118763586
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 373.54923683242305,
+            "clearance_l_h": 0.17443004536492687,
+            "absorption_rate_h": 10.003268323412954,
+            "peripheral_volume_l": 3383.4205941171736,
+            "distribution_clearance_l_h": 39.81919845789113,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.03248079112037399,
+            "mean_absolute_relative_error_pct": 2.6734216977340597,
+            "max_absolute_relative_error_pct": 5.754651761466678
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.1902628210325971,
+            "mean_absolute_relative_error_pct": 10.643115567309684,
+            "max_absolute_relative_error_pct": 40.25385175692239
+          },
+          "held_out_predictions_mg_l": [
+            0.11357161656941195,
+            0.2846398448695788,
+            0.3697774446530011,
+            0.36093598869133375,
+            0.34467464918081814,
+            0.25817649857786235,
+            0.22536249051200927,
+            0.19071246804312328,
+            0.03679455851358498
+          ],
+          "jackknife_min": [
+            337.7803606272419,
+            0.10000006474730558,
+            9.553750390496706,
+            98.78605900280091,
+            0.05082747567115176
+          ],
+          "jackknife_max": [
+            377.08381432283113,
+            37.933748115265246,
+            10.823943889015084,
+            3932.4542905016924,
+            57.551681618684135
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        }
+      ],
+      "predictions": [
+        {
+          "observation": {
+            "time_min": 15.0,
+            "concentration_mg_l": 0.09412049672680668,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.15148586138118722,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.09668605530594318,
+          "relative_error_pct": 2.7258234586067465
+        },
+        {
+          "observation": {
+            "time_min": 30.0,
+            "concentration_mg_l": 0.30679063989438576,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.15148586138118722,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.2891359069316886,
+          "relative_error_pct": -5.754651761466678
+        },
+        {
+          "observation": {
+            "time_min": 60.0,
+            "concentration_mg_l": 0.379269019073225,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.12118868910494977,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.3725467060577757,
+          "relative_error_pct": -1.772439265373127
+        },
+        {
+          "observation": {
+            "time_min": 90.0,
+            "concentration_mg_l": 0.3463168991269751,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.12118868910494977,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.3572213737599419,
+          "relative_error_pct": 3.1486983916914513
+        },
+        {
+          "observation": {
+            "time_min": 120.0,
+            "concentration_mg_l": 0.32595518570718296,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.09089151682871233,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.33898697959896096,
+          "relative_error_pct": 3.9980323870303147
+        },
+        {
+          "observation": {
+            "time_min": 240.0,
+            "concentration_mg_l": 0.28875287417994466,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.06059434455247489,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.2756843127807718,
+          "relative_error_pct": -4.525863659812024
+        },
+        {
+          "observation": {
+            "time_min": 360.0,
+            "concentration_mg_l": 0.22660169698035254,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.06059434455247489,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.2257658767300821,
+          "relative_error_pct": -0.368849951879624
+        },
+        {
+          "observation": {
+            "time_min": 480.0,
+            "concentration_mg_l": 0.18329807108324364,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.06059434455247489,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.1864024538754317,
+          "relative_error_pct": 1.6936254559810404
+        },
+        {
+          "observation": {
+            "time_min": 1440.0,
+            "concentration_mg_l": 0.06158482110660266,
+            "time_error_min": 0.0,
+            "log_concentration_error": 0.06059434455247489,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.061539980614675235,
+          "relative_error_pct": -0.07281094776553365
+        }
+      ],
+      "sampled_cmax_mg_l": 0.379269019073225,
+      "fitted_cmax_mg_l": 0.3727316661503021,
+      "fitted_tmax_min": 57.5
+    },
+    {
+      "curve": {
+        "id": "wang2020-triple-m",
+        "study": "Wang 2020, Figure 3",
+        "substance": "methylliberine",
+        "doses_mg": [
+          150.0,
+          100.0,
+          50.0
+        ],
+        "n": 12,
+        "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278",
+        "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr3_lrg.jpg",
+        "sha256": "1c2f3f349f7c82fe0cae417888da3078513367ee40a67de54c36ba05beb3e1d8",
+        "verification": "Оригинал издателя 1376×1060. Полный текст закрыт; состав и n — из аннотации. Агрегация и тип усов не проверены. Время восстановлено по оси; первый маркер исключён как исходный фон, который дозовая модель с нулевым началом не описывает.",
+        "axes": {
+          "x0_px": 228.0,
+          "x1_px": 1346.0,
+          "t0_min": 0.0,
+          "t1_min": 1800.0,
+          "y0_px": 107.0,
+          "y1_px": 594.0,
+          "c0_ng_ml": 1000.0,
+          "c1_ng_ml": 1.0
+        },
+        "points": [
+          {
+            "pixel": [
+              228.0,
+              417.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              237.0,
+              278.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              247.0,
+              195.0
+            ],
+            "error_px": 6.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              265.0,
+              190.0
+            ],
+            "error_px": 6.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              284.0,
+              204.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              303.0,
+              230.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              377.0,
+              285.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              452.0,
+              330.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              526.0,
+              375.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              1122.0,
+              595.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          }
+        ]
+      },
+      "selected": {
+        "compartments": 2,
+        "parameters": {
+          "volume_l": 148.24341763098587,
+          "clearance_l_h": 100.13053691923228,
+          "absorption_rate_h": 1.0647177851452212,
+          "peripheral_volume_l": 132.46588511847696,
+          "distribution_clearance_l_h": 40.95132388673699,
+          "absorption_stages": 1
+        },
+        "training": {
+          "observations": 9,
+          "log_rmse": 0.1876261601699828,
+          "mean_absolute_relative_error_pct": 14.253110737919911,
+          "max_absolute_relative_error_pct": 53.892100746935334
+        },
+        "leave_one_time_out": {
+          "observations": 9,
+          "log_rmse": 0.37572504599780093,
+          "mean_absolute_relative_error_pct": 32.18144349926519,
+          "max_absolute_relative_error_pct": 148.93100998455435
+        },
+        "held_out_predictions_mg_l": [
+          0.22013591889816758,
+          0.20023143421697465,
+          0.25737929834696627,
+          0.24766699806001408,
+          0.22311771392627852,
+          0.08400704824208183,
+          0.03650806573608391,
+          0.024804598290798577,
+          0.0006438008532374653
+        ],
+        "jackknife_min": [
+          140.58708017165995,
+          95.93964442753477,
+          0.9996264215411584,
+          85.52159908431777,
+          22.86590116817867
+        ],
+        "jackknife_max": [
+          226.64210083862224,
+          102.71608771075756,
+          3.175650379469628,
+          138.11049839537623,
+          45.40023833143485
+        ],
+        "warnings": [
+          "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+        ]
+      },
+      "candidates": [
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 398.3321618527141,
+            "clearance_l_h": 97.72722668129302,
+            "absorption_rate_h": 3.48769522033195,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.36293433571749,
+            "mean_absolute_relative_error_pct": 35.780133463967324,
+            "max_absolute_relative_error_pct": 69.95575063071952
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 1.2136294514749053,
+            "mean_absolute_relative_error_pct": 63.9357401607588,
+            "max_absolute_relative_error_pct": 189.73867507440886
+          },
+          "held_out_predictions_mg_l": [
+            0.25622315790146083,
+            0.17506342399928718,
+            0.1881884491756301,
+            0.17377595505024826,
+            0.16288705857384558,
+            0.10541336066607197,
+            0.06578246234833801,
+            0.04162374049633564,
+            0.000036673532214033186
+          ],
+          "jackknife_min": [
+            265.17370742095113,
+            90.51619789650687,
+            2.0188449925452905
+          ],
+          "jackknife_max": [
+            432.73306971994504,
+            104.51908333167574,
+            64.51957614086805
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка",
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 391.3992960437454,
+            "clearance_l_h": 96.44105644316812,
+            "absorption_rate_h": 7.172193862876617,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.3399889827541861,
+            "mean_absolute_relative_error_pct": 33.74763376714279,
+            "max_absolute_relative_error_pct": 70.98900051324435
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 1.134913091864715,
+            "mean_absolute_relative_error_pct": 62.64553034194206,
+            "max_absolute_relative_error_pct": 189.73860146370293
+          },
+          "held_out_predictions_mg_l": [
+            0.2562230928056723,
+            0.19766940970611852,
+            0.19651839750783728,
+            0.17779913253099253,
+            0.1657240419382085,
+            0.10658658352481104,
+            0.06624738734280877,
+            0.04176308879567062,
+            0.000046569698731505646
+          ],
+          "jackknife_min": [
+            272.86023024934605,
+            89.3913062415296,
+            5.292679271086956
+          ],
+          "jackknife_max": [
+            424.80335351449844,
+            103.73154935374923,
+            73.09878908201884
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка",
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 389.6229689833638,
+            "clearance_l_h": 96.01729971811383,
+            "absorption_rate_h": 11.44568531755688,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.3355767333996023,
+            "mean_absolute_relative_error_pct": 33.46097979089385,
+            "max_absolute_relative_error_pct": 70.92799608057001
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 1.0975900819497555,
+            "mean_absolute_relative_error_pct": 61.78758226134213,
+            "max_absolute_relative_error_pct": 189.73834255420923
+          },
+          "held_out_predictions_mg_l": [
+            0.2562228638455306,
+            0.21339786029195312,
+            0.1977009811493982,
+            0.17823115701280032,
+            0.16574803153276374,
+            0.10632966782272832,
+            0.06609389625297916,
+            0.041670054465991126,
+            0.00005221400486750453
+          ],
+          "jackknife_min": [
+            276.8369916085681,
+            89.10519591291994,
+            9.219803894224947
+          ],
+          "jackknife_max": [
+            422.68248054433167,
+            103.4685238815228,
+            78.23037968852998
+          ],
+          "warnings": [
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 388.84491277694667,
+            "clearance_l_h": 95.7992035736191,
+            "absorption_rate_h": 16.013013223351294,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.33784850061345356,
+            "mean_absolute_relative_error_pct": 33.76912753761912,
+            "max_absolute_relative_error_pct": 70.802070626149
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 1.0933579638653244,
+            "mean_absolute_relative_error_pct": 61.36072949596117,
+            "max_absolute_relative_error_pct": 189.73697498599705
+          },
+          "held_out_predictions_mg_l": [
+            0.2562216544707522,
+            0.2217476794649077,
+            0.19769439894565166,
+            0.17812936058954396,
+            0.1655486292076427,
+            0.10605931580194206,
+            0.06593977043057525,
+            0.04159544632210437,
+            0.00005272352705640524
+          ],
+          "jackknife_min": [
+            275.0781289474916,
+            88.9688868832075,
+            13.239258061704483
+          ],
+          "jackknife_max": [
+            421.8437194529696,
+            102.66084011756287,
+            79.99950219484036
+          ],
+          "warnings": [
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 148.24341763098587,
+            "clearance_l_h": 100.13053691923228,
+            "absorption_rate_h": 1.0647177851452212,
+            "peripheral_volume_l": 132.46588511847696,
+            "distribution_clearance_l_h": 40.95132388673699,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.1876261601699828,
+            "mean_absolute_relative_error_pct": 14.253110737919911,
+            "max_absolute_relative_error_pct": 53.892100746935334
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.37572504599780093,
+            "mean_absolute_relative_error_pct": 32.18144349926519,
+            "max_absolute_relative_error_pct": 148.93100998455435
+          },
+          "held_out_predictions_mg_l": [
+            0.22013591889816758,
+            0.20023143421697465,
+            0.25737929834696627,
+            0.24766699806001408,
+            0.22311771392627852,
+            0.08400704824208183,
+            0.03650806573608391,
+            0.024804598290798577,
+            0.0006438008532374653
+          ],
+          "jackknife_min": [
+            140.58708017165995,
+            95.93964442753477,
+            0.9996264215411584,
+            85.52159908431777,
+            22.86590116817867
+          ],
+          "jackknife_max": [
+            226.64210083862224,
+            102.71608771075756,
+            3.175650379469628,
+            138.11049839537623,
+            45.40023833143485
+          ],
+          "warnings": [
+            "Ошибка на исключаемых точках >30%; перенос кривой требует дополнительных измерений"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 224.9876479877883,
+            "clearance_l_h": 100.81267091735903,
+            "absorption_rate_h": 4.571417396933529,
+            "peripheral_volume_l": 102.5949766147531,
+            "distribution_clearance_l_h": 30.41240458735611,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.13252320918162777,
+            "mean_absolute_relative_error_pct": 9.27391581735238,
+            "max_absolute_relative_error_pct": 43.83229417942624
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.6402277251266277,
+            "mean_absolute_relative_error_pct": 27.807531895632007,
+            "max_absolute_relative_error_pct": 95.0829351793075
+          },
+          "held_out_predictions_mg_l": [
+            0.17251671939029672,
+            0.25755742848218754,
+            0.2953258727064215,
+            0.24436774243361564,
+            0.20452238643272244,
+            0.0769953335946282,
+            0.038172002824391975,
+            0.027660810716938832,
+            0.0001673475337516881
+          ],
+          "jackknife_min": [
+            152.36698809085544,
+            96.94541717765293,
+            3.538511530657303,
+            84.1715007257788,
+            22.061892639752347
+          ],
+          "jackknife_max": [
+            235.35683441034612,
+            104.88744567891784,
+            6.029725370760781,
+            131.1922156675204,
+            98.51308857826226
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 240.14534124466397,
+            "clearance_l_h": 99.22921794249402,
+            "absorption_rate_h": 8.564042148446681,
+            "peripheral_volume_l": 83.56133884984344,
+            "distribution_clearance_l_h": 21.616681595559673,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.15068447109627173,
+            "mean_absolute_relative_error_pct": 9.494396014153473,
+            "max_absolute_relative_error_pct": 54.49097316169835
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.590885600993638,
+            "mean_absolute_relative_error_pct": 22.14635869225539,
+            "max_absolute_relative_error_pct": 81.54163535715333
+          },
+          "held_out_predictions_mg_l": [
+            0.14166176172005124,
+            0.3006537631457624,
+            0.2982764941717941,
+            0.23419649722326463,
+            0.19370080796658223,
+            0.08130763758430495,
+            0.03867332255097567,
+            0.027113844327627742,
+            0.00018198393728303895
+          ],
+          "jackknife_min": [
+            192.9481852114492,
+            97.42241425963425,
+            6.137661614228219,
+            78.82918051999356,
+            19.561685250368733
+          ],
+          "jackknife_max": [
+            245.35543053927682,
+            105.54266770353647,
+            8.753189171697795,
+            118.58360597493282,
+            68.09199695173413
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 242.53622570509012,
+            "clearance_l_h": 99.41238920145757,
+            "absorption_rate_h": 11.38161884772099,
+            "peripheral_volume_l": 82.08462967480679,
+            "distribution_clearance_l_h": 20.906126407514474,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.10637575421500692,
+            "mean_absolute_relative_error_pct": 7.4532256201198726,
+            "max_absolute_relative_error_pct": 33.62032889158575
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.5691608980742576,
+            "mean_absolute_relative_error_pct": 20.31383921385679,
+            "max_absolute_relative_error_pct": 80.94014105902616
+          },
+          "held_out_predictions_mg_l": [
+            0.11816379339251622,
+            0.330757374923737,
+            0.3004486148980278,
+            0.23298019229184405,
+            0.19362201758789904,
+            0.08164566548602754,
+            0.038674436271830724,
+            0.027123016626524686,
+            0.0001879141647297538
+          ],
+          "jackknife_min": [
+            205.21532269230022,
+            97.72236911049298,
+            8.345784308709513,
+            79.09602116794281,
+            19.628901285422565
+          ],
+          "jackknife_max": [
+            247.81616036939366,
+            105.94571628767517,
+            12.657275875936152,
+            121.68351333108411,
+            59.51975066538002
+          ],
+          "warnings": []
+        }
+      ],
+      "predictions": [
+        {
+          "observation": {
+            "time_min": 0.0,
+            "concentration_mg_l": 0.01231258030241749,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.056737209683631516,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.0,
+          "relative_error_pct": -100.0
+        },
+        {
+          "observation": {
+            "time_min": 14.49016100178891,
+            "concentration_mg_l": 0.08843250140343163,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.0709215121045394,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.136090634152804,
+          "relative_error_pct": 53.892100746935334
+        },
+        {
+          "observation": {
+            "time_min": 30.590339892665476,
+            "concentration_mg_l": 0.2870156276278724,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.08510581452544727,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.21993125201134592,
+          "relative_error_pct": -23.373074201905187
+        },
+        {
+          "observation": {
+            "time_min": 59.570661896243294,
+            "concentration_mg_l": 0.308110405465754,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.08510581452544727,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.2667025429939679,
+          "relative_error_pct": -13.43929375224835
+        },
+        {
+          "observation": {
+            "time_min": 90.16100178890876,
+            "concentration_mg_l": 0.2526178681003743,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.0709215121045394,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.24796587145906615,
+          "relative_error_pct": -1.841515280090844
+        },
+        {
+          "observation": {
+            "time_min": 120.75134168157423,
+            "concentration_mg_l": 0.1747027714750922,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.056737209683631516,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.20740858839189913,
+          "relative_error_pct": 18.72083461564884
+        },
+        {
+          "observation": {
+            "time_min": 239.89266547406083,
+            "concentration_mg_l": 0.08007385914479458,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.042552907262723635,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.082979920545737,
+          "relative_error_pct": 3.6292261069714282
+        },
+        {
+          "observation": {
+            "time_min": 360.64400715563505,
+            "concentration_mg_l": 0.04229444861906187,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.042552907262723635,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.03916388378143274,
+          "relative_error_pct": -7.401833904552191
+        },
+        {
+          "observation": {
+            "time_min": 479.78533094812167,
+            "concentration_mg_l": 0.022339629975318253,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.042552907262723635,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.023405122757430286,
+          "relative_error_pct": 4.769518489291147
+        },
+        {
+          "observation": {
+            "time_min": 1439.355992844365,
+            "concentration_mg_l": 0.0009859158208447504,
+            "time_error_min": 3.2200357781753133,
+            "log_concentration_error": 0.042552907262723635,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.0009739803284169698,
+          "relative_error_pct": -1.210599543635893
+        }
+      ],
+      "sampled_cmax_mg_l": 0.308110405465754,
+      "fitted_cmax_mg_l": 0.26690424761639964,
+      "fitted_tmax_min": 62.0
+    },
+    {
+      "curve": {
+        "id": "wang2020-triple-c",
+        "study": "Wang 2020, Figure 4",
+        "substance": "caffeine",
+        "doses_mg": [
+          150.0,
+          100.0,
+          50.0
+        ],
+        "n": 12,
+        "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278",
+        "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr4_lrg.jpg",
+        "sha256": "3c1bc993d5bc2642ab6e6e4484a1218228e2216d8ca40719a42e7c69e2960183",
+        "verification": "Оригинал издателя 1378×922; аннотация и график, не полный текст. Сохранены напечатанные ng/mL. Первый маркер исходного фона исключён. Нельзя сравнивать масштабы разных исследований как причинный эффект смеси.",
+        "axes": {
+          "x0_px": 230.0,
+          "x1_px": 1350.0,
+          "t0_min": 0.0,
+          "t1_min": 1800.0,
+          "y0_px": 28.0,
+          "y1_px": 772.0,
+          "c0_ng_ml": 1000.0,
+          "c1_ng_ml": 1.0
+        },
+        "points": [
+          {
+            "pixel": [
+              230.0,
+              407.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              239.0,
+              250.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              248.0,
+              129.0
+            ],
+            "error_px": 6.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              267.0,
+              121.0
+            ],
+            "error_px": 6.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              286.0,
+              125.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              305.0,
+              123.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              379.0,
+              130.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              454.0,
+              137.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              528.0,
+              147.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              1126.0,
+              224.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          }
+        ]
+      },
+      "selected": {
+        "compartments": 1,
+        "parameters": {
+          "volume_l": 337.62338087036034,
+          "clearance_l_h": 14.128368859512305,
+          "absorption_rate_h": 12.181184300599595,
+          "peripheral_volume_l": 0.0,
+          "distribution_clearance_l_h": 0.0,
+          "absorption_stages": 4
+        },
+        "training": {
+          "observations": 9,
+          "log_rmse": 0.06256990493114813,
+          "mean_absolute_relative_error_pct": 4.422515749380951,
+          "max_absolute_relative_error_pct": 17.797598474165444
+        },
+        "leave_one_time_out": {
+          "observations": 9,
+          "log_rmse": 0.1399152195070113,
+          "mean_absolute_relative_error_pct": 9.466321158735827,
+          "max_absolute_relative_error_pct": 27.22450976886218
+        },
+        "held_out_predictions_mg_l": [
+          0.1499600359559539,
+          0.2849227156976982,
+          0.43380460669582865,
+          0.42760607565472114,
+          0.41412085080471006,
+          0.3798096206025247,
+          0.3482173347263406,
+          0.3210323888574312,
+          0.19877093182297229
+        ],
+        "jackknife_min": [
+          333.8529000064877,
+          11.379029376862306,
+          9.18179162209538
+        ],
+        "jackknife_max": [
+          347.1037380104547,
+          14.229870350206212,
+          12.906295652790226
+        ],
+        "warnings": []
+      },
+      "candidates": [
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 318.69300642968034,
+            "clearance_l_h": 14.600047480516437,
+            "absorption_rate_h": 2.0538344418683585,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.1583054176682545,
+            "mean_absolute_relative_error_pct": 9.993800985348955,
+            "max_absolute_relative_error_pct": 43.519526452761625
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.29485199305293336,
+            "mean_absolute_relative_error_pct": 20.716449149693023,
+            "max_absolute_relative_error_pct": 116.43803529898666
+          },
+          "held_out_predictions_mg_l": [
+            0.27553215737297715,
+            0.2653820339110136,
+            0.3937823759536398,
+            0.4314479140078107,
+            0.4359341681941777,
+            0.40411996477501727,
+            0.36600409660631344,
+            0.3343606436971307,
+            0.13959556844123855
+          ],
+          "jackknife_min": [
+            311.6180921756095,
+            14.122542355832662,
+            1.7764474293429697
+          ],
+          "jackknife_max": [
+            334.4026894849225,
+            16.421520245638046,
+            3.990677369600762
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 331.8847262322665,
+            "clearance_l_h": 14.261950895342883,
+            "absorption_rate_h": 5.72349251682169,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.12733638632406621,
+            "mean_absolute_relative_error_pct": 7.705674168565363,
+            "max_absolute_relative_error_pct": 41.81317060448071
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.20931496836919442,
+            "mean_absolute_relative_error_pct": 13.789700029254012,
+            "max_absolute_relative_error_pct": 74.14794456012308
+          },
+          "held_out_predictions_mg_l": [
+            0.22169559430918095,
+            0.30030649047527863,
+            0.43052863093114113,
+            0.4356153090446309,
+            0.42245387619648594,
+            0.38642308421363475,
+            0.3532216430164248,
+            0.32476698165207585,
+            0.17849921712701236
+          ],
+          "jackknife_min": [
+            326.7938646148595,
+            13.022798671683004,
+            4.849273323034765
+          ],
+          "jackknife_max": [
+            336.2443595651349,
+            14.332811390320586,
+            6.950781997720685
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 337.194373152599,
+            "clearance_l_h": 14.121344632886267,
+            "absorption_rate_h": 9.656613580886384,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.12317911052082735,
+            "mean_absolute_relative_error_pct": 7.150024467680883,
+            "max_absolute_relative_error_pct": 43.2319730731753
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.1871788675241987,
+            "mean_absolute_relative_error_pct": 12.613677992726316,
+            "max_absolute_relative_error_pct": 43.2319274787728
+          },
+          "held_out_predictions_mg_l": [
+            0.18233857061398326,
+            0.26879352495987646,
+            0.4329721557705305,
+            0.4278577919888639,
+            0.41431936938778935,
+            0.3799421062484106,
+            0.34830838951160775,
+            0.32110679866739544,
+            0.1970553684212598
+          ],
+          "jackknife_min": [
+            333.37814225482776,
+            11.509437462245831,
+            6.516936865487071
+          ],
+          "jackknife_max": [
+            346.03204203476776,
+            14.26480822024907,
+            10.10178875571411
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 337.62338087036034,
+            "clearance_l_h": 14.128368859512305,
+            "absorption_rate_h": 12.181184300599595,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.06256990493114813,
+            "mean_absolute_relative_error_pct": 4.422515749380951,
+            "max_absolute_relative_error_pct": 17.797598474165444
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.1399152195070113,
+            "mean_absolute_relative_error_pct": 9.466321158735827,
+            "max_absolute_relative_error_pct": 27.22450976886218
+          },
+          "held_out_predictions_mg_l": [
+            0.1499600359559539,
+            0.2849227156976982,
+            0.43380460669582865,
+            0.42760607565472114,
+            0.41412085080471006,
+            0.3798096206025247,
+            0.3482173347263406,
+            0.3210323888574312,
+            0.19877093182297229
+          ],
+          "jackknife_min": [
+            333.8529000064877,
+            11.379029376862306,
+            9.18179162209538
+          ],
+          "jackknife_max": [
+            347.1037380104547,
+            14.229870350206212,
+            12.906295652790226
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 211.49299367445002,
+            "clearance_l_h": 14.240460394525064,
+            "absorption_rate_h": 1.3143248993228351,
+            "peripheral_volume_l": 115.24492455479789,
+            "distribution_clearance_l_h": 96.21159270790218,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.15460253410708152,
+            "mean_absolute_relative_error_pct": 9.949886279456777,
+            "max_absolute_relative_error_pct": 42.22150999201793
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.3219951143866865,
+            "mean_absolute_relative_error_pct": 25.536696652033715,
+            "max_absolute_relative_error_pct": 116.4380714960683
+          },
+          "held_out_predictions_mg_l": [
+            0.2755322034529556,
+            0.2666977822760984,
+            0.4058428687586127,
+            0.45267544733936765,
+            0.4471132066824924,
+            0.39040093624623873,
+            0.34860683448328633,
+            0.3214255003602921,
+            0.24410210593467924
+          ],
+          "jackknife_min": [
+            190.12208369253884,
+            7.6504351169476505,
+            1.1744608636400906,
+            97.1832446752402,
+            0.010000002114720529
+          ],
+          "jackknife_max": [
+            334.40269181704866,
+            14.366424002333437,
+            3.9906785435680314,
+            5000.000000000004,
+            107.19409268818252
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 331.8846389694833,
+            "clearance_l_h": 14.251958882422695,
+            "absorption_rate_h": 5.723490599081829,
+            "peripheral_volume_l": 5000.000000000004,
+            "distribution_clearance_l_h": 0.010000000000000005,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.12733634875478905,
+            "mean_absolute_relative_error_pct": 7.705670429813322,
+            "max_absolute_relative_error_pct": 41.81315068963705
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.2241967520142967,
+            "mean_absolute_relative_error_pct": 15.95627155522344,
+            "max_absolute_relative_error_pct": 74.14785566965709
+          },
+          "held_out_predictions_mg_l": [
+            0.22169548114893242,
+            0.30030735788499036,
+            0.43052860840577256,
+            0.4356156944361484,
+            0.42245368051017573,
+            0.386422854263209,
+            0.3532216875712524,
+            0.32476699462388386,
+            0.21010000958061553
+          ],
+          "jackknife_min": [
+            181.82834401849743,
+            10.465408646442244,
+            4.066583263803149,
+            169.3159118400044,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            336.24434730899856,
+            14.313650892934039,
+            6.9507783846521285,
+            5000.000000000004,
+            354.08482027737585
+          ],
+          "warnings": [
+            "Параметр у технической границы: идентифицируемость ограничена",
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 337.1944541789331,
+            "clearance_l_h": 14.111339738071647,
+            "absorption_rate_h": 9.656608942860467,
+            "peripheral_volume_l": 4993.382721641041,
+            "distribution_clearance_l_h": 0.01000496308187751,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.12317882444309564,
+            "mean_absolute_relative_error_pct": 7.150012867709123,
+            "max_absolute_relative_error_pct": 43.23183600720839
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.1871753308276223,
+            "mean_absolute_relative_error_pct": 12.611899943192432,
+            "max_absolute_relative_error_pct": 43.2320120403799
+          },
+          "held_out_predictions_mg_l": [
+            0.18233867826346362,
+            0.26879341205050233,
+            0.4329721941672037,
+            0.42785778902125404,
+            0.4143183569810095,
+            0.3799421023076469,
+            0.3483421705780062,
+            0.3211283987964767,
+            0.1970552610915055
+          ],
+          "jackknife_min": [
+            242.34045666963314,
+            11.499443493226591,
+            6.516934304582224,
+            40.94868532006175,
+            0.010000007838432991
+          ],
+          "jackknife_max": [
+            346.0320272039746,
+            14.254809370481235,
+            10.101788420830074,
+            5000.000000000004,
+            974.8102949981458
+          ],
+          "warnings": [
+            "Параметр у технической границы: идентифицируемость ограничена",
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 337.623367644051,
+            "clearance_l_h": 14.118366447456415,
+            "absorption_rate_h": 12.181181645066943,
+            "peripheral_volume_l": 4999.988550784294,
+            "distribution_clearance_l_h": 0.010002031072311741,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 9,
+            "log_rmse": 0.06256980485721082,
+            "mean_absolute_relative_error_pct": 4.422512485471161,
+            "max_absolute_relative_error_pct": 17.797553245397136
+          },
+          "leave_one_time_out": {
+            "observations": 9,
+            "log_rmse": 0.13991658633483842,
+            "mean_absolute_relative_error_pct": 9.466959842570775,
+            "max_absolute_relative_error_pct": 27.22447896606487
+          },
+          "held_out_predictions_mg_l": [
+            0.14995994910863508,
+            0.2849228362934734,
+            0.4338045714725674,
+            0.42760609677621797,
+            0.41412085092857304,
+            0.37980964730059197,
+            0.3482124844280284,
+            0.3210171356479673,
+            0.19877079910350004
+          ],
+          "jackknife_min": [
+            285.1496344999987,
+            11.364126391003566,
+            9.181796872526307,
+            20.225188943438692,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            347.10395432623477,
+            14.219895347732722,
+            12.906313309242016,
+            5000.000000000004,
+            897.5519108691864
+          ],
+          "warnings": [
+            "Параметр у технической границы: идентифицируемость ограничена",
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        }
+      ],
+      "predictions": [
+        {
+          "observation": {
+            "time_min": 0.0,
+            "concentration_mg_l": 0.02963290260014259,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.037138469241839445,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.0,
+          "relative_error_pct": -100.0
+        },
+        {
+          "observation": {
+            "time_min": 14.464285714285714,
+            "concentration_mg_l": 0.12730302092807214,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.046423086552299306,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.1499599014383332,
+          "relative_error_pct": 17.797598474165444
+        },
+        {
+          "observation": {
+            "time_min": 28.928571428571427,
+            "concentration_mg_l": 0.39150916715610223,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.05570770386275917,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.3686836219669816,
+          "relative_error_pct": -5.830143226255446
+        },
+        {
+          "observation": {
+            "time_min": 59.464285714285715,
+            "concentration_mg_l": 0.4216965034285823,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.05570770386275917,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.431173911486548,
+          "relative_error_pct": 2.247447626648569
+        },
+        {
+          "observation": {
+            "time_min": 90.0,
+            "concentration_mg_l": 0.40632258963779583,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.046423086552299306,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.42302871380940726,
+          "relative_error_pct": 4.111542059845497
+        },
+        {
+          "observation": {
+            "time_min": 120.53571428571428,
+            "concentration_mg_l": 0.4139381781308716,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.046423086552299306,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.4141208382625058,
+          "relative_error_pct": 0.044127394206294746
+        },
+        {
+          "observation": {
+            "time_min": 239.46428571428572,
+            "concentration_mg_l": 0.38789097711234694,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.027853851931379583,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.3811572690105341,
+          "relative_error_pct": -1.735979566202317
+        },
+        {
+          "observation": {
+            "time_min": 360.0,
+            "concentration_mg_l": 0.36348280510043135,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.027853851931379583,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.35042453210831426,
+          "relative_error_pct": -3.5925421529937496
+        },
+        {
+          "observation": {
+            "time_min": 478.92857142857144,
+            "concentration_mg_l": 0.33125412135101345,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.027853851931379583,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.3225310970374235,
+          "relative_error_pct": -2.6333330670765043
+        },
+        {
+          "observation": {
+            "time_min": 1440.0,
+            "concentration_mg_l": 0.1620605913741318,
+            "time_error_min": 3.2142857142857144,
+            "log_concentration_error": 0.027853851931379583,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.16499377168128135,
+          "relative_error_pct": 1.8099281770347364
+        }
+      ],
+      "sampled_cmax_mg_l": 0.4216965034285823,
+      "fitted_cmax_mg_l": 0.4315534092838696,
+      "fitted_tmax_min": 55.0
+    },
+    {
+      "curve": {
+        "id": "wang2020-triple-t",
+        "study": "Wang 2020, Figure 5",
+        "substance": "theacrine",
+        "doses_mg": [
+          150.0,
+          100.0,
+          50.0
+        ],
+        "n": 12,
+        "source_url": "https://doi.org/10.1016/j.jchromb.2020.122278",
+        "figure_url": "https://ars.els-cdn.com/content/image/1-s2.0-S1570023220307649-gr5_lrg.jpg",
+        "sha256": "fc2ea775fd872a1863e96da4e4a356a4a4b5badfc69424bbc4d5d1d708685b9b",
+        "verification": "Оригинал издателя 1378×999. Ось рисунка содержит 48 ч, аннотация описывает 24 ч; полный текст нужен для уточнения. Агрегация/усы не проверены. Состав и n из аннотации. Фон исключён.",
+        "axes": {
+          "x0_px": 235.0,
+          "x1_px": 1350.0,
+          "t0_min": 0.0,
+          "t1_min": 3600.0,
+          "y0_px": 50.0,
+          "y1_px": 790.0,
+          "c0_ng_ml": 1000.0,
+          "c1_ng_ml": 1.0
+        },
+        "points": [
+          {
+            "pixel": [
+              235.0,
+              627.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              240.0,
+              419.0
+            ],
+            "error_px": 5.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              244.0,
+              273.0
+            ],
+            "error_px": 7.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              254.0,
+              262.0
+            ],
+            "error_px": 7.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              263.0,
+              260.0
+            ],
+            "error_px": 7.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              272.0,
+              259.0
+            ],
+            "error_px": 6.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              309.0,
+              266.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              346.0,
+              270.0
+            ],
+            "error_px": 4.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              383.0,
+              278.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              681.0,
+              327.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          },
+          {
+            "pixel": [
+              1127.0,
+              416.0
+            ],
+            "error_px": 3.0,
+            "time_min": null,
+            "exclude": null,
+            "upper_limit_ng_ml": null
+          }
+        ]
+      },
+      "selected": {
+        "compartments": 2,
+        "parameters": {
+          "volume_l": 121.2079781935957,
+          "clearance_l_h": 10.44300632840064,
+          "absorption_rate_h": 6.557314910668756,
+          "peripheral_volume_l": 212.23436532091162,
+          "distribution_clearance_l_h": 1722.5265368849123,
+          "absorption_stages": 3
+        },
+        "training": {
+          "observations": 10,
+          "log_rmse": 0.1912512687047554,
+          "mean_absolute_relative_error_pct": 10.976530823873425,
+          "max_absolute_relative_error_pct": 79.37271758273535
+        },
+        "leave_one_time_out": {
+          "observations": 10,
+          "log_rmse": 0.25159997869538336,
+          "mean_absolute_relative_error_pct": 14.309277632175228,
+          "max_absolute_relative_error_pct": 60.77172032613045
+        },
+        "held_out_predictions_mg_l": [
+          0.05131728990578516,
+          0.06780284508247587,
+          0.14485569871347095,
+          0.1453979276914248,
+          0.1423586798496834,
+          0.1339218124778188,
+          0.1249988446018213,
+          0.11802586754286233,
+          0.07056178950718818,
+          0.03878168054011872
+        ],
+        "jackknife_min": [
+          77.29975859527772,
+          9.50880408780564,
+          5.132773027253408,
+          161.08615373736603,
+          0.010000000000000005
+        ],
+        "jackknife_max": [
+          340.44497926917643,
+          10.603661390439264,
+          8.004181833566278,
+          5000.000000000004,
+          1740.462215095406
+        ],
+        "warnings": [
+          "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+        ]
+      },
+      "candidates": [
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 316.7135406881377,
+            "clearance_l_h": 10.448137140543228,
+            "absorption_rate_h": 1.7026950723911705,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.2209365659401447,
+            "mean_absolute_relative_error_pct": 13.733597431762695,
+            "max_absolute_relative_error_pct": 80.91341446119607
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.33687268250720165,
+            "mean_absolute_relative_error_pct": 23.080639144208963,
+            "max_absolute_relative_error_pct": 160.73395923692345
+          },
+          "held_out_predictions_mg_l": [
+            0.08322458792692085,
+            0.08011422351386072,
+            0.126254934287701,
+            0.14080688603302322,
+            0.1459333085439526,
+            0.14343038599446273,
+            0.13316086124961274,
+            0.12487272761839968,
+            0.07214529373605341,
+            0.03357813982114271
+          ],
+          "jackknife_min": [
+            310.75241441386873,
+            10.349744126660964,
+            1.5007984267350951
+          ],
+          "jackknife_max": [
+            330.5958733579784,
+            10.588082706139284,
+            2.9919951048049342
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 332.55613542191935,
+            "clearance_l_h": 10.43721579408558,
+            "absorption_rate_h": 5.335447494534327,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.22045691664239161,
+            "mean_absolute_relative_error_pct": 12.749217192978438,
+            "max_absolute_relative_error_pct": 97.31095690093503
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.2634107582225781,
+            "mean_absolute_relative_error_pct": 16.92715030166007,
+            "max_absolute_relative_error_pct": 101.748910734911
+          },
+          "held_out_predictions_mg_l": [
+            0.06439694318974751,
+            0.08246408499735727,
+            0.14369262780315445,
+            0.14551572896190137,
+            0.1429347783459268,
+            0.1343852454525798,
+            0.12583535607638363,
+            0.1184663989049937,
+            0.07076738005185075,
+            0.03820926900302646
+          ],
+          "jackknife_min": [
+            330.53522981261835,
+            9.599816427285559,
+            3.8006029041017957
+          ],
+          "jackknife_max": [
+            337.1268055175011,
+            10.59565614668465,
+            5.446391920135485
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 334.4236554301392,
+            "clearance_l_h": 10.444022264766039,
+            "absorption_rate_h": 7.720390308977958,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.15973991598015172,
+            "mean_absolute_relative_error_pct": 9.319068466430057,
+            "max_absolute_relative_error_pct": 60.771795843312695
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.251640618368632,
+            "mean_absolute_relative_error_pct": 14.310763621367656,
+            "max_absolute_relative_error_pct": 60.77164821190051
+          },
+          "held_out_predictions_mg_l": [
+            0.0513172668873909,
+            0.06780283389408269,
+            0.14528805322700616,
+            0.14513347952725433,
+            0.14221214282519123,
+            0.13365649138201413,
+            0.12494441615004298,
+            0.11784744391429643,
+            0.07056179274262894,
+            0.0387816626898823
+          ],
+          "jackknife_min": [
+            331.88111567433924,
+            9.518806473699085,
+            5.132772589228158
+          ],
+          "jackknife_max": [
+            340.44495955679423,
+            10.613660242920593,
+            8.004183089569542
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 1,
+          "parameters": {
+            "volume_l": 335.4816478993985,
+            "clearance_l_h": 10.450735310723458,
+            "absorption_rate_h": 9.920092165027734,
+            "peripheral_volume_l": 0.0,
+            "distribution_clearance_l_h": 0.0,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.10324052810259246,
+            "mean_absolute_relative_error_pct": 6.5021314710625875,
+            "max_absolute_relative_error_pct": 30.00609145085027
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.27341910069175546,
+            "mean_absolute_relative_error_pct": 12.29449968453091,
+            "max_absolute_relative_error_pct": 55.08529577956165
+          },
+          "held_out_predictions_mg_l": [
+            0.04149709247353092,
+            0.05601888881946431,
+            0.1460564727657327,
+            0.14488996540470353,
+            0.14184912506648653,
+            0.13331900176484432,
+            0.12469916163122957,
+            0.11755090420812658,
+            0.0705171127409815,
+            0.03890574811319631
+          ],
+          "jackknife_min": [
+            332.512126150407,
+            9.504813135996788,
+            6.395063433255402
+          ],
+          "jackknife_max": [
+            341.25522894625124,
+            10.621564690263083,
+            10.221312412346114
+          ],
+          "warnings": []
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 217.25491178658103,
+            "clearance_l_h": 10.424719114557464,
+            "absorption_rate_h": 1.1126582816583082,
+            "peripheral_volume_l": 110.39900351117298,
+            "distribution_clearance_l_h": 67.26169748060605,
+            "absorption_stages": 1
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.2155411541957383,
+            "mean_absolute_relative_error_pct": 13.500921154403011,
+            "max_absolute_relative_error_pct": 77.8372999806419
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.343607311393939,
+            "mean_absolute_relative_error_pct": 26.00425965061283,
+            "max_absolute_relative_error_pct": 160.73397532633652
+          },
+          "held_out_predictions_mg_l": [
+            0.08322459306255708,
+            0.0801140728916652,
+            0.126254991331899,
+            0.14834095194698296,
+            0.15521812743488428,
+            0.1410318138321716,
+            0.12628485409028795,
+            0.1248728539035636,
+            0.07021565081238895,
+            0.03977506041068589
+          ],
+          "jackknife_min": [
+            182.39009880911132,
+            9.33429528726582,
+            0.9247385653762321,
+            123.18877785432957,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            330.5958804392458,
+            10.607355367420283,
+            2.9919954888412774,
+            4999.999521651626,
+            78.73561507708807
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 332.5562215917255,
+            "clearance_l_h": 10.42721845750789,
+            "absorption_rate_h": 5.3354491554451835,
+            "peripheral_volume_l": 4999.995567660674,
+            "distribution_clearance_l_h": 0.010000019029405812,
+            "absorption_stages": 2
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.22045694945379168,
+            "mean_absolute_relative_error_pct": 12.749215444848943,
+            "max_absolute_relative_error_pct": 97.31097738878861
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.26341692471384015,
+            "mean_absolute_relative_error_pct": 16.935265037405568,
+            "max_absolute_relative_error_pct": 101.74893531747817
+          },
+          "held_out_predictions_mg_l": [
+            0.06439695103634345,
+            0.08246410478284961,
+            0.14369266188177462,
+            0.1455157436897135,
+            0.1429347669687288,
+            0.13438522786451262,
+            0.1257314042993865,
+            0.11846639993039448,
+            0.0707673733823462,
+            0.03820929270216875
+          ],
+          "jackknife_min": [
+            292.32747632116315,
+            9.584592163891356,
+            3.80060383253094,
+            41.10172725237422,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            337.1270304404133,
+            10.585658049482758,
+            5.446394417500694,
+            5000.000000000004,
+            179.89462997882512
+          ],
+          "warnings": [
+            "Параметр у технической границы: идентифицируемость ограничена",
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 121.2079781935957,
+            "clearance_l_h": 10.44300632840064,
+            "absorption_rate_h": 6.557314910668756,
+            "peripheral_volume_l": 212.23436532091162,
+            "distribution_clearance_l_h": 1722.5265368849123,
+            "absorption_stages": 3
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.1912512687047554,
+            "mean_absolute_relative_error_pct": 10.976530823873425,
+            "max_absolute_relative_error_pct": 79.37271758273535
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.25159997869538336,
+            "mean_absolute_relative_error_pct": 14.309277632175228,
+            "max_absolute_relative_error_pct": 60.77172032613045
+          },
+          "held_out_predictions_mg_l": [
+            0.05131728990578516,
+            0.06780284508247587,
+            0.14485569871347095,
+            0.1453979276914248,
+            0.1423586798496834,
+            0.1339218124778188,
+            0.1249988446018213,
+            0.11802586754286233,
+            0.07056178950718818,
+            0.03878168054011872
+          ],
+          "jackknife_min": [
+            77.29975859527772,
+            9.50880408780564,
+            5.132773027253408,
+            161.08615373736603,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            340.44497926917643,
+            10.603661390439264,
+            8.004181833566278,
+            5000.000000000004,
+            1740.462215095406
+          ],
+          "warnings": [
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        },
+        {
+          "compartments": 2,
+          "parameters": {
+            "volume_l": 289.60963625738157,
+            "clearance_l_h": 10.450856110039329,
+            "absorption_rate_h": 9.906095813861453,
+            "peripheral_volume_l": 45.901844396066004,
+            "distribution_clearance_l_h": 5000.000000000004,
+            "absorption_stages": 4
+          },
+          "training": {
+            "observations": 10,
+            "log_rmse": 0.10471710058458249,
+            "mean_absolute_relative_error_pct": 6.578055112676926,
+            "max_absolute_relative_error_pct": 30.85954143291849
+          },
+          "leave_one_time_out": {
+            "observations": 10,
+            "log_rmse": 0.2674159081181042,
+            "mean_absolute_relative_error_pct": 12.203575642837048,
+            "max_absolute_relative_error_pct": 54.15440347863355
+          },
+          "held_out_predictions_mg_l": [
+            0.04149706519787823,
+            0.05717992401303144,
+            0.14603182458639824,
+            0.14487471631958904,
+            0.1418953783406431,
+            0.13355925390868173,
+            0.12472659576993304,
+            0.11764151133347059,
+            0.07051711269122622,
+            0.03890574950312716
+          ],
+          "jackknife_min": [
+            102.04022856129762,
+            9.494813422613431,
+            6.091297975233098,
+            19.884568697288092,
+            0.010000000000000005
+          ],
+          "jackknife_max": [
+            341.2551962165111,
+            10.61156486259179,
+            10.221314102024866,
+            5000.000000000004,
+            2398.894352444694
+          ],
+          "warnings": [
+            "Параметр у технической границы: идентифицируемость ограничена",
+            "Параметры меняются более чем в 10 раз при исключении точки; это не надёжная физиологическая оценка"
+          ]
+        }
+      ],
+      "predictions": [
+        {
+          "observation": {
+            "time_min": 0.0,
+            "concentration_mg_l": 0.004579423524826657,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.03733921772422777,
+            "exclude": "Исходный фон: начальное состояние неизвестно",
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.0,
+          "relative_error_pct": -100.0
+        },
+        {
+          "observation": {
+            "time_min": 16.143497757847534,
+            "concentration_mg_l": 0.03191935111578481,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.04667402215528471,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.05725460753115837,
+          "relative_error_pct": 79.37271758273535
+        },
+        {
+          "observation": {
+            "time_min": 29.058295964125563,
+            "concentration_mg_l": 0.12472282694889268,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.0653436310173986,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.10898152331281011,
+          "relative_error_pct": -12.621028580865023
+        },
+        {
+          "observation": {
+            "time_min": 61.345291479820624,
+            "concentration_mg_l": 0.13821034165307247,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.0653436310173986,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.14371369896758662,
+          "relative_error_pct": 3.9818708561826455
+        },
+        {
+          "observation": {
+            "time_min": 90.40358744394618,
+            "concentration_mg_l": 0.14081491217648334,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.0653436310173986,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.14420068741903613,
+          "relative_error_pct": 2.4044152641372163
+        },
+        {
+          "observation": {
+            "time_min": 119.46188340807176,
+            "concentration_mg_l": 0.14213554618288157,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.05600882658634165,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.14222678791753293,
+          "relative_error_pct": 0.06419346680102134
+        },
+        {
+          "observation": {
+            "time_min": 238.9237668161435,
+            "concentration_mg_l": 0.133144835160264,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.03733921772422777,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.13366169276927095,
+          "relative_error_pct": 0.38819200788735575
+        },
+        {
+          "observation": {
+            "time_min": 358.3856502242152,
+            "concentration_mg_l": 0.12826498305280604,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.03733921772422777,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.12560075353029057,
+          "relative_error_pct": -2.077129282758816
+        },
+        {
+          "observation": {
+            "time_min": 477.847533632287,
+            "concentration_mg_l": 0.11903527392207187,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.028004413293170827,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.11802595755144835,
+          "relative_error_pct": -0.8479136791706754
+        },
+        {
+          "observation": {
+            "time_min": 1440.0,
+            "concentration_mg_l": 0.07534024480382517,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.028004413293170827,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.07151540115458094,
+          "relative_error_pct": -5.076760314760809
+        },
+        {
+          "observation": {
+            "time_min": 2880.0,
+            "concentration_mg_l": 0.03282586780686385,
+            "time_error_min": 6.457399103139013,
+            "log_concentration_error": 0.028004413293170827,
+            "exclude": null,
+            "upper_limit_mg_l": null
+          },
+          "predicted_mg_l": 0.03378802261756744,
+          "relative_error_pct": 2.9310872034353563
+        }
+      ],
+      "sampled_cmax_mg_l": 0.14213554618288157,
+      "fitted_cmax_mg_l": 0.14471460322694796,
+      "fitted_tmax_min": 75.5
+    }
+  ]
+}

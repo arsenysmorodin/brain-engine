@@ -4,9 +4,18 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-pub const CIRCULATION_MODEL_REVISION: u32 = 3;
+pub const CIRCULATION_MODEL_REVISION: u32 = 4;
 pub const CIRCULATION_MODEL_ID: &str = "purine_closed_circulation_v1";
 pub const CIRCULATION_PROVENANCE_ID: &str = "purine_sources_2026_10_24_v1";
+fn one_stage() -> u8 {
+    1
+}
+fn is_one_stage(v: &u8) -> bool {
+    *v == 1
+}
+fn is_zero(v: &f64) -> bool {
+    *v == 0.0
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Purine {
@@ -45,6 +54,12 @@ pub struct PurineParameters {
     pub apparent_volume_l: f64,
     pub apparent_clearance_l_h: f64,
     pub absorption_half_min: f64,
+    #[serde(default = "one_stage", skip_serializing_if = "is_one_stage")]
+    pub absorption_stages: u8,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub peripheral_volume_l: f64,
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub distribution_clearance_l_h: f64,
     /// Assumed brain distribution and permeability. No human brain measurements for M/T.
     pub tissue_blood_partition: f64,
     pub exchange_min_inv: f64,
@@ -73,6 +88,9 @@ impl PurineParameters {
             } else {
                 abs
             },
+            absorption_stages: 1,
+            peripheral_volume_l: 0.0,
+            distribution_clearance_l_h: 0.0,
             tissue_blood_partition: 1.0,
             exchange_min_inv: 0.5,
         }
@@ -99,6 +117,8 @@ pub struct CirculationScenario {
     pub duration_min: f64,
     /// Phenomenological interpolation of oral study ratios, not enzyme kinetics.
     pub interactions: bool,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub calibration_curve_ids: Vec<String>,
     pub beds: CaffeinePerfusion,
     pub capillary_volume_fraction: f64,
     pub venous_volume_fraction: f64,
@@ -118,6 +138,7 @@ impl CirculationScenario {
             doses: vec![],
             duration_min: 1440.0,
             interactions: true,
+            calibration_curve_ids: vec![],
             beds: CaffeinePerfusion::reference(atlas),
             capillary_volume_fraction: 0.03,
             venous_volume_fraction: 0.04,
@@ -147,7 +168,8 @@ impl CirculationScenario {
     /// Revision 1 retains t=0-only semantics; revision 2 accepts a shared oral dose time.
     pub fn interaction_profile_active(&self) -> bool {
         let positive: Vec<_> = self.doses.iter().filter(|d| d.amount_mg > 0.0).collect();
-        self.interactions
+        self.calibration_curve_ids.is_empty()
+            && self.interactions
             && Purine::ALL
                 .iter()
                 .all(|p| positive.iter().filter(|d| d.substance == *p).count() <= 1)
@@ -207,6 +229,24 @@ impl CirculationScenario {
             "Название: 1…512 байт",
         )?;
         self.beds.validate(atlas)?;
+        require(
+            self.calibration_curve_ids.len() <= 3
+                && self
+                    .calibration_curve_ids
+                    .iter()
+                    .collect::<std::collections::HashSet<_>>()
+                    .len()
+                    == self.calibration_curve_ids.len()
+                && self.calibration_curve_ids.iter().all(|s| {
+                    !s.is_empty()
+                        && s.len() <= 128
+                        && s.bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+                })
+                && (self.calibration_curve_ids.is_empty()
+                    || (self.model_revision >= 4 && !self.interactions)),
+            "Подобранный протокол не должен повторно применять парные поправки",
+        )?;
         if let Some(h) = &self.neural_hypothesis {
             h.validate(atlas)?;
         }
@@ -223,6 +263,19 @@ impl CirculationScenario {
             )?;
         }
         for p in &self.parameters {
+            require(
+                (1..=4).contains(&p.absorption_stages)
+                    && p.peripheral_volume_l.is_finite()
+                    && p.distribution_clearance_l_h.is_finite()
+                    && ((p.peripheral_volume_l == 0.0 && p.distribution_clearance_l_h == 0.0)
+                        || ((1.0..=5000.0).contains(&p.peripheral_volume_l)
+                            && (0.01..=5000.0).contains(&p.distribution_clearance_l_h)))
+                    && (self.model_revision >= 4
+                        || (p.absorption_stages == 1
+                            && p.peripheral_volume_l == 0.0
+                            && p.distribution_clearance_l_h == 0.0)),
+                "Транзит/периферическое распределение требуют ревизии 4 и допустимых парных параметров",
+            )?;
             for (v, min, max) in [
                 (p.apparent_volume_l, 10.0, 1000.0),
                 (p.apparent_clearance_l_h, 0.1, 500.0),

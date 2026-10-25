@@ -455,3 +455,53 @@ fn purine_neural_cli_replays_the_same_frozen_regional_snapshot() {
         serde_json::to_value(comparison).unwrap()
     );
 }
+#[test]
+fn digitized_curve_fit_exports_predictions_and_protects_its_input() {
+    let temp = Temp::new();
+    let mut d = neuro_domain::PkCurveDataset::bundled().unwrap();
+    d.curves.truncate(1);
+    let input = temp.0.join("curve.json");
+    fs::write(&input, serde_json::to_vec(&d).unwrap()).unwrap();
+    let before = fs::read(&input).unwrap();
+    let csv = temp.0.join("fit.csv");
+    let protocols = temp.0.join("protocols");
+    let result = cli()
+        .arg("fit-purine-curves")
+        .arg(&input)
+        .arg("--csv")
+        .arg(&csv)
+        .arg("--scenarios-dir")
+        .arg(&protocols)
+        .output()
+        .unwrap();
+    assert!(
+        result.status.success(),
+        "{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let atlas = neuro_domain::BrainAtlas::bundled().unwrap();
+    let scenario =
+        neuro_domain::CirculationScenario::load(protocols.join("protocol-1.json"), &atlas).unwrap();
+    assert!(!scenario.interactions);
+    assert_eq!(scenario.calibration_curve_ids, [d.curves[0].id.clone()]);
+    assert!(protocols.join("comparison.json").is_file());
+    let report: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+    assert_eq!(report["model_id"], neuro_engine::PK_FIT_MODEL_ID);
+    assert!(!report["scope_gaps"].as_array().unwrap().is_empty());
+    assert_eq!(
+        fs::read_to_string(csv).unwrap().lines().count(),
+        d.curves[0].points.len() + 1
+    );
+    assert!(
+        !cli()
+            .arg("fit-purine-curves")
+            .arg(&input)
+            .arg("--csv")
+            .arg(&input)
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
+    assert_eq!(fs::read(input).unwrap(), before);
+}

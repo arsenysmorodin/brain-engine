@@ -19,6 +19,9 @@ pub struct PurinePkComparison {
 }
 
 pub fn compare_purine_pk(trace: &CirculationTrace) -> Result<Vec<PurinePkComparison>, Error> {
+    if !trace.scenario.calibration_curve_ids.is_empty() {
+        return Ok(vec![]);
+    }
     let parameters = trace.scenario.effective_parameters();
     let mut comparisons = Vec::new();
     for r in PurinePkReference::bundled()? {

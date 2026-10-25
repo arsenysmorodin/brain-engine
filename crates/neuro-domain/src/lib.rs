@@ -21,6 +21,8 @@ mod circulation;
 pub use circulation::*;
 mod pk_reference;
 pub use pk_reference::*;
+mod pk_curves;
+pub use pk_curves::*;
 mod caffeine;
 pub use caffeine::*;
 

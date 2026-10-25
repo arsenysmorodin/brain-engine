@@ -20,6 +20,8 @@ pub struct SystemicSample {
     pub administered_mg: f64,
     pub gut_mg: f64,
     pub rest_mg: f64,
+    #[serde(skip_serializing_if = "is_zero")]
+    pub peripheral_mg: f64,
     pub central_mg_l: f64,
     pub brain_mg: f64,
     pub eliminated_mg: f64,
@@ -52,12 +54,23 @@ struct Bed {
 }
 #[derive(Default)]
 struct State {
-    gut: f64,
+    gut: [f64; 4],
     rest: f64,
+    peripheral: f64,
     eliminated: f64,
     administered: f64,
     auc: f64,
     beds: Vec<Bed>,
+}
+fn is_zero(v: &f64) -> bool {
+    *v == 0.0
+}
+fn transit(gut: &mut [f64; 4], stages: usize, rate: f64, dt: f64, reverse: bool) {
+    for k in 0..stages - 1 {
+        let i = if reverse { stages - 2 - k } else { k };
+        let (left, right) = gut.split_at_mut(i + 1);
+        transfer(&mut left[i], &mut right[0], rate, dt);
+    }
 }
 fn transfer(from: &mut f64, to: &mut f64, rate: f64, dt: f64) -> f64 {
     let amount = *from * (-(-rate * dt).exp_m1());
@@ -117,7 +130,7 @@ fn simulate_with_step(
         for d in &s.doses {
             if (d.time_min / dt).round() as usize == step {
                 let st = &mut states[d.substance.index()];
-                st.gut += d.amount_mg;
+                st.gut[0] += d.amount_mg;
                 st.administered += d.amount_mg;
             }
         }
@@ -154,14 +167,20 @@ fn simulate_with_step(
                     .sum::<f64>();
                 SystemicSample {
                     administered_mg: st.administered,
-                    gut_mg: st.gut,
+                    gut_mg: st.gut.iter().sum(),
                     rest_mg: st.rest,
+                    peripheral_mg: st.peripheral,
                     central_mg_l: st.rest / vr[d],
                     brain_mg: brain,
                     eliminated_mg: st.eliminated,
                     return_mg_min: regions.iter().map(|r| r[d].return_mg_min).sum(),
                     auc_mg_min_l: st.auc,
-                    balance_error_mg: st.gut + st.rest + brain + st.eliminated - st.administered,
+                    balance_error_mg: st.gut.iter().sum::<f64>()
+                        + st.rest
+                        + st.peripheral
+                        + brain
+                        + st.eliminated
+                        - st.administered,
                 }
             });
             require(
@@ -170,6 +189,7 @@ fn simulate_with_step(
                         && [
                             v.gut_mg,
                             v.rest_mg,
+                            v.peripheral_mg,
                             v.brain_mg,
                             v.eliminated_mg,
                             v.central_mg_l,
@@ -201,8 +221,14 @@ fn simulate_with_step(
         // Midpoint predictor for the common caffeine-dependent blood flow.
         let caf = &states[0];
         let cp = caf.rest / vr[0];
-        let mut derivative = caf.gut * std::f64::consts::LN_2 / params[0].absorption_half_min
+        let mut derivative = caf.gut[params[0].absorption_stages as usize - 1]
+            * std::f64::consts::LN_2
+            / params[0].absorption_half_min
             - params[0].apparent_clearance_l_h / 60.0 * cp;
+        if params[0].peripheral_volume_l > 0.0 {
+            derivative += params[0].distribution_clearance_l_h / 60.0
+                * (caf.peripheral / params[0].peripheral_volume_l - cp);
+        }
         for (i, b) in caf.beds.iter().enumerate() {
             derivative += q(&s, cp, i)
                 * (b.vein / (s.beds.regions[i].volume_l() * s.venous_volume_fraction) - cp);
@@ -214,8 +240,11 @@ fn simulate_with_step(
             let p = &params[d];
             let before = st.rest / vr[d];
             let half = dt * 0.5;
+            let stages = p.absorption_stages as usize;
+            let ka = std::f64::consts::LN_2 / p.absorption_half_min;
+            transit(&mut st.gut, stages, ka, half, false);
             transfer(
-                &mut st.gut,
+                &mut st.gut[stages - 1],
                 &mut st.rest,
                 std::f64::consts::LN_2 / p.absorption_half_min,
                 half,
@@ -226,6 +255,16 @@ fn simulate_with_step(
                 p.apparent_clearance_l_h / 60.0 / vr[d],
                 half,
             );
+            if p.peripheral_volume_l > 0.0 {
+                exchange(
+                    &mut st.rest,
+                    &mut st.peripheral,
+                    vr[d],
+                    p.peripheral_volume_l,
+                    p.distribution_clearance_l_h / 60.0,
+                    half,
+                );
+            }
             for reverse in [false, true] {
                 for k in 0..n {
                     let i = if reverse { n - 1 - k } else { k };
@@ -261,6 +300,16 @@ fn simulate_with_step(
                     }
                 }
             }
+            if p.peripheral_volume_l > 0.0 {
+                exchange(
+                    &mut st.rest,
+                    &mut st.peripheral,
+                    vr[d],
+                    p.peripheral_volume_l,
+                    p.distribution_clearance_l_h / 60.0,
+                    half,
+                );
+            }
             transfer(
                 &mut st.rest,
                 &mut st.eliminated,
@@ -268,17 +317,27 @@ fn simulate_with_step(
                 half,
             );
             transfer(
-                &mut st.gut,
+                &mut st.gut[stages - 1],
                 &mut st.rest,
                 std::f64::consts::LN_2 / p.absorption_half_min,
                 half,
             );
+            transit(&mut st.gut, stages, ka, half, true);
             st.auc += dt * 0.5 * (before + st.rest / vr[d]);
         }
     }
     Ok(CirculationTrace {
         model_id: s.model_id.clone(),
-        solver: "conservative_pairwise_strang_v1".into(),
+        solver: if s
+            .parameters
+            .iter()
+            .any(|p| p.absorption_stages > 1 || p.peripheral_volume_l > 0.0)
+        {
+            "conservative_pairwise_strang_v2"
+        } else {
+            "conservative_pairwise_strang_v1"
+        }
+        .into(),
         step_min: dt,
         scenario: s,
         frames,
@@ -298,14 +357,19 @@ impl CirculationTrace {
         }
     }
     pub fn csv(&self) -> String {
+        let extended = self.scenario.model_revision >= 4;
         let mut out = String::from(
-            "model_id,model_revision,time_min,substance,administered_mg,gut_mg,rest_mg,central_mg_l,brain_mg,eliminated_mg,return_mg_min,auc_mg_min_l,balance_error_mg\n",
+            "model_id,model_revision,time_min,substance,administered_mg,gut_mg,rest_mg,central_mg_l,brain_mg,eliminated_mg,return_mg_min,auc_mg_min_l,balance_error_mg",
         );
+        if extended {
+            out.push_str(",peripheral_mg");
+        }
+        out.push('\n');
         for f in &self.frames {
             for p in Purine::ALL {
                 let r = f.systemic[p.index()];
                 out.push_str(&format!(
-                    "{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
+                    "{},{},{},{},{},{},{},{},{},{},{},{},{}",
                     self.model_id,
                     self.scenario.model_revision,
                     f.time_min,
@@ -320,6 +384,10 @@ impl CirculationTrace {
                     r.auc_mg_min_l,
                     r.balance_error_mg
                 ));
+                if extended {
+                    out.push_str(&format!(",{}", r.peripheral_mg));
+                }
+                out.push('\n');
             }
         }
         out
@@ -360,6 +428,59 @@ impl CirculationTrace {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn four_stage_two_compartment_circulation_matches_oracle_and_conserves_mass() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut s = CirculationScenario::reference(&a, 1);
+        s.duration_min = 120.0;
+        let p = &mut s.parameters[0];
+        p.apparent_volume_l = 45.0;
+        p.apparent_clearance_l_h = 7.0;
+        p.absorption_half_min = std::f64::consts::LN_2 * 60.0 / 4.0;
+        p.absorption_stages = 4;
+        p.peripheral_volume_l = 80.0;
+        p.distribution_clearance_l_h = 12.0;
+        for bed in &mut s.beds.regions {
+            bed.flow_fraction = 0.0;
+        }
+        let p = &s.parameters[0];
+        let oracle = crate::OralCurveParameters {
+            volume_l: rest_volumes(&s)[0],
+            clearance_l_h: p.apparent_clearance_l_h,
+            absorption_rate_h: 4.0,
+            absorption_stages: 4,
+            peripheral_volume_l: 80.0,
+            distribution_clearance_l_h: 12.0,
+        };
+        let tr = simulate_circulation(s.clone(), &a).unwrap();
+        for f in &tr.frames {
+            let x = &f.systemic[0];
+            assert!((x.central_mg_l - oracle.concentration(150.0, f.time_min)).abs() < 1e-6);
+            assert!(x.balance_error_mg.abs() < 1e-8);
+            assert!(
+                (x.administered_mg
+                    - x.gut_mg
+                    - x.rest_mg
+                    - x.peripheral_mg
+                    - x.brain_mg
+                    - x.eliminated_mg)
+                    .abs()
+                    < 1e-8
+            );
+        }
+        assert!(tr.at(120.0).systemic[0].peripheral_mg > 10.0);
+        assert!(tr.csv().lines().next().unwrap().ends_with(",peripheral_mg"));
+        for bed in &mut s.beds.regions {
+            bed.flow_fraction = 1.0;
+        }
+        s.duration_min = 15.0;
+        let normal = simulate_circulation(s.clone(), &a).unwrap();
+        let fine = simulate_with_step(s, &a, 0.0025).unwrap();
+        for (x, y) in normal.frames.iter().zip(&fine.frames) {
+            assert!((x.systemic[0].central_mg_l - y.systemic[0].central_mg_l).abs() < 1e-6);
+            assert!(x.systemic[0].balance_error_mg.abs() < 1e-8);
+        }
+    }
     #[test]
     fn exact_exchange_conserves_mass_and_equilibrates() {
         let (mut cap, mut tissue) = (1.0, 0.0);
