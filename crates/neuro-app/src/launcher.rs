@@ -118,7 +118,8 @@ impl SimulationLauncher {
             if ui.add_enabled(self.rows.len()<32,egui::Button::new("Добавить приём")).clicked(){self.rows.push(DoseDraft{substance:Purine::Caffeine,amount:"100".into(),time:"0".into()});}
             ui.add_space(8.0);muted(ui,"Время считается от начала сценария, а не по часам. Можно добавить несколько веществ и повторные приёмы.");
             ui.horizontal(|ui|{ui.label("Длительность, мин");ui.add(egui::TextEdit::singleline(&mut self.duration).desired_width(110.0));});
-            ui.checkbox(&mut self.interactions,"Учитывать исследованные PK-взаимодействия");muted(ui,"Профиль относится к одному общему моменту приёма. Другие дозы и тройное сочетание содержат экстраполяции.");
+            if self.base.calibration_curve_ids.is_empty() { ui.checkbox(&mut self.interactions,"Учитывать исследованные PK-взаимодействия");muted(ui,"Профиль относится к одному общему моменту приёма. Другие дозы и тройное сочетание содержат экстраполяции."); }
+            else { muted(ui,"Унаследованы параметры исследовательского протокола. Изменение состава и доз — экстраполяция; парные поправки выключены. Общие параметры можно восстановить в сверке PK."); }
             if let Some(e)=&self.error{ui.colored_label(ERROR,e);}
             ui.add_space(12.0);ui.horizontal(|ui|{if ui.button("Отмена").clicked(){action=Action::Cancel;}ui.with_layout(egui::Layout::right_to_left(egui::Align::Center),|ui|{let r=ui.add(egui::Button::new(RichText::new("Запустить симуляцию").color(BACKGROUND)).fill(TEAL));ctx.data_mut(|d|d.insert_temp(egui::Id::new("launch-submit-rect"),r.rect));if r.clicked(){action=Action::Launch;}});});
         });

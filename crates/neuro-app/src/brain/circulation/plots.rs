@@ -52,6 +52,9 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
         if ui.small_button("Сверка PK").clicked() {
             c.show_pk_reference = true;
         }
+        if ui.small_button("Кривые исследований").clicked() {
+            c.show_study_curves = true;
+        }
         match c.plot {
             PurinePlot::Plasma => {
                 for p in Purine::ALL {
@@ -137,6 +140,11 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
     } else {
         Vec::new()
     };
+    let fitted = if c.plot == PurinePlot::Plasma {
+        neuro_engine::matching_fitted_curves(trace, &c.fitted_report)
+    } else {
+        vec![]
+    };
     let series = |value: fn(&CirculationFrame, usize, usize) -> f64| {
         frames
             .iter()
@@ -189,7 +197,10 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
             "Количество, мг",
             vec![
                 (TEAL, series(|f, _, d| f.systemic[d].gut_mg)),
-                (DRUG_COLORS[0], series(|f, _, d| f.systemic[d].rest_mg)),
+                (
+                    DRUG_COLORS[0],
+                    series(|f, _, d| f.systemic[d].rest_mg + f.systemic[d].peripheral_mg),
+                ),
                 (PURPLE, series(|f, _, d| f.systemic[d].brain_mg)),
                 (MUTED, series(|f, _, d| f.systemic[d].eliminated_mg)),
             ],
@@ -220,6 +231,13 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
             .iter()
             .flat_map(|(_, p)| p.iter().map(|(_, y)| *y))
             .chain(references.iter().map(|r| r.reference.cmax_mg_l()))
+            .chain(fitted.iter().flat_map(|(f, offset)| {
+                f.curve
+                    .observations()
+                    .into_iter()
+                    .filter(move |o| o.time_min + offset <= xmax)
+                    .map(|o| o.concentration_mg_l * o.log_concentration_error.exp())
+            }))
             .fold(0.1_f64, f64::max)
             * 1.1
     };
@@ -249,6 +267,11 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 );
             }
         }
+        for (fit, offset) in &fitted {
+            study_curves::draw_observations(ui, rect, fit, *offset, xmax, |v| {
+                rect.bottom() - rect.height() * (v / ymax) as f32
+            });
+        }
         for row in &references {
             let r = &row.reference;
             let point = egui::pos2(
@@ -267,6 +290,12 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
             }
             ui.interact(egui::Rect::from_center_size(point, egui::vec2(12.0, 12.0)), egui::Id::new(("pk-source-peak", &r.id)), egui::Sense::hover()).on_hover_text(format!("{}: Cmax {:.4} мг/л; Tmax {:.1} мин после приёма. Сводные показатели, не одна измеренная точка временного ряда.", r.title, r.cmax_mg_l(), r.tmax_min));
         }
+    }
+    if !fitted.is_empty() {
+        muted(
+            ui,
+            "● — точки публикации; усы — погрешность чтения. Качество и ограничения: «Кривые исследований».",
+        );
     }
     if c.time_min > xmax {
         muted(
@@ -305,7 +334,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
             format!(
                 "Баланс: ЖКТ {:.2} + организм {:.2} + мозг {:.3} + устранено {:.2} = {:.2} мг; ошибка {:.1e} мг",
                 s.gut_mg,
-                s.rest_mg,
+                s.rest_mg + s.peripheral_mg,
                 s.brain_mg,
                 s.eliminated_mg,
                 s.administered_mg,

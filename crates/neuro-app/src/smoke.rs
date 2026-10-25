@@ -20,7 +20,9 @@ pub fn configure(app: &mut App) {
             std::process::exit(1);
         }
         app.insert_resource(Smoke {
-            frame: if std::env::args().any(|a| a == "--pk-reference-only") {
+            frame: if std::env::args().any(|a| a == "--curve-fit-only") {
+                1250
+            } else if std::env::args().any(|a| a == "--pk-reference-only") {
                 1100
             } else if std::env::args().any(|a| a == "--launcher-only") {
                 900
@@ -1212,6 +1214,136 @@ fn run(
         }
         1230 => {
             std::fs::write(smoke.directory.join("pk-reference-passed.txt"), "Full 24h range by default; 1440 min outside early view has no fake boundary cursor; published endpoint markers and matched references C/M/T/pair; triple is explicitly unmatched; revision-one replay unchanged.\n").unwrap();
+            exit.write(AppExit::Success);
+        }
+        1255 => {
+            lab.view = View::Brain;
+            lab.brain.caffeine.mode = false;
+            lab.brain.simulation.mode = false;
+            lab.brain.circulation.mode = true;
+            lab.brain.circulation.show_study_curves = true;
+        }
+        1260 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("curve-study-preview.png"),
+                ));
+        }
+        1265 | 1290 | 1310 => {
+            let curve = match smoke.frame {
+                1265 => 0,
+                1290 => 1,
+                _ => 2,
+            };
+            let protocol = match curve {
+                0 => 0,
+                1 => 1,
+                _ => 2,
+            };
+            let a = lab.brain.atlas.clone();
+            let scene = lab.brain.scene.clone();
+            let c = &mut lab.brain.circulation;
+            c.study_curve = curve;
+            c.load_study_protocol(protocol, &a).unwrap();
+            c.playing = false;
+            c.set_time(90.0);
+            let tr = c.trace.as_ref().unwrap();
+            let pairs = neuro_engine::matching_fitted_curves(tr, &c.fitted_report);
+            assert_eq!(pairs.len(), if curve == 2 { 3 } else { 1 });
+            assert!(neuro_engine::compare_purine_pk(tr).unwrap().is_empty());
+            let metrics: Vec<_> = pairs
+                .iter()
+                .map(|(f, t)| {
+                    (
+                        f.curve.id.clone(),
+                        neuro_engine::coupled_curve_metrics(tr, f, *t),
+                    )
+                })
+                .collect();
+            std::fs::write(
+                smoke
+                    .directory
+                    .join(format!("curve-protocol-{protocol}-metrics.json")),
+                serde_json::to_vec_pretty(&metrics).unwrap(),
+            )
+            .unwrap();
+            std::fs::write(
+                smoke
+                    .directory
+                    .join(format!("curve-protocol-{protocol}-gui.csv")),
+                tr.csv(),
+            )
+            .unwrap();
+            let project = neuro_domain::CirculationProject::new(scene, c.scenario.clone());
+            project
+                .save(
+                    smoke
+                        .directory
+                        .join(format!("curve-protocol-{protocol}.json")),
+                    &a,
+                )
+                .unwrap();
+        }
+        1270 | 1295 | 1315 | 1325 | 1335 => {
+            let curve = match smoke.frame {
+                1270 => 0,
+                1295 => 1,
+                1315 => 2,
+                1325 => 3,
+                _ => 4,
+            };
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join(format!("curve-fit-{curve}.png")),
+                ));
+        }
+        1275 => {
+            lab.brain.circulation.show_study_curves = false;
+        }
+        1280 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(smoke.directory.join("curve-fit-main-3d.png")));
+        }
+        1320 => {
+            lab.brain.circulation.study_curve = 3;
+        }
+        1330 => {
+            lab.brain.circulation.study_curve = 4;
+        }
+        1340 => {
+            let a = lab.brain.atlas.clone();
+            let c = &mut lab.brain.circulation;
+            let tr = c.trace.as_ref().unwrap();
+            let replay = neuro_domain::CirculationScenario::load(
+                smoke.directory.join("curve-protocol-2.json"),
+                &a,
+            )
+            .unwrap();
+            assert_eq!(
+                neuro_engine::simulate_circulation(replay, &a)
+                    .unwrap()
+                    .csv(),
+                tr.csv()
+            );
+            let mut changed = c.scenario.clone();
+            changed.duration_min = 5.0;
+            changed.doses[0].amount_mg += 1.0;
+            let altered = neuro_engine::simulate_circulation(changed, &a).unwrap();
+            assert!(neuro_engine::matching_fitted_curves(&altered, &c.fitted_report).is_empty());
+            c.restore_pk_reference(&a);
+            assert!(c.scenario.calibration_curve_ids.is_empty());
+            assert!(
+                c.scenario
+                    .parameters
+                    .iter()
+                    .all(|p| p.absorption_stages == 1 && p.peripheral_volume_l == 0.0)
+            );
+        }
+        1350 => {
+            std::fs::write(smoke.directory.join("curve-fit-passed.txt"), "Three complete study protocols; five fitted curves with digitized markers, log decline, source status and excluded-time errors; full contour mass; actual contour error reports; modified dose hides incompatible markers; saved triple replays exactly; reset clears fit coefficients.\n").unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}

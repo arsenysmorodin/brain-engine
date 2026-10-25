@@ -4,6 +4,7 @@ pub use pathway::MapSelection as PurinePathSelection;
 pub use plots::PurinePlot;
 mod pk_validation;
 mod plots;
+mod study_curves;
 use super::{BrainLab, BrainViewport};
 use crate::theme::*;
 use bevy::prelude::UVec2;
@@ -45,6 +46,12 @@ pub struct CirculationLab {
     pub route: bool,
     pub show_plot: bool,
     pub show_pk_reference: bool,
+    pub show_study_curves: bool,
+    pub study_curve: usize,
+    pub study_log: bool,
+    pub study_early: bool,
+    pub fitted_report: neuro_engine::PkCurveFitReport,
+    pub fitted_protocols: Vec<CirculationScenario>,
     pub plot: PurinePlot,
     pub map_selection: Option<PurinePathSelection>,
     pub map_pan: egui::Vec2,
@@ -62,6 +69,9 @@ pub struct CirculationLab {
 }
 impl CirculationLab {
     pub fn new(atlas: &BrainAtlas) -> Result<Self, Error> {
+        let fitted_report =
+            serde_json::from_str(include_str!("../../../../data/purine-pk-fits.json"))?;
+        let fitted_protocols = neuro_engine::fitted_pk_protocols(&fitted_report, atlas)?;
         Ok(Self {
             mode: false,
             scenario: CirculationScenario::reference(atlas, 7),
@@ -84,6 +94,12 @@ impl CirculationLab {
             route: false,
             show_plot: false,
             show_pk_reference: false,
+            show_study_curves: false,
+            study_curve: 0,
+            study_log: true,
+            study_early: false,
+            fitted_report,
+            fitted_protocols,
             plot: PurinePlot::Plasma,
             map_selection: None,
             map_pan: egui::Vec2::ZERO,
@@ -144,12 +160,36 @@ impl CirculationLab {
             current.apparent_volume_l = reference.apparent_volume_l;
             current.apparent_clearance_l_h = reference.apparent_clearance_l_h;
             current.absorption_half_min = reference.absorption_half_min;
+            current.absorption_stages = 1;
+            current.peripheral_volume_l = 0.0;
+            current.distribution_clearance_l_h = 0.0;
         }
+        self.scenario.calibration_curve_ids.clear();
         self.scenario.model_revision = neuro_domain::CIRCULATION_MODEL_REVISION;
         self.invalidate();
         if let Err(e) = self.scenario.validate(atlas) {
             self.error = Some(e.to_string());
         }
+    }
+    pub fn load_study_protocol(&mut self, index: usize, atlas: &BrainAtlas) -> Result<(), Error> {
+        let s = self
+            .fitted_protocols
+            .get(index)
+            .ok_or_else(|| Error::Validation("Неизвестный протокол исследования".into()))?
+            .clone();
+        let mut next = Self::from_scenario(s, atlas)?;
+        next.mode = true;
+        next.show_plot = true;
+        next.show_study_curves = true;
+        next.study_curve = self.study_curve;
+        next.study_log = self.study_log;
+        next.study_early = self.study_early;
+        next.selected = self.fitted_report.fits[self.study_curve].curve.substance;
+        next.playing = true;
+        next.dirty = true;
+        next.revision = self.revision.wrapping_add(1);
+        *self = next;
+        Ok(())
     }
     pub fn set_time(&mut self, t: f64) {
         self.clock_min = if t.is_finite() {
@@ -373,10 +413,19 @@ pub fn sidebar(ui: &mut egui::Ui, lab: &mut BrainLab) {
         for (i,d) in c.scenario.doses.iter_mut().enumerate(){ui.colored_label(DRUG_COLORS[d.substance.index()],d.substance.label());ui.horizontal(|ui|{changed|=ui.add(egui::DragValue::new(&mut d.amount_mg).range(0.0..=500.0).speed(1.0).suffix(" мг")).changed();changed|=ui.add(egui::DragValue::new(&mut d.time_min).range(0.0..=c.scenario.duration_min).speed(0.5).suffix(" мин")).changed();if ui.small_button("×").clicked(){remove=Some(i);}});}
         if let Some(i)=remove{c.scenario.doses.remove(i);changed=true;}
         ui.menu_button("Добавить приём",|ui|{for p in Purine::ALL{if ui.add_enabled(c.scenario.doses.len()<32,egui::Button::new(p.label())).clicked(){c.scenario.doses.push(PurineDose{substance:p,time_min:0.0,amount_mg:50.0});changed=true;ui.close();}}});
-        ui.add_space(6.0);changed|=ui.checkbox(&mut c.scenario.interactions,"Учитывать взаимодействия").changed();muted(ui,"Парные PK-отношения из исследований. Их сочетание в тройной смеси — гипотеза.");
+        ui.add_space(6.0);if c.scenario.calibration_curve_ids.is_empty() { changed|=ui.checkbox(&mut c.scenario.interactions,"Учитывать взаимодействия").changed();muted(ui,"Парные PK-отношения из исследований. Их сочетание в тройной смеси — гипотеза."); }
+        else { ui.colored_label(PURPLE,"Параметры исследования: парные поправки выключены. Изменение доз — экстраполяция."); }
         if c.scenario.interactions&&!c.scenario.interaction_profile_active(){ui.colored_label(PURPLE,"Разнесённые/повторные дозы: профиль взаимодействий не применяется.");}
         changed|=ui.add(egui::DragValue::new(&mut c.scenario.duration_min).range(5.0..=2880.0).speed(30.0).suffix(" мин длительность")).changed();
-        ui.collapsing("PK и обмен в мозге",|ui|{let p=&mut c.scenario.parameters[c.selected.index()];muted(ui,"Редактируется выбранное над мозгом вещество.");for (label,value,min,max) in [("V/F, л",&mut p.apparent_volume_l,10.0,1000.0),("CL/F, л/ч",&mut p.apparent_clearance_l_h,0.1,500.0),("t½ всасывания, мин",&mut p.absorption_half_min,0.5,60.0),("Kp ткани/крови",&mut p.tissue_blood_partition,0.1,3.0),("Обмен, мин⁻¹",&mut p.exchange_min_inv,0.0,5.0)]{ui.label(label);changed|=ui.add(egui::DragValue::new(value).speed(0.05).range(min..=max)).changed();}muted(ui,"Kp и обмен — допущения. V/F и CL/F — кажущиеся параметры; F неизвестна.");});
+        ui.collapsing("PK и обмен в мозге",|ui|{let p=&mut c.scenario.parameters[c.selected.index()];muted(ui,"Редактируется выбранное над мозгом вещество.");for (label,value,min,max) in [("V/F, л",&mut p.apparent_volume_l,10.0,1000.0),("CL/F, л/ч",&mut p.apparent_clearance_l_h,0.1,500.0),("t½ всасывания, мин",&mut p.absorption_half_min,0.5,60.0),("Kp ткани/крови",&mut p.tissue_blood_partition,0.1,3.0),("Обмен, мин⁻¹",&mut p.exchange_min_inv,0.0,5.0)]{ui.label(label);changed|=ui.add(egui::DragValue::new(value).speed(0.05).range(min..=max)).changed();}ui.label("Ступени всасывания");
+            let extra = ui.add(egui::DragValue::new(&mut p.absorption_stages).range(1..=4)).changed();
+            let mut peripheral = p.peripheral_volume_l > 0.0;
+            let toggle = ui.checkbox(&mut peripheral,"Периферический компартмент").changed();
+            if toggle { p.peripheral_volume_l = if peripheral { p.apparent_volume_l } else { 0.0 }; p.distribution_clearance_l_h = if peripheral { 10.0 } else { 0.0 }; }
+            let mut distribution_changed = false;
+            if peripheral { for (label,value,min,max) in [("Vp/F, л", &mut p.peripheral_volume_l,1.0,5000.0),("Qd/F, л/ч", &mut p.distribution_clearance_l_h,0.01,5000.0)] { ui.label(label); distribution_changed |= ui.add(egui::DragValue::new(value).range(min..=max).speed(0.1)).changed(); } }
+            if extra || toggle || distribution_changed { c.scenario.model_revision = neuro_domain::CIRCULATION_MODEL_REVISION; changed = true; }
+            muted(ui,"Kp и обмен — допущения. V/F и CL/F — кажущиеся параметры; F неизвестна.");});
         let before_h=c.scenario.neural_hypothesis.clone();
         ui.collapsing("Учебная гипотеза Ct → E/I",|ui|{
             if c.scenario.neural_hypothesis.is_none(){c.scenario.neural_hypothesis=neuro_domain::PurineNeuralHypothesis::reference(&lab.atlas).ok();}
@@ -409,6 +458,7 @@ fn preset_label(mask: u8) -> &'static str {
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
     pk_validation::show(ui.ctx(), &mut lab.circulation, &lab.atlas);
+    study_curves::show(ui.ctx(), &mut lab.circulation, &lab.atlas);
     if lab.circulation.trace.is_none()
         && !lab.circulation.needs_run
         && lab.circulation.error.is_none()
@@ -699,6 +749,9 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
     if ui.button("Сверка с исследованиями").clicked() {
         c.show_pk_reference = true;
     }
+    if ui.button("Кривые исследований").clicked() {
+        c.show_study_curves = true;
+    }
     let mut changed = false;
     if let Some(id) = &lab.scene.selected_region
         && let Some(i) = c.bed_index(id)
@@ -721,14 +774,30 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
         "V/F = {:.2} л; CL/F = {:.3} л/ч",
         p.apparent_volume_l, p.apparent_clearance_l_h
     ));
-    ui.label(format!(
-        "Производное t½ = {:.2} ч",
-        std::f64::consts::LN_2 * p.apparent_volume_l / p.apparent_clearance_l_h
-    ));
-    muted(
-        ui,
-        "Полувремя CL/V — ориентир общего распределения; хвост многокомпартментной трассы может отличаться.",
-    );
+    if p.absorption_stages > 1 || p.peripheral_volume_l > 0.0 {
+        muted(
+            ui,
+            format!(
+                "{} ступени всасывания; Vp/F {:.2} л; Qd/F {:.3} л/ч",
+                p.absorption_stages, p.peripheral_volume_l, p.distribution_clearance_l_h
+            ),
+        );
+    }
+    if p.peripheral_volume_l > 0.0 {
+        muted(
+            ui,
+            "Два системных компартмента: ln(2)·V/CL не является терминальным t½. Спад и устойчивость подбора смотрите в «Кривые исследований».",
+        );
+    } else {
+        ui.label(format!(
+            "Производное t½ CL/V = {:.2} ч",
+            std::f64::consts::LN_2 * p.apparent_volume_l / p.apparent_clearance_l_h
+        ));
+        muted(
+            ui,
+            "Расчётный ориентир; он не заменяет терминальную оценку исследования.",
+        );
+    }
     if c.interactions_applied() {
         ui.colored_label(
             PURPLE,
