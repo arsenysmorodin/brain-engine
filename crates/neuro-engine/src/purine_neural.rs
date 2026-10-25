@@ -148,13 +148,9 @@ mod tests {
         .unwrap();
         assert_eq!(legacy.model_revision, 1);
         assert!(legacy.neural_hypothesis.is_none());
-        assert!(
-            shifted
-                .csv()
-                .lines()
-                .nth(1)
-                .unwrap()
-                .starts_with("purine_closed_circulation_v1,2,")
-        );
+        assert!(shifted.csv().lines().nth(1).unwrap().starts_with(&format!(
+            "purine_closed_circulation_v1,{},",
+            neuro_domain::CIRCULATION_MODEL_REVISION
+        )));
     }
 }

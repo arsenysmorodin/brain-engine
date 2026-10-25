@@ -49,6 +49,9 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
         if c.plot != PurinePlot::Neural {
             ui.checkbox(&mut c.early, "0–5 мин");
         }
+        if ui.small_button("Сверка PK").clicked() {
+            c.show_pk_reference = true;
+        }
         match c.plot {
             PurinePlot::Plasma => {
                 for p in Purine::ALL {
@@ -125,6 +128,15 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
     }
     let bed = bed.unwrap_or(0);
     let frames: Vec<_> = trace.frames.iter().filter(|f| f.time_min <= xmax).collect();
+    let references = if c.plot == PurinePlot::Plasma {
+        neuro_engine::compare_purine_pk(trace)
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|r| r.dose_time_min + r.reference.tmax_min <= xmax)
+            .collect::<Vec<_>>()
+    } else {
+        Vec::new()
+    };
     let series = |value: fn(&CirculationFrame, usize, usize) -> f64| {
         frames
             .iter()
@@ -207,6 +219,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
         lines
             .iter()
             .flat_map(|(_, p)| p.iter().map(|(_, y)| *y))
+            .chain(references.iter().map(|r| r.reference.cmax_mg_l()))
             .fold(0.1_f64, f64::max)
             * 1.1
     };
@@ -215,7 +228,7 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
         "purine-detail-chart",
         xmax,
         ymax,
-        c.time_min.min(xmax),
+        c.time_min,
         &lines,
         if c.early || xmax <= 120.0 { "min" } else { "h" },
     );
@@ -236,6 +249,38 @@ pub fn show(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 );
             }
         }
+        for row in &references {
+            let r = &row.reference;
+            let point = egui::pos2(
+                rect.left() + rect.width() * ((row.dose_time_min + r.tmax_min) / xmax) as f32,
+                rect.bottom() - rect.height() * (r.cmax_mg_l() / ymax) as f32,
+            );
+            let color = DRUG_COLORS[r.substance.index()];
+            for sign in [-1.0, 1.0] {
+                painter.line_segment(
+                    [
+                        point + egui::vec2(-4.0, -4.0 * sign),
+                        point + egui::vec2(4.0, 4.0 * sign),
+                    ],
+                    egui::Stroke::new(1.5_f32, color),
+                );
+            }
+            ui.interact(egui::Rect::from_center_size(point, egui::vec2(12.0, 12.0)), egui::Id::new(("pk-source-peak", &r.id)), egui::Sense::hover()).on_hover_text(format!("{}: Cmax {:.4} мг/л; Tmax {:.1} мин после приёма. Сводные показатели, не одна измеренная точка временного ряда.", r.title, r.cmax_mg_l(), r.tmax_min));
+        }
+    }
+    if c.time_min > xmax {
+        muted(
+            ui,
+            format!(
+                "Кадр {:.1} мин вне участка 0–5 мин. Отключите увеличение для просмотра всего протокола.",
+                c.time_min
+            ),
+        );
+    } else if !references.is_empty() {
+        muted(
+            ui,
+            "× — опубликованный Cmax/Tmax подходящего протокола; подробности в «Сверка PK».",
+        );
     }
     if let Some(t) = picked {
         c.playing = false;

@@ -177,11 +177,7 @@ impl Lab {
         next.playing = true;
         next.dirty = true;
         next.revision = self.brain.circulation.revision.wrapping_add(1);
-        next.early = next
-            .scenario
-            .doses
-            .iter()
-            .any(|d| d.time_min < 5.0 && d.amount_mg > 0.0);
+        next.early = false;
         self.brain.circulation = next;
         self.brain.caffeine.mode = false;
         self.brain.caffeine.playing = false;
@@ -225,7 +221,7 @@ mod tests {
         let s = d.scenario(&a).unwrap();
         assert_eq!(s.doses[0].amount_mg, 75.5);
         assert_eq!(s.doses[0].time_min, 30.0);
-        assert_eq!(s.model_revision, 2);
+        assert_eq!(s.model_revision, CIRCULATION_MODEL_REVISION);
         for (dose, time) in [("NaN", "0"), ("100", "0.1"), ("501", "0"), ("100", "61")] {
             d.rows[0].amount = dose.into();
             d.rows[0].time = time.into();

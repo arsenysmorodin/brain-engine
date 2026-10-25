@@ -26,6 +26,26 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         help();
         return Ok(());
     }
+    if command == "benchmark-purine-pk" {
+        if args.next().is_some() {
+            return Err("benchmark-purine-pk не принимает аргументов".into());
+        }
+        let atlas = neuro_domain::BrainAtlas::bundled()?;
+        let mut report = Vec::new();
+        for revision in [2, neuro_domain::CIRCULATION_MODEL_REVISION] {
+            for mask in [1, 2, 3, 4, 5] {
+                let mut s = neuro_domain::CirculationScenario::reference(&atlas, mask);
+                s.model_revision = revision;
+                s.parameters = neuro_domain::Purine::ALL
+                    .map(|p| neuro_domain::PurineParameters::reference_revision(p, revision));
+                s.duration_min = 240.0;
+                let trace = neuro_engine::simulate_circulation(s, &atlas)?;
+                report.push(serde_json::json!({"revision": revision, "mask": mask, "comparisons": neuro_engine::compare_purine_pk(&trace)?}));
+            }
+        }
+        println!("{}", serde_json::to_string_pretty(&report)?);
+        return Ok(());
+    }
     if command == "benchmark-response" {
         if args.next().is_some() {
             return Err("benchmark-response не принимает аргументов".into());
@@ -203,6 +223,9 @@ fn same_path(a: &Path, b: &Path) -> bool {
     normalized(a) == normalized(b)
 }
 fn help() {
+    println!(
+        "  neuro-cli benchmark-purine-pk — сравнение сводных плазменных ориентиров с ревизиями 2/3 (JSON, без объявления биологической валидации)\n"
+    );
     println!(
         "NeuroLab — анатомия мозга и численные модули\n\n  neuro-cli atlas [--csv regions.csv]\n  neuro-cli new scenario.json\n  neuro-cli new-response response.json\n  neuro-cli new-network network.json\n  neuro-cli new-circulation circulation.json\n  neuro-cli circulation circulation-or-project.json [--csv pk.csv] [--regional-csv regions.csv] [--json trace.json] [--network-at-min 60]\n  neuro-cli new-caffeine caffeine.json\n  neuro-cli caffeine caffeine-or-project.json [--csv pk.csv] [--json report.json] [--regional-csv regions.csv] [--network-at-min 60]\n  neuro-cli simulate network-or-project.json [--csv trace.csv] [--json trace.json]\n  neuro-cli run scenario.json [--csv results.csv] [--json results.json]\n  neuro-cli benchmark-response\n\nrun выбирает модель по model_id. simulate вычисляет временную трассу сети E/I. atlas проверяет геометрию. JSON — stdout, ошибки — stderr и код 1."
     );

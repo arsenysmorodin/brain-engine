@@ -1,0 +1,32 @@
+[
+  {
+    "id": "he2017-c150", "title": "He 2017, table 2, condition 3", "url": "https://www.memphis.edu/nutraceutical/pdfs/8-2017-jcr-theacrine-pk.pdf", "n": 8,
+    "substance": "caffeine", "doses_mg": [150, 0, 0],
+    "reported_cmax_ng_ml": 33.4, "cmax_dose_normalized": true,
+    "reported_auc_h_ng_ml_per_mg": 262, "tmax_min": 48, "tmax_statistic": "median", "half_life_h": 6.2
+  },
+  {
+    "id": "mondal2022-m100", "title": "Mondal 2022, table 2, cohort II", "url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "n": 12,
+    "substance": "methylliberine", "doses_mg": [0, 100, 0],
+    "reported_cmax_ng_ml": 254, "cmax_dose_normalized": false,
+    "reported_auc_h_ng_ml_per_mg": 6.69, "tmax_min": 46.2, "tmax_statistic": "geometric mean", "half_life_h": 1.4
+  },
+  {
+    "id": "mondal2022-c150-m100", "title": "Mondal 2022, table 2, cohort IV", "url": "https://journalofexerciseandnutrition.com/index.php/JEN/article/download/124/110/342", "n": 12,
+    "substance": "methylliberine", "doses_mg": [150, 100, 0],
+    "reported_cmax_ng_ml": 229, "cmax_dose_normalized": false,
+    "reported_auc_h_ng_ml_per_mg": 8.26, "tmax_min": 57.6, "tmax_statistic": "geometric mean", "half_life_h": 1.41
+  },
+  {
+    "id": "he2017-t125", "title": "He 2017, table 1, condition 2", "url": "https://www.memphis.edu/nutraceutical/pdfs/8-2017-jcr-theacrine-pk.pdf", "n": 8,
+    "substance": "theacrine", "doses_mg": [0, 0, 125],
+    "reported_cmax_ng_ml": 25.6, "cmax_dose_normalized": true,
+    "reported_auc_h_ng_ml_per_mg": 736, "tmax_min": 108, "tmax_statistic": "median", "half_life_h": 26.1
+  },
+  {
+    "id": "he2017-c150-t125", "title": "He 2017, table 1, condition 4", "url": "https://www.memphis.edu/nutraceutical/pdfs/8-2017-jcr-theacrine-pk.pdf", "n": 8,
+    "substance": "theacrine", "doses_mg": [150, 0, 125],
+    "reported_cmax_ng_ml": 38.6, "cmax_dose_normalized": true,
+    "reported_auc_h_ng_ml_per_mg": 1242, "tmax_min": 60, "tmax_statistic": "median", "half_life_h": 29.2
+  }
+]

@@ -2,6 +2,7 @@ pub(super) mod geometry;
 mod pathway;
 pub use pathway::MapSelection as PurinePathSelection;
 pub use plots::PurinePlot;
+mod pk_validation;
 mod plots;
 use super::{BrainLab, BrainViewport};
 use crate::theme::*;
@@ -43,6 +44,7 @@ pub struct CirculationLab {
     pub early: bool,
     pub route: bool,
     pub show_plot: bool,
+    pub show_pk_reference: bool,
     pub plot: PurinePlot,
     pub map_selection: Option<PurinePathSelection>,
     pub map_pan: egui::Vec2,
@@ -78,9 +80,10 @@ impl CirculationLab {
             particles: true,
             opacity: 0.13,
             show_regions: false,
-            early: true,
+            early: false,
             route: false,
             show_plot: false,
+            show_pk_reference: false,
             plot: PurinePlot::Plasma,
             map_selection: None,
             map_pan: egui::Vec2::ZERO,
@@ -133,6 +136,20 @@ impl CirculationLab {
         self.error = None;
         self.dirty = true;
         self.revision = self.revision.wrapping_add(1);
+    }
+    pub fn restore_pk_reference(&mut self, atlas: &BrainAtlas) {
+        for p in Purine::ALL {
+            let reference = neuro_domain::PurineParameters::reference(p);
+            let current = &mut self.scenario.parameters[p.index()];
+            current.apparent_volume_l = reference.apparent_volume_l;
+            current.apparent_clearance_l_h = reference.apparent_clearance_l_h;
+            current.absorption_half_min = reference.absorption_half_min;
+        }
+        self.scenario.model_revision = neuro_domain::CIRCULATION_MODEL_REVISION;
+        self.invalidate();
+        if let Err(e) = self.scenario.validate(atlas) {
+            self.error = Some(e.to_string());
+        }
     }
     pub fn set_time(&mut self, t: f64) {
         self.clock_min = if t.is_finite() {
@@ -391,6 +408,7 @@ fn preset_label(mask: u8) -> &'static str {
     }
 }
 pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport) {
+    pk_validation::show(ui.ctx(), &mut lab.circulation, &lab.atlas);
     if lab.circulation.trace.is_none()
         && !lab.circulation.needs_run
         && lab.circulation.error.is_none()
@@ -547,7 +565,7 @@ pub fn viewport(ui: &mut egui::Ui, lab: &mut BrainLab, viewport: &BrainViewport)
     });
     let height = (ui.available_height()
         - if lab.circulation.show_plot {
-            285.0
+            320.0
         } else {
             75.0
         })
@@ -641,7 +659,6 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 );
             }
         }
-
         if let Some(id) = &lab.scene.selected_region
             && let Some(i) = c.bed_index(id)
         {
@@ -678,6 +695,9 @@ pub fn inspector(ui: &mut egui::Ui, lab: &mut BrainLab) {
                 r.territory.label()
             ));
         }
+    }
+    if ui.button("Сверка с исследованиями").clicked() {
+        c.show_pk_reference = true;
     }
     let mut changed = false;
     if let Some(id) = &lab.scene.selected_region
@@ -885,6 +905,34 @@ mod animation_tests {
 #[cfg(test)]
 mod parity_tests {
     use super::*;
+    #[test]
+    fn explicit_reference_reset_preserves_doses_and_brain_parameters_and_invalidates_trace() {
+        let a = BrainAtlas::bundled().unwrap();
+        let mut s = CirculationScenario::from_json(
+            include_str!("../../../../scenarios/purine-circulation.json"),
+            &a,
+        )
+        .unwrap();
+        s.duration_min = 5.0;
+        s.parameters[2].tissue_blood_partition = 1.7;
+        let doses = s.doses.clone();
+        let beds = s.beds.clone();
+        let mut c = CirculationLab::from_scenario(s, &a).unwrap();
+        assert!(!c.early);
+        c.restore_pk_reference(&a);
+        assert!(c.trace.is_none() && c.needs_run && c.dirty);
+        assert_eq!(
+            c.scenario.model_revision,
+            neuro_domain::CIRCULATION_MODEL_REVISION
+        );
+        assert_eq!(c.scenario.doses, doses);
+        assert_eq!(c.scenario.beds, beds);
+        assert_eq!(c.scenario.parameters[2].tissue_blood_partition, 1.7);
+        assert_eq!(
+            c.scenario.parameters[2].absorption_half_min,
+            neuro_domain::PurineParameters::reference(Purine::Theacrine).absorption_half_min
+        );
+    }
     #[test]
     fn neural_settings_preserve_pk_but_invalidate_comparisons_on_time_or_dose_changes() {
         let a = BrainAtlas::bundled().unwrap();

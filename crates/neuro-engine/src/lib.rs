@@ -11,6 +11,8 @@ mod purine_neural;
 pub use purine_neural::*;
 mod circulation;
 pub use circulation::*;
+mod pk_reference;
+pub use pk_reference::*;
 mod caffeine;
 pub use caffeine::*;
 mod network;

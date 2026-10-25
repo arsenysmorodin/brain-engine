@@ -4,7 +4,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-pub const CIRCULATION_MODEL_REVISION: u32 = 2;
+pub const CIRCULATION_MODEL_REVISION: u32 = 3;
 pub const CIRCULATION_MODEL_ID: &str = "purine_closed_circulation_v1";
 pub const CIRCULATION_PROVENANCE_ID: &str = "purine_sources_2026_10_24_v1";
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -51,15 +51,28 @@ pub struct PurineParameters {
 }
 impl PurineParameters {
     pub fn reference(p: Purine) -> Self {
+        Self::reference_revision(p, CIRCULATION_MODEL_REVISION)
+    }
+    pub fn reference_revision(p: Purine, revision: u32) -> Self {
         let (v, cl, abs) = match p {
+            Purine::Caffeine if revision >= 3 => (33.5, 4.1, 7.5),
             Purine::Caffeine => (49.0, 49.0 * std::f64::consts::LN_2 / 5.0, 7.5),
             Purine::Methylliberine => (303.0, 149.0, 10.0),
             Purine::Theacrine => (51.0, 1.6, 10.0),
         };
+        let peak = match p {
+            Purine::Caffeine => 48.0,
+            Purine::Methylliberine => 46.2,
+            Purine::Theacrine => 108.0,
+        };
         Self {
             apparent_volume_l: v,
             apparent_clearance_l_h: cl,
-            absorption_half_min: abs,
+            absorption_half_min: if revision >= 3 {
+                crate::pk_reference::absorption_half_at_peak(v, cl, peak)
+            } else {
+                abs
+            },
             tissue_blood_partition: 1.0,
             exchange_min_inv: 0.5,
         }
@@ -158,10 +171,24 @@ impl CirculationScenario {
                 p[0].apparent_clearance_l_h *= 0.42;
                 p[1].apparent_volume_l *= 0.81;
                 p[1].apparent_clearance_l_h *= 0.81;
+                if self.model_revision >= 3 {
+                    let base = PurineParameters::reference(Purine::Methylliberine);
+                    p[1].absorption_half_min *= crate::pk_reference::absorption_half_at_peak(
+                        303.0 * 0.81,
+                        149.0 * 0.81,
+                        57.6,
+                    ) / base.absorption_half_min;
+                }
             }
             if present[0] && present[2] {
                 p[2].apparent_volume_l *= 35.4 / 51.0;
                 p[2].apparent_clearance_l_h *= 1.2 / 1.6;
+                if self.model_revision >= 3 {
+                    let base = PurineParameters::reference(Purine::Theacrine);
+                    p[2].absorption_half_min *=
+                        crate::pk_reference::absorption_half_at_peak(35.4, 1.2, 60.0)
+                            / base.absorption_half_min;
+                }
             }
         }
         p

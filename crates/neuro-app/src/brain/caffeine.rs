@@ -941,10 +941,12 @@ pub(super) fn chart(
             Stroke::new(1.8_f32, *color),
         ));
     }
-    painter.line_segment(
-        [at(cursor, 0.0), at(cursor, ymax)],
-        Stroke::new(1.0_f32, TEXT),
-    );
+    if cursor.is_finite() && (0.0..=xmax).contains(&cursor) {
+        painter.line_segment(
+            [at(cursor, 0.0), at(cursor, ymax)],
+            Stroke::new(1.0_f32, TEXT),
+        );
+    }
     response.clone().on_hover_text(if axis != "ms" {
         "Щелчок или перетаскивание выбирает время PK"
     } else {

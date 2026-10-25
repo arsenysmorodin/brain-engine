@@ -20,7 +20,9 @@ pub fn configure(app: &mut App) {
             std::process::exit(1);
         }
         app.insert_resource(Smoke {
-            frame: if std::env::args().any(|a| a == "--launcher-only") {
+            frame: if std::env::args().any(|a| a == "--pk-reference-only") {
+                1100
+            } else if std::env::args().any(|a| a == "--launcher-only") {
                 900
             } else if std::env::args().any(|a| a == "--circulation-only") {
                 680
@@ -1019,7 +1021,10 @@ fn run(
             c.early = false;
             assert!(c.scenario.interaction_profile_active());
             c.show_plot = true;
-            assert_eq!(c.scenario.model_revision, 2);
+            assert_eq!(
+                c.scenario.model_revision,
+                neuro_domain::CIRCULATION_MODEL_REVISION
+            );
         }
         1010 => {
             commands
@@ -1102,6 +1107,111 @@ fn run(
         }
         1060 => {
             std::fs::write(smoke.directory.join("launcher-passed.txt"),"Unified launcher: M100 at 30 min, T50 at 10 min, triple at shared 5 min; invalid drafts and cancel preserve results; all compounds share 3D, pathway, PK/mass, optional E/I; caffeine PET stays caffeine-only; project replay and export guards passed.\n").unwrap();
+            exit.write(AppExit::Success);
+        }
+        1105 | 1135 | 1155 | 1175 | 1195 => {
+            lab.glossary.open = false;
+            lab.view = View::Brain;
+            lab.brain.caffeine.mode = false;
+            lab.brain.simulation.mode = false;
+            let mask = match smoke.frame {
+                1105 => 1,
+                1135 => 2,
+                1155 => 4,
+                1175 => 5,
+                _ => 7,
+            };
+            let a = lab.brain.atlas.clone();
+            let s = neuro_domain::CirculationScenario::reference(&a, mask);
+            let mut c = crate::brain::circulation::CirculationLab::from_scenario(s, &a).unwrap();
+            c.mode = true;
+            c.selected = if mask == 1 {
+                neuro_domain::Purine::Caffeine
+            } else if mask == 2 {
+                neuro_domain::Purine::Methylliberine
+            } else {
+                neuro_domain::Purine::Theacrine
+            };
+            c.set_time(1440.0);
+            c.show_plot = true;
+            assert!(!c.early);
+            let comparisons = neuro_engine::compare_purine_pk(c.trace.as_ref().unwrap()).unwrap();
+            assert_eq!(comparisons.is_empty(), mask == 7);
+            std::fs::write(
+                smoke.directory.join(format!("pk-comparison-{mask}.json")),
+                serde_json::to_vec_pretty(&comparisons).unwrap(),
+            )
+            .unwrap();
+            lab.brain.circulation = c;
+        }
+        1110 | 1140 | 1160 | 1180 | 1200 => {
+            let name = match smoke.frame {
+                1110 => "caffeine",
+                1140 => "methylliberine",
+                1160 => "theacrine",
+                1180 => "caffeine-theacrine",
+                _ => "triple",
+            };
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join(format!("pk-{name}-24h.png")),
+                ));
+        }
+        1115 => {
+            lab.brain.circulation.early = true;
+        }
+        1120 => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join("pk-early-outside-cursor.png"),
+                ));
+        }
+        1125 | 1145 | 1165 | 1185 | 1205 => {
+            lab.brain.circulation.early = false;
+            lab.brain.circulation.show_pk_reference = true;
+        }
+        1130 | 1150 | 1170 | 1190 | 1210 => {
+            let name = match smoke.frame {
+                1130 => "caffeine",
+                1150 => "methylliberine",
+                1170 => "theacrine",
+                1190 => "caffeine-theacrine",
+                _ => "triple",
+            };
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(
+                    smoke.directory.join(format!("pk-{name}-reference.png")),
+                ));
+        }
+        1215 => {
+            let a = lab.brain.atlas.clone();
+            let s = neuro_domain::CirculationScenario::from_json(
+                include_str!("../../../scenarios/purine-circulation.json"),
+                &a,
+            )
+            .unwrap();
+            let c =
+                crate::brain::circulation::CirculationLab::from_scenario(s.clone(), &a).unwrap();
+            assert_eq!(s.model_revision, 1);
+            assert_eq!(s.parameters[2].absorption_half_min, 10.0);
+            let csv = c.trace.as_ref().unwrap().csv();
+            let project = neuro_domain::CirculationProject::new(lab.brain.scene.clone(), s);
+            let path = smoke.directory.join("legacy-project.json");
+            project.save(&path, &a).unwrap();
+            let reloaded = neuro_domain::CirculationScenario::load(&path, &a).unwrap();
+            assert_eq!(
+                neuro_engine::simulate_circulation(reloaded, &a)
+                    .unwrap()
+                    .csv(),
+                csv
+            );
+            std::fs::write(smoke.directory.join("legacy-gui.csv"), csv).unwrap();
+        }
+        1230 => {
+            std::fs::write(smoke.directory.join("pk-reference-passed.txt"), "Full 24h range by default; 1440 min outside early view has no fake boundary cursor; published endpoint markers and matched references C/M/T/pair; triple is explicitly unmatched; revision-one replay unchanged.\n").unwrap();
             exit.write(AppExit::Success);
         }
         _ => {}
