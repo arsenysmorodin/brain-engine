@@ -19,3 +19,9 @@ No physiological activity or connectivity is included in these assets.
 
 The assets and adapted anatomical metadata are distributed under CC BY 4.0.
 The project's MIT license applies to its own code, not to these third-party assets.
+
+Additional selected cerebral artery assets: 85 named structures / branches,
+127 meshes, converted from the same official BodyParts3D 4.0 source.
+See data/vascular-atlas.json and docs/brain-atlas.md for mapping and provenance.
+The schematic capillary / venous paths are NeuroLab-generated geometry,
+not additional measured BodyParts3D vascular assets.
